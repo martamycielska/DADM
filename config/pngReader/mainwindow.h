@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "vtkImageViewer.h"
+#include "vtkSmartPointer.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +19,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    vtkSmartPointer<vtkImageViewer> image_view;
 };
 
 #endif // MAINWINDOW_H
