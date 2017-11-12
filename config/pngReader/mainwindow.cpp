@@ -1,6 +1,6 @@
 #include "vtkAutoInit.h"
-VTK_MODULE_INIT(vtkRenderingOpenGL2); // VTK was built with vtkRenderingOpenGL2
-VTK_MODULE_INIT(vtkInteractionStyle);
+VTK_MODULE_INIT(vtkRenderingOpenGL2) // VTK was built with vtkRenderingOpenGL2
+VTK_MODULE_INIT(vtkInteractionStyle)
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -42,8 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
       reader->SetFileName(stdstrFileNameDCM.c_str());
       //delete [] fname;
 
-      vtkSmartPointer<vtkImageViewer> image_view =
-              vtkSmartPointer<vtkImageViewer>::New();
+      image_view = vtkSmartPointer<vtkImageViewer>::New();
       // use our render window with image_view
       image_view->SetRenderWindow(renWin);
       image_view->SetInputConnection(reader->GetOutputPort());
