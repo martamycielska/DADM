@@ -8,8 +8,6 @@ namespace Ui {
 class DADM;
 }
 
-
-
 class DADM : public QMainWindow
 {
     Q_OBJECT
@@ -26,8 +24,6 @@ private slots:
     void mri_reconstruct();
     void onReconstructionFinished(QString str);
 };
-
-
 
 class Worker : public QThread
 {

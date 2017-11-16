@@ -26,17 +26,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         dadm.cpp \
+    mri.cpp \
+    dadm.cpp \
+    main.cpp \
     mri.cpp
 
 HEADERS += \
         dadm.h \
+    mri.h \
+    dadm.h \
     mri.h
-
-LIBS += /usr/local/lib/*.so
-INCLUDEPATH += /usr/local/include/vtk-9.0 \
 
 FORMS += \
         dadm.ui
 
-DISTFILES += \
-    8bit.raw
+
+LIBS += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/lib/*.lib"
+INCLUDEPATH += "C:\Program Files (x86)\VTK\include\vtk-8.0"
+
+
+
