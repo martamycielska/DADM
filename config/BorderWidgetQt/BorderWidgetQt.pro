@@ -23,8 +23,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 #LIBS += /usr/local/lib/*.so
-LIBS += -L"/usr/local/lib/" -libQVTKWidgetPlugin.so -libvtkGUISupportQt-9.0.so.1 -libvtkCommonCore-9.0.so.1 -libvtkCommonCore-9.0.so.1
-INCLUDEPATH += /usr/local/include/vtk-9.0 \
+LIBS += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/lib/*.lib"
+INCLUDEPATH += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/include/vtk-8.0"
 
 SOURCES += \
         main.cpp \

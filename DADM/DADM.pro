@@ -42,7 +42,7 @@ FORMS += \
 
 
 LIBS += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/lib/*.lib"
-INCLUDEPATH += "C:\Program Files (x86)\VTK\include\vtk-8.0"
+INCLUDEPATH += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/include/vtk-8.0"
 
 
 
