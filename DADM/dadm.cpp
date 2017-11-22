@@ -1,5 +1,4 @@
 #include "dadm.h"
-#include "visualization3D.h"
 #include "ui_dadm.h"
 #include "mri.h"
 #include <QMessageBox>
@@ -11,7 +10,6 @@ DADM::DADM(QWidget *parent) :
     ui->setupUi(this);
     mri = new MRI();
     connect(ui->reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
-    connect(ui->visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
 }
 
 void DADM::mri_reconstruct() {
@@ -22,19 +20,12 @@ void DADM::mri_reconstruct() {
     //mri->start_reconstruction();
 }
 
-void DADM::visualization3d() {
-    vis3D = new Visualization3D();
-    vis3D->show();
-}
-
 void DADM::onReconstructionFinished(QString str)
 {
     QMessageBox msgBox;
     msgBox.setText(str);
     msgBox.exec();
 }
-
-
 
 DADM::~DADM()
 {
