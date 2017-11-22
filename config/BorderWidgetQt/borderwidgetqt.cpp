@@ -1,5 +1,4 @@
 #include "borderwidgetqt.h"
-
 #include <vtkBorderWidget.h>
 #include <vtkCommand.h>
 #include <vtkGenericOpenGLRenderWindow.h>
@@ -45,7 +44,7 @@ BorderWidgetQt::BorderWidgetQt()
   sphereActor->SetMapper(sphereMapper);
 
   // VTK Renderer
-  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>();
+  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
   renderer->AddActor(sphereActor);
 
   // Connect VTK with Qt
