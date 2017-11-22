@@ -28,6 +28,7 @@ class Ui_DADM
 public:
     QWidget *centralWidget;
     QPushButton *reconstructionPushButton;
+    QPushButton *visualizationBtn;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -36,16 +37,19 @@ public:
     {
         if (DADM->objectName().isEmpty())
             DADM->setObjectName(QStringLiteral("DADM"));
-        DADM->resize(400, 300);
+        DADM->resize(613, 402);
         centralWidget = new QWidget(DADM);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         reconstructionPushButton = new QPushButton(centralWidget);
         reconstructionPushButton->setObjectName(QStringLiteral("reconstructionPushButton"));
-        reconstructionPushButton->setGeometry(QRect(20, 30, 111, 23));
+        reconstructionPushButton->setGeometry(QRect(20, 30, 131, 41));
+        visualizationBtn = new QPushButton(centralWidget);
+        visualizationBtn->setObjectName(QStringLiteral("visualizationBtn"));
+        visualizationBtn->setGeometry(QRect(20, 90, 131, 41));
         DADM->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(DADM);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 21));
+        menuBar->setGeometry(QRect(0, 0, 613, 21));
         DADM->setMenuBar(menuBar);
         mainToolBar = new QToolBar(DADM);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -63,6 +67,7 @@ public:
     {
         DADM->setWindowTitle(QApplication::translate("DADM", "DADM", Q_NULLPTR));
         reconstructionPushButton->setText(QApplication::translate("DADM", "MRI Reconstruction", Q_NULLPTR));
+        visualizationBtn->setText(QApplication::translate("DADM", "Visualization 3D", Q_NULLPTR));
     } // retranslateUi
 
 };
