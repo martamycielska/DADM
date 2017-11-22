@@ -20,6 +20,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
+#include "QVTKOpenGLWidget.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -29,6 +30,7 @@ public:
     QWidget *centralWidget;
     QPushButton *reconstructionPushButton;
     QPushButton *visualizationBtn;
+    QVTKOpenGLWidget *widget;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -42,14 +44,17 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         reconstructionPushButton = new QPushButton(centralWidget);
         reconstructionPushButton->setObjectName(QStringLiteral("reconstructionPushButton"));
-        reconstructionPushButton->setGeometry(QRect(20, 30, 131, 41));
+        reconstructionPushButton->setGeometry(QRect(30, 70, 181, 51));
         visualizationBtn = new QPushButton(centralWidget);
         visualizationBtn->setObjectName(QStringLiteral("visualizationBtn"));
-        visualizationBtn->setGeometry(QRect(20, 90, 131, 41));
+        visualizationBtn->setGeometry(QRect(30, 150, 181, 51));
+        widget = new QVTKOpenGLWidget(centralWidget);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setGeometry(QRect(250, 30, 341, 291));
         DADM->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(DADM);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 613, 21));
+        menuBar->setGeometry(QRect(0, 0, 613, 22));
         DADM->setMenuBar(menuBar);
         mainToolBar = new QToolBar(DADM);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
