@@ -29,16 +29,19 @@ SOURCES += \
     mri.cpp \
     dadm.cpp \
     main.cpp \
-    mri.cpp
+    mri.cpp \
+    visualization3d.cpp
 
 HEADERS += \
         dadm.h \
     mri.h \
     dadm.h \
-    mri.h
+    mri.h \
+    visualization3d.h
 
 FORMS += \
-        dadm.ui
+        dadm.ui \
+    visualization3d.ui
 
 
 LIBS += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/lib/*.lib"
