@@ -27,7 +27,7 @@ Visualization3D::Visualization3D(QWidget *parent) :
 
 void Visualization3D::brain3D(){
     ui->processDescLabel->setText("The model 3D initializing ...");
-    const char* fileName = "C:\\Users\\Anetka\\Desktop\\DADM\\DADM\\DADM\\8bit.raw";
+    const char* fileName = "/home/aneta/Desktop/DADMgit/DADM/DADM/8bit.raw";
     float threshold = 100;
     int extractLargest = 0;
 
@@ -47,7 +47,7 @@ void Visualization3D::brain3D(){
     mc -> SetInputConnection(reader -> GetOutputPort());
     mc -> ComputeNormalsOn();
     mc -> ComputeGradientsOn();
-    mc -> SetValue(0, ui->horizontalSlider->value());
+    mc -> SetValue(0, threshold);
 
     // To remain largest region
     vtkSmartPointer<vtkPolyDataConnectivityFilter> confilter = vtkSmartPointer<vtkPolyDataConnectivityFilter>::New();
