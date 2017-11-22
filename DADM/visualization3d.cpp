@@ -27,7 +27,7 @@ Visualization3D::Visualization3D(QWidget *parent) :
 
 void Visualization3D::brain3D(){
     ui->processDescLabel->setText("The model 3D initializing ...");
-    const char* fileName = "/home/aneta/Desktop/DADMgit/DADM/DADM/8bit.raw";
+    const char* fileName = "/home/aneta/Pulpit/DADMgit/DADM/DADM/8bit.raw";
     float threshold = 100;
     int extractLargest = 0;
 
