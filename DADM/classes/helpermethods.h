@@ -1,0 +1,4 @@
+#ifndef HELPERMETHODS_H
+#define HELPERMETHODS_H
+
+#endif // HELPERMETHODS_H
