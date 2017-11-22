@@ -1,5 +1,5 @@
 #include "dadm.h"
-#include "visualization3D.h"
+#include "visualization3d.h"
 #include "ui_dadm.h"
 #include "mri.h"
 #include <QMessageBox>

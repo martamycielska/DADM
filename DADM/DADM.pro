@@ -39,8 +39,8 @@ FORMS += \
     visualization3d.ui
 
 
-LIBS += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/lib/*.lib"
-INCLUDEPATH += "C:/Users/Anetka/Desktop/DADM/DADM/DADM/include/vtk-8.0"
+LIBS += /usr/local/lib/*.so
+INCLUDEPATH += /usr/local/include/vtk-9.0 \
 
 
 
