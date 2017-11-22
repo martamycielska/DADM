@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>613</width>
+    <height>402</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,25 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>111</width>
-      <height>23</height>
+      <width>131</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
      <string>MRI Reconstruction</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="visualizationBtn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>131</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Visualization 3D</string>
     </property>
    </widget>
   </widget>
@@ -33,7 +46,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>613</width>
      <height>21</height>
     </rect>
    </property>
