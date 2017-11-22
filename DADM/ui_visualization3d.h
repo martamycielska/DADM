@@ -21,17 +21,19 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include "QVTKOpenGLWidget.h"
 
 QT_BEGIN_NAMESPACE
 
 class Ui_Visualization3D
 {
 public:
-    QWidget *centralwidget;
+    QWidget *widget;
     QPushButton *visualizeBtn;
     QLabel *label;
-    QSlider *horizontalSlider;
     QLabel *processDescLabel;
+    QSlider *horizontalSlider;
+    QVTKOpenGLWidget *qvtkWidget;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -39,17 +41,17 @@ public:
     {
         if (Visualization3D->objectName().isEmpty())
             Visualization3D->setObjectName(QStringLiteral("Visualization3D"));
-        Visualization3D->resize(520, 346);
-        centralwidget = new QWidget(Visualization3D);
-        centralwidget->setObjectName(QStringLiteral("centralwidget"));
-        visualizeBtn = new QPushButton(centralwidget);
+        Visualization3D->resize(988, 642);
+        widget = new QWidget(Visualization3D);
+        widget->setObjectName(QStringLiteral("widget"));
+        visualizeBtn = new QPushButton(widget);
         visualizeBtn->setObjectName(QStringLiteral("visualizeBtn"));
-        visualizeBtn->setGeometry(QRect(10, 80, 151, 41));
-        label = new QLabel(centralwidget);
+        visualizeBtn->setGeometry(QRect(40, 190, 191, 51));
+        label = new QLabel(widget);
         label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(190, 10, 151, 31));
+        label->setGeometry(QRect(330, 10, 321, 51));
         QFont font;
-        font.setPointSize(12);
+        font.setPointSize(22);
         font.setBold(true);
         font.setWeight(75);
         label->setFont(font);
@@ -57,24 +59,25 @@ public:
         label->setScaledContents(false);
         label->setAlignment(Qt::AlignCenter);
         label->setWordWrap(false);
-        horizontalSlider = new QSlider(centralwidget);
-        horizontalSlider->setObjectName(QStringLiteral("horizontalSlider"));
-        horizontalSlider->setGeometry(QRect(10, 140, 151, 21));
-        horizontalSlider->setMinimum(10);
-        horizontalSlider->setMaximum(500);
-        horizontalSlider->setValue(100);
-        horizontalSlider->setOrientation(Qt::Horizontal);
-        processDescLabel = new QLabel(centralwidget);
+        processDescLabel = new QLabel(widget);
         processDescLabel->setObjectName(QStringLiteral("processDescLabel"));
-        processDescLabel->setGeometry(QRect(170, 280, 221, 21));
+        processDescLabel->setGeometry(QRect(10, 450, 251, 71));
         QFont font1;
-        font1.setPointSize(10);
+        font1.setPointSize(12);
         processDescLabel->setFont(font1);
         processDescLabel->setAlignment(Qt::AlignCenter);
-        Visualization3D->setCentralWidget(centralwidget);
+        processDescLabel->setWordWrap(true);
+        horizontalSlider = new QSlider(widget);
+        horizontalSlider->setObjectName(QStringLiteral("horizontalSlider"));
+        horizontalSlider->setGeometry(QRect(30, 270, 211, 31));
+        horizontalSlider->setOrientation(Qt::Horizontal);
+        qvtkWidget = new QVTKOpenGLWidget(widget);
+        qvtkWidget->setObjectName(QStringLiteral("qvtkWidget"));
+        qvtkWidget->setGeometry(QRect(280, 90, 691, 501));
+        Visualization3D->setCentralWidget(widget);
         menubar = new QMenuBar(Visualization3D);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 520, 21));
+        menubar->setGeometry(QRect(0, 0, 988, 22));
         Visualization3D->setMenuBar(menubar);
         statusbar = new QStatusBar(Visualization3D);
         statusbar->setObjectName(QStringLiteral("statusbar"));

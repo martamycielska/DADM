@@ -1,5 +1,6 @@
 #include "visualization3d.h"
 #include "ui_visualization3d.h"
+#include "classes/helpermethods.h"
 #include <QThread>
 #include <QDebug>
 
@@ -17,19 +18,26 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkImageReader.h>
 #include <vtkNamedColors.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkBorderWidget.h>
 
 Visualization3D::Visualization3D(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::Visualization3D){
+    ui(new Ui::Visualization3D)
+{
     ui -> setupUi(this);
     connect(ui->visualizeBtn, SIGNAL(clicked(bool)), this, SLOT(brain3D()));
 }
 
 void Visualization3D::brain3D(){
+
     ui->processDescLabel->setText("The model 3D initializing ...");
-    const char* fileName = "/home/aneta/Pulpit/DADMgit/DADM/DADM/8bit.raw";
+    const char* fileName = "/home/aneta/Pulpit/gitDADM/DADM/DADM/8bit.raw";
     float threshold = 100;
     int extractLargest = 0;
+
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+    ui->qvtkWidget->SetRenderWindow(renderWnd);
 
     vtkImageReader *reader = vtkImageReader::New();
     reader -> SetFileName(fileName);
@@ -70,6 +78,7 @@ void Visualization3D::brain3D(){
     actor -> GetProperty() -> SetColor(colors -> GetColor3d("Flesh").GetData());
     actor -> SetMapper(mapper);
 
+    // VTK Renderer
     vtkSmartPointer<vtkRenderer> render = vtkSmartPointer<vtkRenderer>::New();
     render -> AddActor(actor);
     render -> SetBackground(colors -> GetColor3d("Burlywood").GetData());
@@ -80,14 +89,21 @@ void Visualization3D::brain3D(){
     render -> GetActiveCamera() -> Azimuth(30.0);
     render -> GetActiveCamera() -> Elevation(30.0);
 
-    vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-    renderWindow -> AddRenderer(render);
+    // Connect VTK with QT
+    ui->qvtkWidget->GetRenderWindow()->AddRenderer(render);
+    //vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+    //renderWindow -> AddRenderer(render);
 
-    vtkSmartPointer<vtkRenderWindowInteractor> interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-    interactor -> SetRenderWindow(renderWindow);
-    interactor -> Initialize();
-    interactor -> Start();
+    // Add a border widget to the right renderer
+    //vtkSmartPointer<vtkBorderWidget> bw = vtkSmartPointer<vtkBorderWidget>::New();
+    //BorderWidget = bw;
+    //BorderWidget->SetInteractor(ui->qvtkWidget->GetInteractor());
+    //BorderWidget->On();
 
-    ui->processDescLabel->setText("");
-    qDebug() << "Brain visualization 3D done";
+    //vtkSmartPointer<vtkRenderWindowInteractor> interactor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    //interactor -> SetRenderWindow(renderWindow);
+    //interactor -> Initialize();
+    //interactor -> Start();
+
+    ui->processDescLabel->setText("Brain visualization done.\nPlease tap on the render window to see the result.");
 }

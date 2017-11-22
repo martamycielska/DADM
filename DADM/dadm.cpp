@@ -2,6 +2,7 @@
 #include "visualization3d.h"
 #include "ui_dadm.h"
 #include "mri.h"
+#include "classes/helpermethods.h"
 #include <QMessageBox>
 
 DADM::DADM(QWidget *parent) :
@@ -24,6 +25,7 @@ void DADM::mri_reconstruct() {
 
 void DADM::visualization3d() {
     vis3D = new Visualization3D();
+    HelperMethods::SetCenterPosition(vis3D);
     vis3D->show();
 }
 
@@ -34,11 +36,11 @@ void DADM::onReconstructionFinished(QString str)
     msgBox.exec();
 }
 
-
-
 DADM::~DADM()
 {
     delete ui;
+    delete mri;
+    delete vis3D;
 }
 
 Worker::Worker(MRI *mri, process prc) : QThread(nullptr), mri(mri), prc(prc) {}

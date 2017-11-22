@@ -26,12 +26,14 @@ SOURCES += \
            main.cpp \
            dadm.cpp \
            mri.cpp \
-           visualization3d.cpp
+           visualization3d.cpp \
+    classes/helpermethods.cpp
 
 HEADERS += \
            dadm.h \
            mri.h \
-           visualization3d.h
+           visualization3d.h \
+    classes/helpermethods.h
 
 FORMS += \
         dadm.ui \
