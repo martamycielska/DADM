@@ -1,12 +1,2 @@
-﻿  Moc'ing dadm.h...
-  Moc'ing visualization3d.h...
-  helpermethods.cpp
-  dadm.cpp
-  moc_dadm.cpp
-  moc_visualization3d.cpp
-  main.cpp
-  mri.cpp
-  visualization3d.cpp
-  Generating Code...
-  qrc_dadm.cpp
-  DADM.vcxproj -> c:\Users\Michał\documents\visual studio 2015\Projects\DADM\Win32\Debug\DADM.exe
+﻿  visualization3d.cpp
+  DADM.vcxproj -> C:\Users\Michał\Documents\Visual Studio 2015\Projects\DADM\Win32\Debug\DADM.exe
