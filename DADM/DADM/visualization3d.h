@@ -5,6 +5,25 @@
 
 #include "vtkSmartPointer.h"
 #include "vtkRenderer.h"
+#include <vtkMarchingCubes.h>
+#include <vtkSmartPointer.h>
+#include <vtkStructuredPointsReader.h>
+#include <vtkPolyDataConnectivityFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkImageReader.h>
+#include <vtkNamedColors.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkBorderWidget.h>
+#include <vtkPlane.h>
+#include <vtkImplicitPlaneRepresentation.h>
+#include <vtkClipPolyData.h>
+#include <vtkImplicitPlaneWidget2.h>
 
 typedef vtkSmartPointer<vtkRenderer> Renderer;
 
@@ -38,11 +57,32 @@ class Visualization3D : public QMainWindow
         Ui::Visualization3D *ui;
         QString processDescString;
 		VisualizationWorker *worker;
+		int threshold;
+		vtkSmartPointer<vtkMarchingCubes> mc;
 
     private slots:
         void brain3D();
-		void sliderValueChanged(int);
+		void acceptThreshold();
+		//void sliderValueChanged(int);
 		void addRenderer(Renderer);
+};
+
+class MyCallback : public vtkCommand
+{
+public:
+	static MyCallback * New()
+	{
+		return new MyCallback;
+	}
+	virtual void Execute(vtkObject* caller, unsigned long, void*)
+	{
+		vtkImplicitPlaneWidget2* planeWidget = reinterpret_cast<vtkImplicitPlaneWidget2*>(caller);
+		vtkImplicitPlaneRepresentation* rep = reinterpret_cast<vtkImplicitPlaneRepresentation*>(planeWidget->GetRepresentation());
+		rep->GetPlane(this->Plane);
+	}
+
+	MyCallback() : Plane(0) {}
+	vtkPlane* Plane;
 };
 
 #endif // VISUALIZATION3D_H
