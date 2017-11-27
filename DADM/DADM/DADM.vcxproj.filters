@@ -76,18 +76,15 @@
     <CustomBuild Include="dadm.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="visualization3d.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="visualization3d.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="visualization3d.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_dadm.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_visualization3d.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_visualization3d.h">
@@ -98,6 +95,9 @@
     </ClInclude>
     <ClInclude Include="classes\helpermethods.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_visualization3d.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

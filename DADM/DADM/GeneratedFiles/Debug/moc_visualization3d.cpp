@@ -130,7 +130,7 @@ void VisualizationWorker::initializationDone(Renderer _t1)
 }
 struct qt_meta_stringdata_Visualization3D_t {
     QByteArrayData data[6];
-    char stringdata0[65];
+    char stringdata0[62];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -142,12 +142,12 @@ static const qt_meta_stringdata_Visualization3D_t qt_meta_stringdata_Visualizati
 QT_MOC_LITERAL(0, 0, 15), // "Visualization3D"
 QT_MOC_LITERAL(1, 16, 7), // "brain3D"
 QT_MOC_LITERAL(2, 24, 0), // ""
-QT_MOC_LITERAL(3, 25, 18), // "sliderValueChanged"
-QT_MOC_LITERAL(4, 44, 11), // "addRenderer"
-QT_MOC_LITERAL(5, 56, 8) // "Renderer"
+QT_MOC_LITERAL(3, 25, 15), // "acceptThreshold"
+QT_MOC_LITERAL(4, 41, 11), // "addRenderer"
+QT_MOC_LITERAL(5, 53, 8) // "Renderer"
 
     },
-    "Visualization3D\0brain3D\0\0sliderValueChanged\0"
+    "Visualization3D\0brain3D\0\0acceptThreshold\0"
     "addRenderer\0Renderer"
 };
 #undef QT_MOC_LITERAL
@@ -167,12 +167,12 @@ static const uint qt_meta_data_Visualization3D[] = {
 
  // slots: name, argc, parameters, tag, flags
        1,    0,   29,    2, 0x08 /* Private */,
-       3,    1,   30,    2, 0x08 /* Private */,
-       4,    1,   33,    2, 0x08 /* Private */,
+       3,    0,   30,    2, 0x08 /* Private */,
+       4,    1,   31,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,    2,
+    QMetaType::Void,
     QMetaType::Void, 0x80000000 | 5,    2,
 
        0        // eod
@@ -185,7 +185,7 @@ void Visualization3D::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->brain3D(); break;
-        case 1: _t->sliderValueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: _t->acceptThreshold(); break;
         case 2: _t->addRenderer((*reinterpret_cast< Renderer(*)>(_a[1]))); break;
         default: ;
         }

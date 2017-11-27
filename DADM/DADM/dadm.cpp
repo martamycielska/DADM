@@ -4,8 +4,7 @@
 #include "classes/helpermethods.h"
 #include <QMessageBox>
 
-DADM::DADM(QWidget *parent)
-	: QMainWindow(parent)
+DADM::DADM(QWidget *parent): QMainWindow(parent)
 {
 	ui.setupUi(this);
 	mri = new MRI;
