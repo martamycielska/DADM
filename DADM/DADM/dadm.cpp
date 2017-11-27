@@ -37,7 +37,8 @@ void DADM::onReconstructionFinished(QString str)
 DADM::~DADM()
 {
 	delete mri;
-	delete vis3D;
+	if(vis3D)
+		delete vis3D;
 }
 
 Worker::Worker(MRI *mri, process prc) : QThread(nullptr), mri(mri), prc(prc) {}

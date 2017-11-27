@@ -28,17 +28,22 @@ Visualization3D::Visualization3D(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Visualization3D)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
+	qRegisterMetaType<Renderer>("Renderer");
     connect(ui->visualizeBtn, SIGNAL(clicked(bool)), this, SLOT(brain3D()));
 	connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 }
 
 void Visualization3D::sliderValueChanged(int i) {
-	qRegisterMetaType<Renderer>("Renderer");
+
 }
 
 void Visualization3D::addRenderer(Renderer render) {
+	qDebug() << "Add Renderer";
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui->qvtkWidget->SetRenderWindow(renderWnd);
 	ui->qvtkWidget->GetRenderWindow()->AddRenderer(render);
+	ui->qvtkWidget->repaint();
 	ui->processDescLabel->setText("Brain visualization done.\nPlease tap on the render window to see the result.");
 }
 
@@ -48,8 +53,8 @@ void Visualization3D::brain3D(){
 	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Raw file (*.raw) (*raw)");
 	QString path = url.path().remove(0, 1);
 
-	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-	ui->qvtkWidget->SetRenderWindow(renderWnd);
+	//vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	//ui->qvtkWidget->SetRenderWindow(renderWnd);
 
 	worker = new VisualizationWorker(path);
 	connect(worker, &VisualizationWorker::initializationDone, this, &Visualization3D::addRenderer);
@@ -57,13 +62,16 @@ void Visualization3D::brain3D(){
 	worker->start();
 
 	/*
+	connect(this, &Visualization3D::initializationDone, this, &Visualization3D::addRenderer);
+
+	
 	QByteArray ba = path.toLatin1();
     const char* fileName = ba.data();
     float threshold = 100;
     int extractLargest = 0;
 
-    vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-    ui->qvtkWidget->SetRenderWindow(renderWnd);
+    //vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+    //ui->qvtkWidget->SetRenderWindow(renderWnd);
 
     vtkImageReader *reader = vtkImageReader::New();
     reader -> SetFileName(fileName);
@@ -190,7 +198,7 @@ void VisualizationWorker::run() {
 	actor->SetMapper(mapper);
 
 	// VTK Renderer
-	vtkSmartPointer<vtkRenderer> render = vtkSmartPointer<vtkRenderer>::New();
+	render = vtkSmartPointer<vtkRenderer>::New();
 	render->AddActor(actor);
 	render->SetBackground(colors->GetColor3d("Burlywood").GetData());
 	render->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
@@ -199,6 +207,7 @@ void VisualizationWorker::run() {
 	render->ResetCamera();
 	render->GetActiveCamera()->Azimuth(30.0);
 	render->GetActiveCamera()->Elevation(30.0);
+	
 
 	qDebug() << "DONE";
 
