@@ -87,17 +87,14 @@
     <ClInclude Include="GeneratedFiles\ui_dadm.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_visualization3d.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_visualization3d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="mri.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="classes\helpermethods.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_visualization3d.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

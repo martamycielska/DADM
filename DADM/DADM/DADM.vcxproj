@@ -129,7 +129,6 @@
     <ClInclude Include="GeneratedFiles\ui_dadm.h" />
     <ClInclude Include="GeneratedFiles\ui_visualization3d.h" />
     <ClInclude Include="mri.h" />
-    <ClInclude Include="ui_visualization3d.h" />
     <CustomBuild Include="visualization3d.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing visualization3d.h...</Message>

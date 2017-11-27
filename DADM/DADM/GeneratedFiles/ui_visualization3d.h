@@ -77,7 +77,7 @@ public:
         Visualization3D->setCentralWidget(widget);
         menubar = new QMenuBar(Visualization3D);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 988, 22));
+        menubar->setGeometry(QRect(0, 0, 988, 21));
         Visualization3D->setMenuBar(menubar);
         statusbar = new QStatusBar(Visualization3D);
         statusbar->setObjectName(QStringLiteral("statusbar"));
