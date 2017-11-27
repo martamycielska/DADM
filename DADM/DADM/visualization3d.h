@@ -43,6 +43,9 @@ signals:
 	void initializationDone(Renderer);
 
 private:
+	vtkSmartPointer<vtkRenderer> render;
+
+private:
 	QString path;
 };
 

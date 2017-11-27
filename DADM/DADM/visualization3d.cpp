@@ -12,6 +12,7 @@ Visualization3D::Visualization3D(QWidget *parent) :
     ui(new Ui::Visualization3D)
 {
     ui->setupUi(this);
+	qRegisterMetaType<Renderer>("Renderer");
 	threshold = 100;
 	mc = vtkSmartPointer<vtkMarchingCubes>::New();
 
@@ -39,6 +40,7 @@ void Visualization3D::acceptThreshold() {
 }
 
 void Visualization3D::addRenderer(Renderer render) {
+	qDebug() << "Add Renderer";
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	ui->qvtkWidget->SetRenderWindow(renderWnd);
 	ui->qvtkWidget->GetRenderWindow()->AddRenderer(render);
@@ -111,7 +113,7 @@ void VisualizationWorker::run() {
 	actor->SetMapper(mapper);
 
 	// VTK Renderer
-	vtkSmartPointer<vtkRenderer> render = vtkSmartPointer<vtkRenderer>::New();
+	render = vtkSmartPointer<vtkRenderer>::New();
 	render->AddActor(actor);
 	render->SetBackground(colors->GetColor3d("Burlywood").GetData());
 	render->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
@@ -120,6 +122,7 @@ void VisualizationWorker::run() {
 	render->ResetCamera();
 	render->GetActiveCamera()->Azimuth(30.0);
 	render->GetActiveCamera()->Elevation(30.0);
+	
 
 	qDebug() << "DONE";
 
