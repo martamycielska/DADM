@@ -59,10 +59,40 @@
     <ClCompile Include="visualization3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mri.cpp">
+    <ClCompile Include="classes\helpermethods.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="classes\helpermethods.cpp">
+    <ClCompile Include="Reconstruction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Intensity_inhomogenity_correction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Non_stationary_noise_estimation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Skull_stripping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Non_stationary_noise_filtering_2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Non_stationary_noise_filtering_1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Segmentation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Upsampling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Brain_3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Oblique_imaging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Diffusion_tensor_imaging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,17 +117,44 @@
     <ClInclude Include="GeneratedFiles\ui_dadm.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_visualization3d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mri.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="classes\helpermethods.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_visualization3d.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Reconstruction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Intensity_inhomogenity_correction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Non_stationary_noise_estimation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Skull_stripping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Non_stationary_noise_filtering_2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Non_stationary_noise_filtering_1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Segmentation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Upsampling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Brain_3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Oblique_imaging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Diffusion_tensor_imaging.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
