@@ -25,7 +25,7 @@
 #include <vtkClipPolyData.h>
 #include <vtkImplicitPlaneWidget2.h>
 
-typedef vtkSmartPointer<vtkRenderer> Renderer;
+#include "Brain_3D.h"
 
 namespace Ui {
     class Visualization3D;
@@ -36,17 +36,15 @@ class VisualizationWorker : public QThread
 	Q_OBJECT
 
 public:
-	VisualizationWorker(QString);
+	VisualizationWorker(QString, Brain_3D*);
 	void run();
 
 signals:
-	void initializationDone(Renderer);
-
-private:
-	vtkSmartPointer<vtkRenderer> render;
+	void initializationDone();
 
 private:
 	QString path;
+	Brain_3D *brain_3D;
 };
 
 class Visualization3D : public QMainWindow
@@ -60,14 +58,13 @@ class Visualization3D : public QMainWindow
         Ui::Visualization3D *ui;
         QString processDescString;
 		VisualizationWorker *worker;
-		int threshold;
-		vtkSmartPointer<vtkMarchingCubes> mc;
+		Brain_3D *brain_3D;
 
     private slots:
         void brain3D();
 		void acceptThreshold();
 		//void sliderValueChanged(int);
-		void addRenderer(Renderer);
+		void addRenderer();
 };
 
 class MyCallback : public vtkCommand
