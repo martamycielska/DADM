@@ -7,6 +7,7 @@
 DADM::DADM(QWidget *parent): QMainWindow(parent)
 {
 	ui.setupUi(this);
+	vis3D = new Visualization3D();
 	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
 	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
 }

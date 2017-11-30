@@ -41,6 +41,7 @@ public:
 	void setMarchingCubes(MarchingCubes _mc);
 	float getThreshold();
 	void setThreshold(float t);
+	void MarchingCubesSetValue(float t);
 
 private:
 	float threshold;

@@ -97,6 +97,11 @@ void Brain_3D::setThreshold(float t)
 	threshold = t;
 }
 
+void Brain_3D::MarchingCubesSetValue(float t)
+{
+	threshold = t;
+	mc->SetValue(0, t);
+}
 
 Brain_3D::~Brain_3D()
 {
