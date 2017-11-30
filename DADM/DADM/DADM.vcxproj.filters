@@ -159,5 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="8bit.raw" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

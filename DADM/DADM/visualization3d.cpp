@@ -6,6 +6,7 @@
 #include <QUrl>
 #include <QString>
 #include <QFileDialog>
+#include <QTimer>
 
 #pragma region VISUALIZATION3D class
 Visualization3D::Visualization3D(QWidget *parent) :
@@ -29,7 +30,9 @@ Visualization3D::Visualization3D(QWidget *parent) :
 
 void Visualization3D::acceptThreshold() {
 	ui->processDescLabel->setText("The model 3D rendering...\nPlease wait");
-	
+	QEventLoop loop;
+	QTimer::singleShot(1000, &loop, SLOT(quit()));
+	loop.exec();
 	QString thresholdString = ui->thresholdTextEdit->toPlainText();
 	brain_3D->setThreshold(thresholdString.toFloat());
 	MarchingCubes mc = brain_3D->getMarchingCubes();
@@ -37,7 +40,7 @@ void Visualization3D::acceptThreshold() {
 	brain_3D->setMarchingCubes(mc);
 	ui->qvtkWidget->GetRenderWindow()->Render();
 
-	ui->processDescLabel->setText("Brain visualization done");
+	ui->processDescLabel->setText("Rendering done");
 }
 
 void Visualization3D::addRenderer() {
