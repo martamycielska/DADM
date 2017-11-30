@@ -48,3 +48,21 @@ private:
 	MarchingCubes mc;
 };
 
+class MyCallback : public vtkCommand
+{
+public:
+	static MyCallback * New()
+	{
+		return new MyCallback;
+	}
+	virtual void Execute(vtkObject* caller, unsigned long, void*)
+	{
+		vtkImplicitPlaneWidget2* planeWidget = reinterpret_cast<vtkImplicitPlaneWidget2*>(caller);
+		vtkImplicitPlaneRepresentation* rep = reinterpret_cast<vtkImplicitPlaneRepresentation*>(planeWidget->GetRepresentation());
+		rep->GetPlane(this->Plane);
+	}
+
+	MyCallback() : Plane(0) {}
+	vtkPlane* Plane;
+};
+

@@ -29,14 +29,12 @@ Visualization3D::Visualization3D(QWidget *parent) :
 
 void Visualization3D::acceptThreshold() {
 	ui->processDescLabel->setText("The model 3D rendering...\nPlease wait");
+	
 	QString thresholdString = ui->thresholdTextEdit->toPlainText();
-
 	brain_3D->setThreshold(thresholdString.toFloat());
-	//float threshold = thresholdString.toFloat();
 	MarchingCubes mc = brain_3D->getMarchingCubes();
 	mc->SetValue(0, thresholdString.toFloat());
 	brain_3D->setMarchingCubes(mc);
-	//mc->SetValue(0, threshold);
 	ui->qvtkWidget->GetRenderWindow()->Render();
 
 	ui->processDescLabel->setText("Brain visualization done");
@@ -47,7 +45,7 @@ void Visualization3D::addRenderer() {
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	ui->qvtkWidget->SetRenderWindow(renderWnd);
 	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getRenderer());
-	ui->processDescLabel->setText("Brain visualization done.\nPlease tap on the render window to\n see the result.");
+	ui->processDescLabel->setText("Brain visualization done.");
 	ui->qvtkWidget->repaint();
 }
 
@@ -60,7 +58,6 @@ void Visualization3D::brain3D(){
 	connect(worker, &VisualizationWorker::initializationDone, this, &Visualization3D::addRenderer);
 	connect(worker, &VisualizationWorker::finished, worker, &QObject::deleteLater);
 	worker->start();
-
 }
 #pragma endregion VISUALIZATION3D class
 
