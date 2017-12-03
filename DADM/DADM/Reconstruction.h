@@ -1,8 +1,13 @@
 #pragma once
-class Reconstruction
+#include "MRI_Module.h"
+class Reconstruction :
+	public MRI_Module
 {
 public:
-	Reconstruction();
+	Reconstruction(QString);
 	~Reconstruction();
+
+private:
+	QString path;
 };
 

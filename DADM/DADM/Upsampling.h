@@ -1,7 +1,7 @@
 #pragma once
-#include "Segmentation.h"
-class Upsampling :
-	public Segmentation
+#include "MRI_Module.h"
+class Upsampling:
+	public MRI_Module
 {
 public:
 	Upsampling();

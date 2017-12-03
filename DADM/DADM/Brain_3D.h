@@ -1,6 +1,4 @@
 #pragma once
-#include "Segmentation.h"
-
 #include "vtkSmartPointer.h"
 #include "vtkRenderer.h"
 #include <vtkMarchingCubes.h>
@@ -25,11 +23,13 @@
 
 #include "qstring.h"
 
+#include "MRI_Module.h"
+
 typedef vtkSmartPointer<vtkRenderer> Renderer;
 typedef vtkSmartPointer<vtkMarchingCubes> MarchingCubes;
 
-class Brain_3D :
-	public Segmentation
+class Brain_3D:
+	public MRI_Module
 {
 public:
 	Brain_3D();
