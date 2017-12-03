@@ -105,5 +105,5 @@ void Brain_3D::MarchingCubesSetValue(float t)
 
 Brain_3D::~Brain_3D()
 {
-	test();
+
 }

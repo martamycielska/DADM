@@ -1,6 +1,7 @@
 #include "visualization3d.h"
 #include "ui_visualization3d.h"
 #include "classes/helpermethods.h"
+#include "Globals.h"
 #include <QThread>
 #include <QDebug>
 #include <QUrl>
@@ -19,6 +20,7 @@ Visualization3D::Visualization3D(QWidget *parent) :
     connect(ui->visualizeBtn, SIGNAL(clicked(bool)), this, SLOT(brain3D()));
 	//connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 	connect(ui->acceptBtn, SIGNAL(clicked(bool)), this, SLOT(acceptThreshold()));
+	qDebug() << Globals::i;
 }
 
 //void Visualization3D::sliderValueChanged(int sliderValue) {

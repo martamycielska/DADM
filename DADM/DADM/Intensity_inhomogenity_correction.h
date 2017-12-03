@@ -1,7 +1,7 @@
 #pragma once
-#include "Reconstruction.h"
-class Intensity_inhomogenity_correction :
-	public Reconstruction
+#include "MRI_Module.h"
+class Intensity_inhomogenity_correction:
+	public MRI_Module
 {
 public:
 	Intensity_inhomogenity_correction();

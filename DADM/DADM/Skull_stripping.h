@@ -1,9 +1,7 @@
 #pragma once
-#include "Non_stationary_noise_filtering_1.h"
-#include "Non_stationary_noise_filtering_2.h"
-class Skull_stripping :
-	public Non_stationary_noise_filtering_1,
-	public Non_stationary_noise_filtering_2
+#include "MRI_Module.h"
+class Skull_stripping:
+	public MRI_Module
 {
 public:
 	Skull_stripping();
