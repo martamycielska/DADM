@@ -1,12 +1,21 @@
 #include "Brain_3D.h"
 #include "qdebug.h"
 
-Brain_3D::Brain_3D()
+Brain_3D::Brain_3D(QString path)
 {
 	qDebug() << "Brain 3D constructor called";
+	this->path = path;
 	this->mc = vtkSmartPointer<vtkMarchingCubes>::New();
 	this->render = vtkSmartPointer<vtkRenderer>::New();
 	threshold = 100;
+}
+
+void Brain_3D::start() {
+	initialize(path);
+}
+
+float*** Brain_3D::getResult() {
+	return 0;
 }
 
 void Brain_3D::initialize(QString path) {
