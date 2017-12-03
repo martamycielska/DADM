@@ -29,12 +29,11 @@ typedef vtkSmartPointer<vtkRenderer> Renderer;
 typedef vtkSmartPointer<vtkMarchingCubes> MarchingCubes;
 
 class Brain_3D:
-	public MRI_Module
+	public MRI_Module<float***>
 {
 public:
-	Brain_3D();
+	Brain_3D(QString);
 	~Brain_3D();
-	void initialize(QString path);
 	Renderer getRenderer();
 	void setRenderer(Renderer renderer);
 	MarchingCubes getMarchingCubes();
@@ -42,8 +41,12 @@ public:
 	float getThreshold();
 	void setThreshold(float t);
 	void MarchingCubesSetValue(float t);
+	virtual void start();
+	virtual float***getResult();
 
 private:
+	void initialize(QString path);
+	QString path;
 	float threshold;
 	Renderer render;
 	MarchingCubes mc;

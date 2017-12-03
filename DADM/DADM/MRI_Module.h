@@ -9,12 +9,11 @@ public:
 	void run() = 0;
 };
 
+template <typename T>
 class MRI_Module
 {
 public:
-	MRI_Module();
-	virtual void process();
-	virtual float*** getResult();
-	virtual ~MRI_Module();
+	virtual void start() = 0;
+	virtual T getResult() = 0;
 };
 

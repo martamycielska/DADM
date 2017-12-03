@@ -7,12 +7,12 @@ Reconstruction::Reconstruction(QString path)
 	this->path = path;
 }
 
-void MRI_Module::process() {
+void Reconstruction::start() {
 
 }
 
-float*** MRI_Module::getResult() {
-	return 0;
+float*** Reconstruction::getResult() {
+	return image;
 }
 
 Reconstruction::~Reconstruction()

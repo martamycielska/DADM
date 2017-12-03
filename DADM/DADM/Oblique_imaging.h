@@ -1,7 +1,7 @@
 #pragma once
 #include "MRI_Module.h"
 class Oblique_imaging:
-	public MRI_Module
+	public MRI_Module<float***>
 {
 public:
 	Oblique_imaging();

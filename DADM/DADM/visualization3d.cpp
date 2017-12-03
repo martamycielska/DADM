@@ -15,7 +15,6 @@ Visualization3D::Visualization3D(QWidget *parent) :
     ui(new Ui::Visualization3D)
 {
     ui->setupUi(this);
-	brain_3D = new Brain_3D();
 
     connect(ui->visualizeBtn, SIGNAL(clicked(bool)), this, SLOT(brain3D()));
 	//connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
@@ -58,6 +57,7 @@ void Visualization3D::brain3D(){
 	ui->processDescLabel->setText("The model 3D initializing ....\nPlease wait");
 	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Raw file (*.raw) (*raw)");
 	QString path = url.path().remove(0, 1);
+	brain_3D = new Brain_3D(path);
 
 	worker = new VisualizationWorker(path, brain_3D);
 	connect(worker, &VisualizationWorker::initializationDone, this, &Visualization3D::addRenderer);
@@ -74,7 +74,7 @@ VisualizationWorker::VisualizationWorker(QString path, Brain_3D *brain_3D) : pat
 }
 
 void VisualizationWorker::run() {
-	brain_3D->initialize(path);
+	brain_3D->start();
 	emit initializationDone();
 }
 #pragma endregion WORKER class
