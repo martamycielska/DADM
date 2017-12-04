@@ -95,6 +95,18 @@
     <ClCompile Include="Diffusion_tensor_imaging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MRI_Module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MRI_Module.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MRI_Module.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dadm.h">
@@ -111,6 +123,9 @@
     </CustomBuild>
     <CustomBuild Include="visualization3d.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="MRI_Module.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -156,8 +171,12 @@
     <ClInclude Include="Diffusion_tensor_imaging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="8bit.raw" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
