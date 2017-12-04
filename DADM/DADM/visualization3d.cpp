@@ -174,7 +174,7 @@ void Visualization3D::AddRendererAndPlaneWidget() {
 	visualizationDone = true;
 	UpdateProcessStateText("Brain visualization done");
 
-	qDebug() << "Add Renderer";
+	qDebug() << "Add renderer and plane widget";
 }
 
 void Visualization3D::UpdateProcessStateText(QString text) {

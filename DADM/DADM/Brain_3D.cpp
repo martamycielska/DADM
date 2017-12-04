@@ -69,19 +69,21 @@ void Brain_3D::initialize(QString path) {
 
 	// Visualize
 	actor = vtkSmartPointer<vtkActor>::New();
-	actor->GetProperty()->SetColor(colors->GetColor3d("Flesh").GetData());
+	actor->GetProperty()->SetColor(colors->GetColor3d("titanium_white").GetData());
 	actor->SetMapper(mapper);
 
 	// VTK Renderer
 	this->render = vtkSmartPointer<vtkRenderer>::New();
 	render->AddActor(actor);
-	render->SetBackground(colors->GetColor3d("Burlywood").GetData());
+	render->SetBackground(colors->GetColor3d("black").GetData());
 	render->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
 	render->GetActiveCamera()->SetPosition(0.0, 1.0, 0.0);
 	render->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
 	render->ResetCamera();
 	render->GetActiveCamera()->Azimuth(30.0);
 	render->GetActiveCamera()->Elevation(30.0);
+
+	// change colors: https://gitlab.kitware.com/vtk/vtk/blob/bc8b0a565766ab3768df6a4f5f07992bdae4afd8/Common/Color/vtkNamedColors.cxx
 }
 
 Renderer Brain_3D::getRenderer()
