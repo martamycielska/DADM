@@ -1,7 +1,7 @@
 #pragma once
-#include "Skull_stripping.h"
-class Segmentation :
-	public Skull_stripping
+#include "MRI_Module.h"
+class Segmentation:
+	public MRI_Module<float***>
 {
 public:
 	Segmentation();

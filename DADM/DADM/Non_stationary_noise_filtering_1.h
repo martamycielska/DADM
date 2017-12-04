@@ -1,7 +1,7 @@
 #pragma once
-#include "Non_stationary_noise_estimation.h"
-class Non_stationary_noise_filtering_1 :
-	public Non_stationary_noise_estimation
+#include "MRI_Module.h"
+class Non_stationary_noise_filtering_1:
+	public MRI_Module<float***>
 {
 public:
 	Non_stationary_noise_filtering_1();
