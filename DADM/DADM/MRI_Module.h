@@ -1,13 +1,5 @@
 #pragma once
 #include "qthread.h"
-class WorkerThread : public QThread
-{
-	Q_OBJECT
-
-public:
-	WorkerThread();
-	void run() = 0;
-};
 
 template <typename T>
 class MRI_Module

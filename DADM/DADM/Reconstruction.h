@@ -1,5 +1,6 @@
 #pragma once
 #include "MRI_Module.h"
+
 class Reconstruction :
 	public MRI_Module<float***>
 {
@@ -11,6 +12,5 @@ public:
 
 private:
 	QString path;
-	float*** image;
+	float*** image;;
 };
-
