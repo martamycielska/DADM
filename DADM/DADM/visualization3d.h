@@ -61,6 +61,7 @@ class Visualization3D : public QMainWindow
 		VisualizationWorker *worker;
 		Brain_3D *brain_3D;
 		int threshold;
+		int shrinkingFactor;
 		int xspace;
 		int yspace;
 		int zspace;
@@ -71,13 +72,18 @@ class Visualization3D : public QMainWindow
 		vtkSmartPointer<MyCallback> myCallback;
 		vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
 		vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
+		void InitValue();
+		void InitUI();
+		void SetConnections();
+		void UpdateProcessStateText(QString text);
 
     private slots:
-        void brain3D();
-		void acceptThreshold();
-		void sliderValueChanged(int);
-		void cutEnableChanged(bool);
-		void addRenderer();
+        void Brain3D();
+		void AcceptThreshold();
+		void SliderValueChanged(int);
+	    void ShrinkSliderValueChanged(int);
+		void CutEnableChanged(bool);
+		void AddRendererAndPlaneWidget();
 };
 
 #endif // VISUALIZATION3D_H

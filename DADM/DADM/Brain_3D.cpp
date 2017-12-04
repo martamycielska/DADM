@@ -1,7 +1,7 @@
 #include "Brain_3D.h"
 #include "qdebug.h"
 
-Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold)
+Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor)
 {
 	qDebug() << "Brain 3D constructor called";
 	this -> path = path;
@@ -11,6 +11,7 @@ Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int thresho
 	this -> xspace = xspace;
 	this -> yspace = yspace;
 	this -> zspace = zspace;
+	this -> shrinkingFactor = shrinkingFactor;
 }
 
 void Brain_3D::start() {
@@ -39,7 +40,7 @@ void Brain_3D::initialize(QString path) {
 
 	shrink = vtkSmartPointer<vtkImageShrink3D>::New();
 	shrink->SetInputConnection(reader->GetOutputPort());
-	shrink->SetShrinkFactors(2, 2, 2);
+	shrink->SetShrinkFactors(shrinkingFactor, shrinkingFactor, shrinkingFactor);
 
     colors = vtkSmartPointer<vtkNamedColors>::New();
 
@@ -127,6 +128,11 @@ Mapper Brain_3D::getMapper()
 Confilter Brain_3D::getConfilter()
 {
 	return confilter;
+}
+
+void Brain_3D::setShrinkFactor(int value)
+{
+	shrink->SetShrinkFactors(value, value, value);
 }
 
 
