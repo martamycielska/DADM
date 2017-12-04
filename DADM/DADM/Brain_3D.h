@@ -50,13 +50,11 @@ public:
 };
 
 class Brain_3D :
-	public Segmentation
+	public MRI_Module<float***>
 {
 public:
-	Brain_3D(int xspace, int yspace, int zspace, int threshold);
+	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold);
 	~Brain_3D();
-	void initialize(QString path);
-	//void cutPlane();
 	Renderer getRenderer();
 	MarchingCubes getMarchingCubes();
 	float getThreshold();
@@ -65,9 +63,12 @@ public:
 	void setRenderer(Renderer renderer);
 	void setMarchingCubes(MarchingCubes _mc);
 	void setThreshold(int t);
-	//void setVTKInteractor(vtkSmartPointer<vtkRenderWindowInteractor> interactor);
+	virtual void start();
+	virtual float***getResult();
 
 private:
+	void initialize(QString path);
+	QString path;
 	float threshold;
 	int xspace;
 	int yspace;
@@ -80,11 +81,5 @@ private:
 	vtkSmartPointer<vtkNamedColors> colors;
 	vtkSmartPointer<vtkImageReader> reader;
 	vtkSmartPointer<vtkImageShrink3D> shrink;
-	//vtkSmartPointer<vtkRenderWindowInteractor> vtkInteractor;
-	//vtkSmartPointer<vtkPlane> plane;
-	//vtkSmartPointer<vtkClipPolyData> clipper;
-	//vtkSmartPointer<MyCallback> myCallback;
-	//vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
-	//vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
 };
 

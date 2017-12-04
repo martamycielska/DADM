@@ -37,7 +37,7 @@ class VisualizationWorker : public QThread
 	Q_OBJECT
 
 public:
-	VisualizationWorker(QString, Brain_3D*);
+	VisualizationWorker(Brain_3D*);
 	void run();
 
 signals:
@@ -45,7 +45,6 @@ signals:
 	void CuttingPlaneDone();
 
 private:
-	QString path;
 	Brain_3D *brain_3D;
 };
 
@@ -79,7 +78,6 @@ class Visualization3D : public QMainWindow
 		void sliderValueChanged(int);
 		void cutEnableChanged(bool);
 		void addRenderer();
-		//void showFinishedText();
 };
 
 #endif // VISUALIZATION3D_H

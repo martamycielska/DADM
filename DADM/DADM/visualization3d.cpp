@@ -6,6 +6,7 @@
 #include <QUrl>
 #include <QString>
 #include <QFileDialog>
+#include <QTimer>
 
 #pragma region VISUALIZATION3D class
 Visualization3D::Visualization3D(QWidget *parent) :
@@ -19,7 +20,6 @@ Visualization3D::Visualization3D(QWidget *parent) :
 	threshold = 100;
 	visualizationDone = false;
 	setCutOptionEnable = true;
-	brain_3D = new Brain_3D(xspace, yspace, zspace, threshold);
 	planeWidget = vtkSmartPointer<vtkImplicitPlaneWidget2>::New();
 
     connect(ui->visualizeBtn, SIGNAL(clicked(bool)), this, SLOT(brain3D()));
@@ -44,33 +44,40 @@ void Visualization3D::cutEnableChanged(bool cutEnable) {
 
 		ui->qvtkWidget->GetRenderWindow()->Render();
 	}
-	else
+	else {
 		if (cutEnable)
 			setCutOptionEnable = true;
 		else
 			setCutOptionEnable = false;
+	}
 }
 
 void Visualization3D::acceptThreshold() {
+	ui->processDescLabel->setText("The model 3D rendering...\nPlease wait");
+
+	QEventLoop loop;
+	QTimer::singleShot(1000, &loop, SLOT(quit()));
+	loop.exec();
+
 	QString thresholdString = ui->thresholdTextEdit->toPlainText();
 	float thresholdFloat = thresholdString.toFloat();
-	brain_3D->setThreshold(thresholdFloat);
+	threshold = thresholdFloat;
 
 	if (visualizationDone == true) {
-
 		MarchingCubes mc = brain_3D->getMarchingCubes();
 		mc->SetValue(0, thresholdFloat);
 		brain_3D->setMarchingCubes(mc);
+		brain_3D->setThreshold(threshold);
 		ui->qvtkWidget->GetRenderWindow()->Render();
 	}
+
+	ui->processDescLabel->setText("Rendering done");
 }
 
 void Visualization3D::addRenderer() {
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	ui->qvtkWidget->SetRenderWindow(renderWnd);
 	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getRenderer());
-	//ui->processDescLabel->setText("Brain visualization done.");
-	//ui->qvtkWidget->repaint();
 
 	plane = vtkSmartPointer<vtkPlane>::New();
 	plane->SetNormal(1, 0, 0);
@@ -92,7 +99,6 @@ void Visualization3D::addRenderer() {
 	planeWidget->SetInteractor(ui->qvtkWidget->GetInteractor());
 	planeWidget->SetRepresentation(rep);
 	planeWidget->AddObserver(vtkCommand::InteractionEvent, myCallback);
-	//planeWidget->SetEnabled(true);
 
 	if (setCutOptionEnable) 
 		planeWidget->On();
@@ -117,18 +123,12 @@ void Visualization3D::addRenderer() {
 	rep->SetOrigin(plane->GetOrigin());
 	rep->SetNormal(plane->GetNormal());
 
-	ui->processDescLabel->setText("Brain visualization done");
 	ui->qvtkWidget->repaint();
-
 	visualizationDone = true;
+	ui->processDescLabel->setText("Brain visualization done");
+
 	qDebug() << "Add Renderer";
 }
-
-//void Visualization3D::showFinishedText() {
-//	ui->processDescLabel->setText("Brain visualization done.");
-//	ui->qvtkWidget->repaint();
-//	qDebug() << "ShowFinishedText";
-//}
 
 void Visualization3D::brain3D(){
 	ui->processDescLabel->setText("The model 3D initializing ....\nPlease wait");
@@ -138,10 +138,10 @@ void Visualization3D::brain3D(){
 		return;
 
 	QString path = url.path().remove(0, 1);
+	brain_3D = new Brain_3D(path, xspace, yspace, zspace, threshold);
 
-	worker = new VisualizationWorker(path, brain_3D);
+	worker = new VisualizationWorker(brain_3D);
 	connect(worker, &VisualizationWorker::ModelCreationDone, this, &Visualization3D::addRenderer);
-	//connect(worker, &VisualizationWorker::CuttingPlaneDone, this, &Visualization3D::showFinishedText);
 	connect(worker, &VisualizationWorker::finished, worker, &QObject::deleteLater);
 	worker->start();
 }
@@ -149,7 +149,7 @@ void Visualization3D::brain3D(){
 
 
 #pragma region WORKER class
-VisualizationWorker::VisualizationWorker(QString path, Brain_3D *brain_3D) : path(path), brain_3D(brain_3D) {
+VisualizationWorker::VisualizationWorker(Brain_3D *brain_3D) : brain_3D(brain_3D) {
 	qRegisterMetaType<Renderer>("Renderer");
 	qRegisterMetaType<MarchingCubes>("MarchingCubes");
 	qRegisterMetaType<MarchingCubes>("Confilter");
@@ -157,9 +157,7 @@ VisualizationWorker::VisualizationWorker(QString path, Brain_3D *brain_3D) : pat
 }
 
 void VisualizationWorker::run() {
-	brain_3D->initialize(path);
+	brain_3D->start();
 	emit ModelCreationDone();
-	/*brain_3D->cutPlane();
-	emit CuttingPlaneDone();*/
 }
 #pragma endregion WORKER class
