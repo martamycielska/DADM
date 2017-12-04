@@ -22,31 +22,14 @@
 #include <vtkImplicitPlaneRepresentation.h>
 #include <vtkClipPolyData.h>
 #include <vtkImplicitPlaneWidget2.h>
+#include <vtkImageShrink3D.h>
 
 #include "qstring.h"
 
 typedef vtkSmartPointer<vtkRenderer> Renderer;
 typedef vtkSmartPointer<vtkMarchingCubes> MarchingCubes;
-
-class Brain_3D :
-	public Segmentation
-{
-public:
-	Brain_3D();
-	~Brain_3D();
-	void initialize(QString path);
-	Renderer getRenderer();
-	void setRenderer(Renderer renderer);
-	MarchingCubes getMarchingCubes();
-	void setMarchingCubes(MarchingCubes _mc);
-	float getThreshold();
-	void setThreshold(float t);
-
-private:
-	float threshold;
-	Renderer render;
-	MarchingCubes mc;
-};
+typedef vtkSmartPointer<vtkPolyDataConnectivityFilter> Confilter;
+typedef vtkSmartPointer<vtkPolyDataMapper> Mapper;
 
 class MyCallback : public vtkCommand
 {
@@ -64,5 +47,44 @@ public:
 
 	MyCallback() : Plane(0) {}
 	vtkPlane* Plane;
+};
+
+class Brain_3D :
+	public Segmentation
+{
+public:
+	Brain_3D(int xspace, int yspace, int zspace, int threshold);
+	~Brain_3D();
+	void initialize(QString path);
+	//void cutPlane();
+	Renderer getRenderer();
+	MarchingCubes getMarchingCubes();
+	float getThreshold();
+	Mapper getMapper();
+	Confilter getConfilter();
+	void setRenderer(Renderer renderer);
+	void setMarchingCubes(MarchingCubes _mc);
+	void setThreshold(int t);
+	//void setVTKInteractor(vtkSmartPointer<vtkRenderWindowInteractor> interactor);
+
+private:
+	float threshold;
+	int xspace;
+	int yspace;
+	int zspace;
+	Renderer render;
+	MarchingCubes mc;
+	vtkSmartPointer<vtkPolyDataConnectivityFilter> confilter;
+	vtkSmartPointer<vtkPolyDataMapper> mapper;
+	vtkSmartPointer<vtkActor> actor;
+	vtkSmartPointer<vtkNamedColors> colors;
+	vtkSmartPointer<vtkImageReader> reader;
+	vtkSmartPointer<vtkImageShrink3D> shrink;
+	//vtkSmartPointer<vtkRenderWindowInteractor> vtkInteractor;
+	//vtkSmartPointer<vtkPlane> plane;
+	//vtkSmartPointer<vtkClipPolyData> clipper;
+	//vtkSmartPointer<MyCallback> myCallback;
+	//vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
+	//vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
 };
 
