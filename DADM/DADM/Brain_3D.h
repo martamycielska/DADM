@@ -53,7 +53,7 @@ class Brain_3D :
 	public MRI_Module<float***>
 {
 public:
-	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold);
+	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);
 	~Brain_3D();
 	Renderer getRenderer();
 	MarchingCubes getMarchingCubes();
@@ -63,12 +63,14 @@ public:
 	void setRenderer(Renderer renderer);
 	void setMarchingCubes(MarchingCubes _mc);
 	void setThreshold(int t);
+	void setShrinkFactor(int t);
 	virtual void start();
 	virtual float***getResult();
 
 private:
 	void initialize(QString path);
 	QString path;
+	int shrinkingFactor;
 	float threshold;
 	int xspace;
 	int yspace;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1110</width>
-    <height>664</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,9 +50,9 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>110</y>
+      <y>80</y>
       <width>721</width>
-      <height>501</height>
+      <height>591</height>
      </rect>
     </property>
    </widget>
@@ -60,7 +60,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>230</y>
+      <y>210</y>
       <width>291</width>
       <height>161</height>
      </rect>
@@ -165,7 +165,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>110</y>
+      <y>90</y>
       <width>291</width>
       <height>101</height>
      </rect>
@@ -197,7 +197,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>410</y>
+      <y>390</y>
       <width>291</width>
       <height>61</height>
      </rect>
@@ -244,9 +244,9 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>490</y>
+      <y>580</y>
       <width>291</width>
-      <height>111</height>
+      <height>91</height>
      </rect>
     </property>
     <property name="font">
@@ -262,14 +262,14 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>40</y>
+       <y>30</y>
        <width>271</width>
        <height>51</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <pointsize>9</pointsize>
+       <pointsize>10</pointsize>
        <weight>50</weight>
        <bold>false</bold>
       </font>
@@ -279,6 +279,63 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="shrinkDataGroupBox">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>470</y>
+      <width>291</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="title">
+     <string>Shrinking data</string>
+    </property>
+    <widget class="QSlider" name="shrinkSlider">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>5</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="shrinkingLabel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>251</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>* Shrink data to increase efficiency</string>
      </property>
     </widget>
    </widget>
