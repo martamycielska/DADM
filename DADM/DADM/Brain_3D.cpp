@@ -1,15 +1,24 @@
 #include "Brain_3D.h"
 #include "qdebug.h"
 
-Brain_3D::Brain_3D(int xspace, int yspace, int zspace, int threshold)
+Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold)
 {
 	qDebug() << "Brain 3D constructor called";
-	this->mc = vtkSmartPointer<vtkMarchingCubes>::New();
-	this->render = vtkSmartPointer<vtkRenderer>::New();
+	this -> path = path;
+	this -> mc = vtkSmartPointer<vtkMarchingCubes>::New();
+	this -> render = vtkSmartPointer<vtkRenderer>::New();
 	this -> threshold = threshold;
 	this -> xspace = xspace;
 	this -> yspace = yspace;
 	this -> zspace = zspace;
+}
+
+void Brain_3D::start() {
+	initialize(path);	
+}
+
+float*** Brain_3D::getResult() {
+	return 0;	
 }
 
 void Brain_3D::initialize(QString path) {
@@ -74,64 +83,10 @@ void Brain_3D::initialize(QString path) {
 	render->GetActiveCamera()->Elevation(30.0);
 }
 
-//void Brain_3D::cutPlane() {
-//	plane = vtkSmartPointer<vtkPlane>::New();
-//	plane->SetNormal(1, 0, 0);
-//	clipper = vtkSmartPointer<vtkClipPolyData>::New();
-//	clipper->SetClipFunction(plane);
-//	clipper->InsideOutOn();
-//
-//	myCallback = vtkSmartPointer<MyCallback>::New();
-//	myCallback->Plane = plane;
-//
-//	rep = vtkSmartPointer<vtkImplicitPlaneRepresentation>::New();
-//	rep->SetPlaceFactor(1.0); // This must be set prior to placing the widget
-//	rep->SetNormal(plane->GetNormal());
-//	rep->OutlineTranslationOff();
-//	rep->ScaleEnabledOff();
-//	rep->GetPlaneProperty()->SetOpacity(0.0);
-//	rep->GetSelectedPlaneProperty()->SetOpacity(0.2);
-//
-//	planeWidget = vtkSmartPointer<vtkImplicitPlaneWidget2>::New();
-//	//vtkInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-//	planeWidget->SetInteractor(vtkInteractor);
-//	planeWidget->SetRepresentation(rep);
-//	planeWidget->AddObserver(vtkCommand::InteractionEvent, myCallback);
-//	//planeWidget->SetEnabled(true);
-//
-//	planeWidget->On();
-//	clipper->SetInputConnection(confilter->GetOutputPort());
-//	mapper->SetInputConnection(clipper->GetOutputPort());
-//
-//	plane->SetOrigin(xspace / 2., yspace / 2., zspace / 2.);
-//	plane->SetNormal(0, -1, 0);
-//	rep->SetNormal(plane->GetNormal());
-//
-//	double bounds[6];
-//	bounds[0] = 0;
-//	bounds[1] = xspace;
-//	bounds[2] = 0;
-//	bounds[3] = yspace;
-//	bounds[4] = 0;
-//	bounds[5] = zspace;
-//
-//	plane->SetNormal(1., 0., 0.);
-//	rep->PlaceWidget(bounds);
-//	rep->SetOrigin(plane->GetOrigin());
-//	rep->SetNormal(plane->GetNormal());
-//
-//	qDebug() << "Jestem w cutPlane()";
-//}
-
 Renderer Brain_3D::getRenderer()
 {
 	return render;
 }
-
-//void Brain_3D::setVTKInteractor(vtkSmartPointer<vtkRenderWindowInteractor> interactor) 
-//{
-//	vtkInteractor = interactor;
-//}
 
 void Brain_3D::setRenderer(Renderer renderer)
 {
@@ -161,7 +116,7 @@ void Brain_3D::setThreshold(int t)
 
 Brain_3D::~Brain_3D()
 {
-	test();
+
 }
 
 Mapper Brain_3D::getMapper()
