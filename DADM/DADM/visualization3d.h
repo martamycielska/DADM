@@ -24,6 +24,7 @@
 #include <vtkImplicitPlaneRepresentation.h>
 #include <vtkClipPolyData.h>
 #include <vtkImplicitPlaneWidget2.h>
+#include <QVTKOpenGLWidget.h>
 
 #include "Brain_3D.h"
 
@@ -40,7 +41,8 @@ public:
 	void run();
 
 signals:
-	void initializationDone();
+	void ModelCreationDone();
+	void CuttingPlaneDone();
 
 private:
 	QString path;
@@ -59,12 +61,25 @@ class Visualization3D : public QMainWindow
         QString processDescString;
 		VisualizationWorker *worker;
 		Brain_3D *brain_3D;
+		int threshold;
+		int xspace;
+		int yspace;
+		int zspace;
+		bool visualizationDone;
+		bool setCutOptionEnable;
+		vtkSmartPointer<vtkPlane> plane;
+		vtkSmartPointer<vtkClipPolyData> clipper;
+		vtkSmartPointer<MyCallback> myCallback;
+		vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
+		vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
 
     private slots:
         void brain3D();
 		void acceptThreshold();
-		//void sliderValueChanged(int);
+		void sliderValueChanged(int);
+		void cutEnableChanged(bool);
 		void addRenderer();
+		//void showFinishedText();
 };
 
 #endif // VISUALIZATION3D_H
