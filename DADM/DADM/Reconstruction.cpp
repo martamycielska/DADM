@@ -15,6 +15,8 @@ float*** Reconstruction::getResult() {
 	return image;
 }
 
+
+
 Reconstruction::~Reconstruction()
 {
 }
