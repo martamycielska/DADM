@@ -18,8 +18,8 @@ void Brain_3D::start() {
 	initialize(path);	
 }
 
-float*** Brain_3D::getResult() {
-	return 0;	
+Renderer Brain_3D::getResult() {
+	return this->getRenderer();	
 }
 
 void Brain_3D::initialize(QString path) {

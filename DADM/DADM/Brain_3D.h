@@ -50,7 +50,7 @@ public:
 };
 
 class Brain_3D :
-	public MRI_Module<float***>
+	public MRI_Module<Renderer>
 {
 public:
 	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);
@@ -65,7 +65,7 @@ public:
 	void setThreshold(int t);
 	void setShrinkFactor(int t);
 	virtual void start();
-	virtual float***getResult();
+	virtual Renderer getResult();
 
 private:
 	void initialize(QString path);
