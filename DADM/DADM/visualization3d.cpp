@@ -123,7 +123,7 @@ void Visualization3D::InitUI() {
 void Visualization3D::AddRendererAndPlaneWidget() {
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	ui->qvtkWidget->SetRenderWindow(renderWnd);
-	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getRenderer());
+	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getResult());
 
 	plane = vtkSmartPointer<vtkPlane>::New();
 	plane->SetNormal(1, 0, 0);

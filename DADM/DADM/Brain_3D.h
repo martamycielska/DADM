@@ -55,7 +55,6 @@ class Brain_3D :
 public:
 	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);
 	~Brain_3D();
-	Renderer getRenderer();
 	MarchingCubes getMarchingCubes();
 	float getThreshold();
 	Mapper getMapper();
@@ -69,6 +68,7 @@ public:
 
 private:
 	void initialize(QString path);
+	Renderer getRenderer();
 	QString path;
 	int shrinkingFactor;
 	float threshold;
