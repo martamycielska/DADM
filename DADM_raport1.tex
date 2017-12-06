@@ -1,0 +1,159 @@
+\documentclass[12]{article}
+\usepackage{amsmath}                                            % pakiet matematyczny AMS Math
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{geometry}
+
+
+\title{Dedykowane Algorytmy Diagnostyki Medycznej\\ \small{Projekt oprogramowania MRI}}
+\author{Marta Mycielska}
+\setlength{\parskip}{1.5ex}
+\begin{document}
+	
+	\maketitle
+	\newpage
+	\tableofcontents
+	\newpage
+	%\newgeometry{tmargin=3cm, bmargin=3cm, lmargin=3cm, rmargin=3cm} 	
+	\section{Organizacja projektu}
+	\subsection{System kontroli wersji}
+	\paragraph{}
+	Pierwszym etapem w zarządzeniu organizacją projektu, było zaplanowanie, jak programiści będą ze sobą współpracować i dodawać kod do aplikacji. Dlatego też należało starannie wybrać odpowiedni system kontroli wersji. Jest to oprogramowanie, które umożliwia wspólną pracę nad aplikacją, kontrolowanie zmian w kodzie i daje pewność, że kod jest dodawany i aktualizowany poprawnie, bez naruszenia kodu innych osób współpracujących nad aplikacją. Dostępny wybór systemu jest bardzo szeroki, jednak ostatecznie zdecydowano się na system kontroli wersji Git.
+	\paragraph{}
+	Git wybrano ze względu na szereg zalet, którymi się charakteryzuje. Jest to system rozproszony, a więc każda osoba odpowiedzialna za fragment kodu, może pracować na własnym komputerze, nie przeszkadzając innym. Co więcej, programista może pracować bez podłączenia do sieci (off-line), posiadając jedynie własną, lokalną kopię repozytorium. Dzięki temu każdy może pracować w dogodnym czasie, a kod dołączać do aplikacji dopiero, gdy jest uważa fragment za gotowy.
+	\paragraph{}
+	Ponadto, Git jest systemem darmowym, łatwym do nauczenia i łatwym w obsłudze. Są to kolejne zalety przemawiające na jego korzyść. Programista może skupić się na opracowaniu algorytmu, a nie na potencjalnych problemach z systemem kontroli wersji.
+
+	\subsection{Repozytorium}
+	\paragraph{}
+	Z uwagi na fakt, iż system kontroli wersji Git jest wykorzystywany przez GitHuba, to właśnie na tym serwisie zdecydowano się założyć repozytorium. Korzystanie z repozytorium na GitHubie jest darmowe (jeżeli jest to repozytorium publiczne) i daje możliwości bugtrackera oraz wiki. W momencie, gdy Project Manager doda użytkowników współpracujących nad projektem, tylko te osoby mogą dodawać kod do repozytorium, łącząc się z nim zdalnie z własnego komputera.
+	\paragraph{}
+	Link do repozytorium: 
+	\url{https://github.com/martamycielska/DADM}
+	\subsection{Przydział zadań w zespole}
+	\paragraph{}
+	Zadania w zespole zostały przydzielone następująco:
+	\paragraph{}
+	Software Architect: Michał Trojak
+	\paragraph{}
+	GUI Engineer: Szymon Wójs
+	\paragraph{}
+	Visualization Engineer: Magdalena Kopciuch
+	\paragraph{}
+	Osoby odpowiedzialne za moduły przetwarzania danych:
+	\paragraph{}
+	MRI reconstruction: Magdalena Hetmańska
+	\paragraph{}
+	Intensity inhomogeneity correction: Adrianna Gurgacz
+	\paragraph{}
+	Non-stationary noise estimation: Katarzyna Zawada
+	\paragraph{}
+	Non-stationary noise filtering \#1: Klaudia Kantor
+	\paragraph{}
+	Non-stationary noise filtering \#2: Patryk Kuś
+	\paragraph{}
+	Diffusion tensor imaging: Lidia Wójtowicz
+	\paragraph{}
+	Skull striping: Justyna Skibińska
+	\paragraph{}
+	Segmentation: Agnieszka Górowska
+	\paragraph{}
+	Upsampling: Blanka Hasior
+	\paragraph{}
+	Brain 3D: Aneta Kalamaszek
+	\paragraph{}
+	Oblique imaging: Magdalena Połetek
+	\paragraph{}
+	Osoby odpowiedzialne za poszczególne moduły są zobowiązane dokonań przeglądu literaturowego dotyczącego danego zagadnienia, a następnie na tej podstawie opracować algorytm realizujący dane zagadnienia. Szczegółowy opis modułów dostępny będzie w dalszej części dokumentacji.
+	Software architect jest odpowiedzialny za ustalenie wraz z programistami zależności między modułami, sporządzenie drabinki obrazującej dane zależności i skonstruowanie szkieletu aplikacji. Ponadto, konsultując się z programistami, architect wybrał środowisko programistyczne, z którego korzystają wszyscy programiści.
+	\paragraph{}
+	GUI engineer to osoba odpowiedzialna za opracowanie algorytmu interfejsu użytkownika oraz ustalenie, jakie moduły będą połączone z interfejsem i w jaki sposób. Konieczne jest więc ustalenie jakie kontrolki będą potrzebne, jakie informacje użytkownik będzie wprowadzał, a jakie otrzymywał.
+	\paragraph{}
+	Visualisation engineer ma za zadanie pomóc każdemu modułowi, którego dane wyjściowe mają być wyświetlone. Jego zadaniem jest ustalenie, jakie to będą moduły.
+	
+	\subsection{Trudności organizacyjne}
+	\newpage
+	\section{Opis oprogramowania}
+	\subsection{Założenie i cel}
+	\subsection{Działanie}
+	\subsection{Architektura oprogramowania}
+	\newpage
+	\section{Specyfikacja modułów}
+	\subsection{MRI reconstruction}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Intensity inhomogeneity correction}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Non-stationary noise estimation}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Non-stationary noise filtering \#1}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Non-stationary noise filtering \#2}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Skull stripping}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Segmentation}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Diffusion tensor imaging}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Brain 3D}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Oblique imaging}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\subsection{Upsampling}
+		\subsubsection{Wstęp teoretyczny}
+		\subsubsection{Cel modułu}
+		\subsubsection{Specyfikacja wejścia-wyjścia}
+		\subsubsection{Analiza algorytmu}
+		\newpage
+	\section{Interfejs użytkownika}
+	\newpage
+	\section{Wizualizacja danych}
+	\newpage
+	\addcontentsline{toc}{section}{Literatura}
+	\begin{thebibliography}{99}
+		
+	\end{thebibliography}
+
+\end{document}
+
