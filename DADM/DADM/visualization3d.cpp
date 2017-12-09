@@ -100,7 +100,7 @@ void Visualization3D::InitValue() {
 	xspace = 180;
 	yspace = 216;
 	zspace = 180;
-	threshold = 100;
+	threshold = 84;
 	shrinkingFactor = 2;
 	visualizationDone = false;
 	setCutOptionEnable = true;
