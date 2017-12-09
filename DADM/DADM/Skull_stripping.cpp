@@ -1,25 +1,25 @@
 #include "Skull_stripping.h"
 #include "qdebug.h"
 
-template <class T>
-Skull_stripping<T>::Skull_stripping(T data, DataType type)
+template <class InputDataType, class OutputDataType>
+Skull_stripping<InputDataType, OutputDataType>::Skull_stripping(InputDataType data, DataType type)
 {
 	qDebug() << "Skull stripping constructor called";
-	this->data = data;
+	this->inputData = data;
 	dtype = type;
 }
 
-template <class T>
-void Skull_stripping<T>::StructuralDataAlgorithm() {
+template <class InputDataType, class OutputDataType>
+void Skull_stripping<InputDataType, OutputDataType>::StructuralDataAlgorithm() {
 
 }
 
-template <class T>
-void Skull_stripping<T>::DiffusionDataAlgorithm() {
+template <class InputDataType, class OutputDataType>
+void Skull_stripping<InputDataType, OutputDataType>::DiffusionDataAlgorithm() {
 
 }
 
-template <class T>
-Skull_stripping<T>::~Skull_stripping()
+template <class InputDataType, class OutputDataType>
+Skull_stripping<InputDataType, OutputDataType>::~Skull_stripping()
 {
 }

@@ -14,7 +14,7 @@ class MRI_Module
 public:
 	MRI_Module() {};
 	virtual void Start() = 0;
-	virtual T getData() { return outputData; };
+	virtual U getData() { return outputData; };
 	~MRI_Module() {};
 
 protected:

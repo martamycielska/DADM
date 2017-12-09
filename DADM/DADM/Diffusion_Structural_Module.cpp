@@ -1,7 +1,7 @@
 #include "Diffusion_Structural_Module.h"
 
-template <class T>
-void Diffusion_Structural_Module<T>::Start() {
+template <class T, class U>
+void Diffusion_Structural_Module<T, U>::Start() {
 	switch (dtype) {
 	case STRUCTURAL_DATA:
 		StructuralDataAlgorithm();

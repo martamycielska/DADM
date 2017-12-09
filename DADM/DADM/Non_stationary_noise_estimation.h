@@ -1,12 +1,12 @@
 #pragma once
 #include "Estimation_Module.h"
 
-template <class T, class U>
+template <class InputDataType, class OutputDataType>
 class Non_stationary_noise_estimation:
-	public Estimation_Module<T, U>
+	public Estimation_Module<InputDataType, OutputDataType>
 {
 public:
-	Non_stationary_noise_estimation(T, DataType);
+	Non_stationary_noise_estimation(InputDataType, DataType);
 	~Non_stationary_noise_estimation();
 
 private:

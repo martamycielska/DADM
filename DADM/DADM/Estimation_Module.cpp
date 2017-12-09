@@ -1,8 +1,8 @@
 #include "Estimation_Module.h"
 
 
-template <class T>
-T Estimation_Module<T>::getData(EstimatorType eType)
+template <class T, class U>
+U Estimation_Module<T, U>::getData(EstimatorType eType)
 {
 	switch (eType) {
 	case RICE:

@@ -5,7 +5,7 @@
 Segmentation::Segmentation(Data3D data)
 {
 	qDebug() << "Segmentation constructor called";
-	this->data = data;
+	this->inputData = data;
 }
 
 void Segmentation::Start() {
