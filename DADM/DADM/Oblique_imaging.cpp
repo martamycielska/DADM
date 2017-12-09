@@ -5,7 +5,7 @@
 Oblique_imaging::Oblique_imaging(Data3D data, int profile_idx, double a, double b)
 {
 	qDebug() << "Oblique imaging constructor called";
-	profiles = data;
+	this->inputData = data;
 	current_profile = profile_idx;
 	this->a = a;
 	this->b = b;

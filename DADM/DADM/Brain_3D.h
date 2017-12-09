@@ -50,7 +50,7 @@ public:
 };
 
 class Brain_3D :
-	public MRI_Module<Renderer>
+	public MRI_Module<Data3D, Renderer>
 {
 public:
 	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);

@@ -1,26 +1,26 @@
 #include "Non_stationary_noise_filtering_2.h"
 #include "qdebug.h"
 
-template <class T>
-Non_stationary_noise_filtering_2<T>::Non_stationary_noise_filtering_2(T images, T estim, DataType type)
+template <class InputDataType, class EstimatorDataType, class OutputDataType>
+Non_stationary_noise_filtering_2<InputDataType, EstimatorDataType, OutputDataType>::Non_stationary_noise_filtering_2(InputDataType images, EstimatorDataType estim, DataType type)
 {
 	qDebug() << "Non stationary noise filtering 2 constructor called";
-	this->data = images;
+	this->inputData = images;
 	estimator = estim;
 	dtype = type;
 }
 
-template <class T>
-void Non_stationary_noise_filtering_2<T>::StructuralDataAlgorithm() {
+template <class InputDataType, class EstimatorDataType, class OutputDataType>
+void Non_stationary_noise_filtering_2<InputDataType, EstimatorDataType, OutputDataType>::StructuralDataAlgorithm() {
 
 }
 
-template <class T>
-void Non_stationary_noise_filtering_2<T>::DiffusionDataAlgorithm() {
+template <class InputDataType, class EstimatorDataType, class OutputDataType>
+void Non_stationary_noise_filtering_2<InputDataType, EstimatorDataType, OutputDataType>::DiffusionDataAlgorithm() {
 
 }
 
-template <class T>
-Non_stationary_noise_filtering_2<T>::~Non_stationary_noise_filtering_2()
+template <class InputDataType, class EstimatorDataType, class OutputDataType>
+Non_stationary_noise_filtering_2<InputDataType, EstimatorDataType, OutputDataType>::~Non_stationary_noise_filtering_2()
 {
 }

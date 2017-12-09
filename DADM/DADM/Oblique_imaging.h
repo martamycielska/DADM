@@ -9,7 +9,6 @@ public:
 	~Oblique_imaging();
 
 private:
-	Data3D profiles;
 	int current_profile;
 	double a;
 	double b;

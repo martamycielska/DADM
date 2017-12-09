@@ -1,19 +1,19 @@
 #include "Intensity_inhomogenity_correction.h"
 #include "qdebug.h"
 
-template <class T>
-Intensity_inhomogenity_correction<T>::Intensity_inhomogenity_correction(T data)
+template <class T, class U>
+Intensity_inhomogenity_correction<T, U>::Intensity_inhomogenity_correction(T data)
 {
 	qDebug() << "Intensity inhomogenity correction constructor called";
-	this->data = data;
+	this->inputData = data;
 }
 
-template <class T>
-void Intensity_inhomogenity_correction<T>::Start() {
+template <class T, class U>
+void Intensity_inhomogenity_correction<T, U>::Start() {
 
 }
 
-template <class T>
-Intensity_inhomogenity_correction<T>::~Intensity_inhomogenity_correction()
+template <class T, class U>
+Intensity_inhomogenity_correction<T, U>::~Intensity_inhomogenity_correction()
 {
 }

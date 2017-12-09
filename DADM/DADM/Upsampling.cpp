@@ -5,7 +5,7 @@
 Upsampling::Upsampling(Data3D data)
 {
 	qDebug() << "Upsampling constructor called";
-	this->data = data;
+	this->inputData = data;
 }
 
 void Upsampling::Start() {

@@ -6,7 +6,7 @@ Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int thresho
 	qDebug() << "Brain 3D constructor called";
 	this -> path = path;
 	this -> mc = vtkSmartPointer<vtkMarchingCubes>::New();
-	this -> data = vtkSmartPointer<vtkRenderer>::New();
+	this -> outputData = vtkSmartPointer<vtkRenderer>::New();
 	this -> threshold = threshold;
 	this -> xspace = xspace;
 	this -> yspace = yspace;
@@ -16,7 +16,7 @@ Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int thresho
 
 Brain_3D::Brain_3D(Data3D profiles, int threshold)
 {
-	this->profiles = profiles;
+	this->inputData = profiles;
 	this->threshold = threshold;
 }
 
@@ -79,15 +79,15 @@ void Brain_3D::initialize(QString path) {
 	actor->SetMapper(mapper);
 
 	// VTK Renderer
-	data = vtkSmartPointer<vtkRenderer>::New();
-	data->AddActor(actor);
-	data->SetBackground(colors->GetColor3d("black").GetData());
-	data->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
-	data->GetActiveCamera()->SetPosition(0.0, 1.0, 0.0);
-	data->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
-	data->ResetCamera();
-	data->GetActiveCamera()->Azimuth(30.0);
-	data->GetActiveCamera()->Elevation(30.0);
+	outputData = vtkSmartPointer<vtkRenderer>::New();
+	outputData->AddActor(actor);
+	outputData->SetBackground(colors->GetColor3d("black").GetData());
+	outputData->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
+	outputData->GetActiveCamera()->SetPosition(0.0, 1.0, 0.0);
+	outputData->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
+	outputData->ResetCamera();
+	outputData->GetActiveCamera()->Azimuth(30.0);
+	outputData->GetActiveCamera()->Elevation(30.0);
 
 	// change colors: https://gitlab.kitware.com/vtk/vtk/blob/bc8b0a565766ab3768df6a4f5f07992bdae4afd8/Common/Color/vtkNamedColors.cxx
 }
@@ -99,7 +99,7 @@ void Brain_3D::initialize(QString path) {
 
 void Brain_3D::setRenderer(Renderer renderer)
 {
-	data = renderer;
+	outputData = renderer;
 }
 
 MarchingCubes Brain_3D::getMarchingCubes()
