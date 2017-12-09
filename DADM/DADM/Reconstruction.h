@@ -1,16 +1,19 @@
 #pragma once
-#include "MRI_Module.h"
+#include "Diffusion_Structural_Module.h"
+#include <Eigen\Eigenvalues>
 
+typedef Tensor<std::complex<double>, 3> Data3DRaw;
+typedef Tensor<std::complex<double>, 4> Data4DRaw;
+
+template <class T, class U>
 class Reconstruction :
-	public MRI_Module<float***>
+	public Diffusion_Structural_Module<T, U>
 {
 public:
-	Reconstruction(QString);
+	Reconstruction(T);
 	~Reconstruction();
-	virtual void start();
-	virtual float*** getResult();
 
 private:
-	QString path;
-	float*** image;;
+	virtual void StructuralDataAlgorithm();
+	virtual void DiffusionDataAlgorithm();
 };

@@ -2,11 +2,15 @@
 #include "qdebug.h"
 
 
-Upsampling::Upsampling()
+Upsampling::Upsampling(Data3D data)
 {
 	qDebug() << "Upsampling constructor called";
+	this->data = data;
 }
 
+void Upsampling::Start() {
+
+}
 
 Upsampling::~Upsampling()
 {

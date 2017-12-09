@@ -6,7 +6,7 @@ Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int thresho
 	qDebug() << "Brain 3D constructor called";
 	this -> path = path;
 	this -> mc = vtkSmartPointer<vtkMarchingCubes>::New();
-	this -> render = vtkSmartPointer<vtkRenderer>::New();
+	this -> data = vtkSmartPointer<vtkRenderer>::New();
 	this -> threshold = threshold;
 	this -> xspace = xspace;
 	this -> yspace = yspace;
@@ -14,13 +14,19 @@ Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int thresho
 	this -> shrinkingFactor = shrinkingFactor;
 }
 
-void Brain_3D::start() {
+Brain_3D::Brain_3D(Data3D profiles, int threshold)
+{
+	this->profiles = profiles;
+	this->threshold = threshold;
+}
+
+void Brain_3D::Start() {
 	initialize(path);	
 }
 
-Renderer Brain_3D::getResult() {
-	return this->getRenderer();	
-}
+//Renderer Brain_3D::getResult() {
+//	return this->getRenderer();	
+//}
 
 void Brain_3D::initialize(QString path) {
 
@@ -73,27 +79,27 @@ void Brain_3D::initialize(QString path) {
 	actor->SetMapper(mapper);
 
 	// VTK Renderer
-	this->render = vtkSmartPointer<vtkRenderer>::New();
-	render->AddActor(actor);
-	render->SetBackground(colors->GetColor3d("black").GetData());
-	render->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
-	render->GetActiveCamera()->SetPosition(0.0, 1.0, 0.0);
-	render->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
-	render->ResetCamera();
-	render->GetActiveCamera()->Azimuth(30.0);
-	render->GetActiveCamera()->Elevation(30.0);
+	data = vtkSmartPointer<vtkRenderer>::New();
+	data->AddActor(actor);
+	data->SetBackground(colors->GetColor3d("black").GetData());
+	data->GetActiveCamera()->SetViewUp(0.0, 0.0, 1.0);
+	data->GetActiveCamera()->SetPosition(0.0, 1.0, 0.0);
+	data->GetActiveCamera()->SetFocalPoint(0.0, 0.0, 0.0);
+	data->ResetCamera();
+	data->GetActiveCamera()->Azimuth(30.0);
+	data->GetActiveCamera()->Elevation(30.0);
 
 	// change colors: https://gitlab.kitware.com/vtk/vtk/blob/bc8b0a565766ab3768df6a4f5f07992bdae4afd8/Common/Color/vtkNamedColors.cxx
 }
 
-Renderer Brain_3D::getRenderer()
-{
-	return render;
-}
+//Renderer Brain_3D::getRenderer()
+//{
+//	return render;
+//}
 
 void Brain_3D::setRenderer(Renderer renderer)
 {
-	render = renderer;
+	data = renderer;
 }
 
 MarchingCubes Brain_3D::getMarchingCubes()

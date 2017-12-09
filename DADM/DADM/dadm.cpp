@@ -5,6 +5,7 @@
 #include "Globals.h"
 #include <QDebug>
 #include <QMessageBox>
+#include "Non_stationary_noise_estimation.h"
 
 DADM::DADM(QWidget *parent): QMainWindow(parent)
 {
@@ -12,8 +13,13 @@ DADM::DADM(QWidget *parent): QMainWindow(parent)
 	vis3D = new Visualization3D();
 	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
 	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
-	qDebug() << Globals::i;
-	Globals::i++;
+
+	//std::vector<MatrixXd> a3d;
+	//Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(a3d, STRUCTURAL_DATA);
+
+	//Reconstruction *reconstruction = new Reconstruction(STRUCTURAL_DATA);
+	//reconstruction->Start();
+	//MatrixXd matrix = reconstruction->getData();
 }
 
 void DADM::mri_reconstruct() {

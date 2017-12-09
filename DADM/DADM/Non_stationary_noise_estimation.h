@@ -1,10 +1,16 @@
 #pragma once
-#include "MRI_Module.h"
+#include "Estimation_Module.h"
+
+template <class T, class U>
 class Non_stationary_noise_estimation:
-	public MRI_Module<float***>
+	public Estimation_Module<T, U>
 {
 public:
-	Non_stationary_noise_estimation();
+	Non_stationary_noise_estimation(T, DataType);
 	~Non_stationary_noise_estimation();
+
+private:
+	virtual void StructuralDataAlgorithm();
+	virtual void DiffusionDataAlgorithm();
 };
 

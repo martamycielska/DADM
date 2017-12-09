@@ -1,13 +1,26 @@
 #include "Non_stationary_noise_filtering_2.h"
 #include "qdebug.h"
 
-
-Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2()
+template <class T>
+Non_stationary_noise_filtering_2<T>::Non_stationary_noise_filtering_2(T images, T estim, DataType type)
 {
 	qDebug() << "Non stationary noise filtering 2 constructor called";
+	this->data = images;
+	estimator = estim;
+	dtype = type;
 }
 
+template <class T>
+void Non_stationary_noise_filtering_2<T>::StructuralDataAlgorithm() {
 
-Non_stationary_noise_filtering_2::~Non_stationary_noise_filtering_2()
+}
+
+template <class T>
+void Non_stationary_noise_filtering_2<T>::DiffusionDataAlgorithm() {
+
+}
+
+template <class T>
+Non_stationary_noise_filtering_2<T>::~Non_stationary_noise_filtering_2()
 {
 }

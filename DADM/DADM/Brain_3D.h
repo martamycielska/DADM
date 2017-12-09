@@ -54,6 +54,7 @@ class Brain_3D :
 {
 public:
 	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);
+	Brain_3D(Data3D, int threshold);
 	~Brain_3D();
 	MarchingCubes getMarchingCubes();
 	float getThreshold();
@@ -63,19 +64,20 @@ public:
 	void setMarchingCubes(MarchingCubes _mc);
 	void setThreshold(int t);
 	void setShrinkFactor(int t);
-	virtual void start();
-	virtual Renderer getResult();
+	virtual void Start();
+	//virtual Renderer getResult();
 
 private:
+	Data3D profiles;
 	void initialize(QString path);
-	Renderer getRenderer();
+	//Renderer getRenderer();
 	QString path;
 	int shrinkingFactor;
 	float threshold;
 	int xspace;
 	int yspace;
 	int zspace;
-	Renderer render;
+	//Renderer render;
 	MarchingCubes mc;
 	vtkSmartPointer<vtkPolyDataConnectivityFilter> confilter;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;

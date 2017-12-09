@@ -1,10 +1,16 @@
 #pragma once
-#include "MRI_Module.h"
+#include "Diffusion_Structural_Module.h"
+
+template <class T, class U>
 class Intensity_inhomogenity_correction:
-	public MRI_Module<float***>
+	public Diffusion_Structural_Module<T, U>
 {
 public:
-	Intensity_inhomogenity_correction();
+	Intensity_inhomogenity_correction(T);
 	~Intensity_inhomogenity_correction();
+
+private:
+	virtual void StructuralDataAlgorithm();
+	virtual void DiffusionDataAlgorithm();
 };
 
