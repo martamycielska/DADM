@@ -79,7 +79,10 @@
     <ClCompile Include="Brain_3D.cpp" />
     <ClCompile Include="classes\helpermethods.cpp" />
     <ClCompile Include="dadm.cpp" />
+    <ClCompile Include="Diffusion_Module.cpp" />
+    <ClCompile Include="Diffusion_Structural_Module.cpp" />
     <ClCompile Include="Diffusion_tensor_imaging.cpp" />
+    <ClCompile Include="Estimation_Module.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_dadm.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -139,7 +142,10 @@
   <ItemGroup>
     <ClInclude Include="Brain_3D.h" />
     <ClInclude Include="classes\helpermethods.h" />
+    <ClInclude Include="Diffusion_Module.h" />
+    <ClInclude Include="Diffusion_Structural_Module.h" />
     <ClInclude Include="Diffusion_tensor_imaging.h" />
+    <ClInclude Include="Estimation_Module.h" />
     <ClInclude Include="GeneratedFiles\ui_dadm.h" />
     <ClInclude Include="GeneratedFiles\ui_visualization3d.h" />
     <ClInclude Include="Globals.h" />

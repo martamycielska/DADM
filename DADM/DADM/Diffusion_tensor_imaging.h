@@ -1,10 +1,11 @@
 #pragma once
-#include "MRI_Module.h"
+#include "Diffusion_Module.h"
 class Diffusion_tensor_imaging:
-	public MRI_Module<float***>
+	public Diffusion_Module
 {
 public:
 	Diffusion_tensor_imaging();
+	virtual void Start();
 	~Diffusion_tensor_imaging();
 };
 

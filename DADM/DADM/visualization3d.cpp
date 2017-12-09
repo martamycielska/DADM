@@ -123,7 +123,7 @@ void Visualization3D::InitUI() {
 void Visualization3D::AddRendererAndPlaneWidget() {
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
 	ui->qvtkWidget->SetRenderWindow(renderWnd);
-	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getResult());
+	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getData());
 
 	plane = vtkSmartPointer<vtkPlane>::New();
 	plane->SetNormal(1, 0, 0);
@@ -194,7 +194,7 @@ VisualizationWorker::VisualizationWorker(Brain_3D *brain_3D) : brain_3D(brain_3D
 }
 
 void VisualizationWorker::run() {
-	brain_3D->start();
+	brain_3D->Start();
 	emit ModelCreationDone();
 }
 #pragma endregion WORKER class

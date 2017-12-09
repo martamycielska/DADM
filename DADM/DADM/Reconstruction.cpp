@@ -1,22 +1,24 @@
 #include "Reconstruction.h"
 #include "qdebug.h"
 
-Reconstruction::Reconstruction(QString path)
+template <class In, class Out>
+Reconstruction<In, Out>::Reconstruction(In data)
 {
 	qDebug() << "Reconstruction constructor called";
-	this->path = path;
+	inputData = data;
 }
 
-void Reconstruction::start() {
+template <class In, class Out>
+void Reconstruction<In, Out>::StructuralDataAlgorithm() {
 
 }
 
-float*** Reconstruction::getResult() {
-	return image;
+template <class In, class Out>
+void Reconstruction<In, Out>::DiffusionDataAlgorithm() {
+
 }
 
-
-
-Reconstruction::~Reconstruction()
+template <class In, class Out>
+Reconstruction<In, Out>::~Reconstruction()
 {
 }
