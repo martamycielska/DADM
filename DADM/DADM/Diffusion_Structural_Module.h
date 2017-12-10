@@ -9,7 +9,7 @@ class Diffusion_Structural_Module:
 public:
 	Diffusion_Structural_Module() {};
 	virtual void Start();
-	~Diffusion_Structural_Module() {};
+	virtual ~Diffusion_Structural_Module() {};
 
 protected:
 	DataType dtype;
