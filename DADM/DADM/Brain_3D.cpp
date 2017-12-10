@@ -5,7 +5,7 @@ Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int thresho
 {
 	qDebug() << "Brain 3D constructor called";
 	this -> path = path;
-	this -> mc = vtkSmartPointer<vtkMarchingCubes>::New();
+	//this -> mc = vtkSmartPointer<vtkMarchingCubes>::New();
 	this -> outputData = vtkSmartPointer<vtkRenderer>::New();
 	this -> threshold = threshold;
 	this -> xspace = xspace;

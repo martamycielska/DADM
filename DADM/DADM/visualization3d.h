@@ -66,12 +66,12 @@ class Visualization3D : public QMainWindow
 		int yspace;
 		int zspace;
 		bool visualizationDone;
-		bool setCutOptionEnable;
-		vtkSmartPointer<vtkPlane> plane;
-		vtkSmartPointer<vtkClipPolyData> clipper;
-		vtkSmartPointer<MyCallback> myCallback;
-		vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
-		vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
+		//bool setCutOptionEnable;
+		//vtkSmartPointer<vtkPlane> plane;
+		//vtkSmartPointer<vtkClipPolyData> clipper;
+		//vtkSmartPointer<MyCallback> myCallback;
+		//vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
+		//vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
 		void InitValue();
 		void InitUI();
 		void SetConnections();
@@ -82,7 +82,7 @@ class Visualization3D : public QMainWindow
 		void AcceptThreshold();
 		void SliderValueChanged(int);
 	    void ShrinkSliderValueChanged(int);
-		void CutEnableChanged(bool);
+		//void CutEnableChanged(bool);
 		void AddRendererAndPlaneWidget();
 };
 
