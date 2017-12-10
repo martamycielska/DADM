@@ -15,7 +15,7 @@ public:
 	MRI_Module() {};
 	virtual void Start() = 0;
 	virtual U getData() { return outputData; };
-	~MRI_Module() {};
+	virtual ~MRI_Module() {};
 
 protected:
 	T inputData;

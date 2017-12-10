@@ -5,11 +5,11 @@ class Diffusion_Module :
 {
 public:
 	Diffusion_Module();
-	MatrixXd getFA() { return FA; };
-	MatrixXd getMD() { return MD; };
-	MatrixXd getRA() { return RA; };
-	MatrixXd getVR() { return VR; };
-	~Diffusion_Module();
+	virtual MatrixXd getFA() { return FA; };
+	virtual MatrixXd getMD() { return MD; };
+	virtual MatrixXd getRA() { return RA; };
+	virtual MatrixXd getVR() { return VR; };
+	virtual ~Diffusion_Module();
 
 protected:
 	MatrixXd FA;

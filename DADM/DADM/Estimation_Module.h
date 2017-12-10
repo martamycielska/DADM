@@ -3,17 +3,17 @@
 
 typedef enum EstimatorType {RICE, GAUSS} EstimatorType;
 
-template <class T, class U>
+template <class InputDataType, class OutputDataType>
 class Estimation_Module :
-	protected Diffusion_Structural_Module<T, U>
+	protected Diffusion_Structural_Module<InputDataType, OutputDataType>
 {
 public:
 	Estimation_Module() {};
-	virtual U getData(EstimatorType);
-	~Estimation_Module() {};
+	virtual OutputDataType getData(EstimatorType);
+	virtual ~Estimation_Module() {};
 
 protected:
-	U RiceEstimator;
-	U GaussEstimator;
+	OutputDataType RiceEstimator;
+	OutputDataType GaussEstimator;
 };
 
