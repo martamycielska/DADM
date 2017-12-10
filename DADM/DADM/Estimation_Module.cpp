@@ -2,7 +2,7 @@
 
 
 template <class InputDataType, class OutputDataType>
-U Estimation_Module<InputDataType, OutputDataType>::getData(EstimatorType eType)
+OutputDataType Estimation_Module<InputDataType, OutputDataType>::getData(EstimatorType eType)
 {
 	switch (eType) {
 	case RICE:
