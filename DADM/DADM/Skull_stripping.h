@@ -7,7 +7,7 @@ class Skull_stripping:
 {
 public:
 	Skull_stripping(InputDataType, DataType);
-	~Skull_stripping();
+	~Skull_stripping() {};
 
 private:
 	virtual void StructuralDataAlgorithm();

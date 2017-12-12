@@ -6,8 +6,8 @@ class Intensity_inhomogenity_correction:
 	public Diffusion_Structural_Module<InputDataType, OutputDataType>
 {
 public:
-	Intensity_inhomogenity_correction(InputDataType);
-	~Intensity_inhomogenity_correction();
+	Intensity_inhomogenity_correction(InputDataType, DataType);
+	~Intensity_inhomogenity_correction() {};
 
 private:
 	virtual void StructuralDataAlgorithm();

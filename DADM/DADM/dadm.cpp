@@ -6,6 +6,10 @@
 #include <QDebug>
 #include <QMessageBox>
 #include "Non_stationary_noise_estimation.h"
+//#include "Reconstruction.h"
+#include "Intensity_inhomogenity_correction.h"
+#include <Eigen\Dense>
+#include <unsupported\Eigen\CXX11\Tensor>
 
 DADM::DADM(QWidget *parent): QMainWindow(parent)
 {
@@ -14,16 +18,23 @@ DADM::DADM(QWidget *parent): QMainWindow(parent)
 	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
 	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
 
-	//std::vector<MatrixXd> a3d;
-	//Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(a3d, STRUCTURAL_DATA);
-
-	//Reconstruction *reconstruction = new Reconstruction(STRUCTURAL_DATA);
-	//reconstruction->Start();
-	//MatrixXd matrix = reconstruction->getData();
+	/*
+	Data3DRaw input(3,3,3);
+	input.setZero();
+	Reconstruction<Data3DRaw, Data3D> *reconstruction = new Reconstruction<Data3DRaw, Data3D>(input, STRUCTURAL_DATA);
+	reconstruction->Start();
+	Data3D out = reconstruction->getData();
+	*/
 }
 
 void DADM::mri_reconstruct() {
+	Data3DRaw input(3, 3, 3);
+	input.setZero();
 
+	worker = new Worker(input);
+	connect(worker, &Worker::resultReady, this, &DADM::onReconstructionFinished);
+	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
+	worker->start();
 }
 
 void DADM::visualization3d() {
@@ -43,4 +54,17 @@ DADM::~DADM()
 {
 	if(vis3D)
 		delete vis3D;
+}
+
+Worker::Worker(Data3DRaw input)
+{
+	this->input = input;
+}
+
+void Worker::run()
+{
+	Reconstruction<Data3DRaw, Data3D> *reconstruction = new Reconstruction<Data3DRaw, Data3D>(input, STRUCTURAL_DATA);
+	reconstruction->Start();
+	Data3D out = reconstruction->getData();
+	emit resultReady("Finished");
 }

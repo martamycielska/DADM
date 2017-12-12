@@ -9,7 +9,16 @@ class Estimation_Module :
 {
 public:
 	Estimation_Module() {};
-	virtual OutputDataType getData(EstimatorType);
+	virtual OutputDataType getData(EstimatorType eType) {
+		switch (eType) {
+		case RICE:
+			return RiceEstimator;
+			break;
+		case GAUSS:
+			return GaussEstimator;
+			break;
+		}
+	};
 	virtual ~Estimation_Module() {};
 
 protected:
