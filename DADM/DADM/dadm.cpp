@@ -17,17 +17,10 @@ DADM::DADM(QWidget *parent): QMainWindow(parent)
 	vis3D = new Visualization3D();
 	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
 	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
-
-	/*
-	Data3DRaw input(3,3,3);
-	input.setZero();
-	Reconstruction<Data3DRaw, Data3D> *reconstruction = new Reconstruction<Data3DRaw, Data3D>(input, STRUCTURAL_DATA);
-	reconstruction->Start();
-	Data3D out = reconstruction->getData();
-	*/
 }
 
 void DADM::mri_reconstruct() {
+	qRegisterMetaType<Data3D>("Data3D");
 	Data3DRaw input(3, 3, 3);
 	input.setZero();
 
@@ -43,10 +36,11 @@ void DADM::visualization3d() {
 	vis3D->show();
 }
 
-void DADM::onReconstructionFinished(QString str)
+void DADM::onReconstructionFinished(Data3D data)
 {
+	Data3D structuralData = data;
 	QMessageBox msgBox;
-	msgBox.setText(str);
+	msgBox.setText("Finished");
 	msgBox.exec();
 }
 
@@ -66,5 +60,5 @@ void Worker::run()
 	Reconstruction<Data3DRaw, Data3D> *reconstruction = new Reconstruction<Data3DRaw, Data3D>(input, STRUCTURAL_DATA);
 	reconstruction->Start();
 	Data3D out = reconstruction->getData();
-	emit resultReady("Finished");
+	emit resultReady(out);
 }

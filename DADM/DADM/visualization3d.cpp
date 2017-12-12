@@ -7,6 +7,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QTimer>
+#include "Globals.h"
 
 #pragma region VISUALIZATION3D class
 Visualization3D::Visualization3D(QWidget *parent) :

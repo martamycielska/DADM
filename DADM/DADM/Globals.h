@@ -1,18 +1,13 @@
 #pragma once
 #include <Eigen/Dense>
 #include <unsupported\Eigen\CXX11\Tensor>
+#include "MRI_Module.h"
 
-using namespace Eigen;
-
-class Globals
-{
-public:
-	static Tensor<double, 3> structuralData;
-	static Tensor<double, 4> diffusionData4D;
-	static Tensor<double, 3> diffusionData3D;
-	static MatrixXd FA;
-	static MatrixXd MD;
-	static MatrixXd RA;
-	static MatrixXd VR;
-};
+extern Data3D structuralData;
+extern Data4D diffusionData4D;
+extern Data3D diffusionData3D;
+extern MatrixXd FA;
+extern MatrixXd MD;
+extern MatrixXd RA;
+extern MatrixXd VR;
 

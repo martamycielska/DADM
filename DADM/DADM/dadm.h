@@ -15,7 +15,7 @@ public:
 	void run();
 
 signals:
-	void resultReady(QString);
+	void resultReady(Data3D);
 
 private:
 	Data3DRaw input;
@@ -38,7 +38,7 @@ private:
 
 private slots:
 	void mri_reconstruct();
-	void onReconstructionFinished(QString str);
+	void onReconstructionFinished(Data3D);
 	void visualization3d();
 };
 #endif // DADM_H
