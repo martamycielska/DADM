@@ -5,12 +5,12 @@
 typedef Tensor<std::complex<double>, 3> Data3DRaw;
 typedef Tensor<std::complex<double>, 4> Data4DRaw;
 
-template <class T, class U>
+template <class InputDataType, class OutputDataType>
 class Reconstruction :
-	public Diffusion_Structural_Module<T, U>
+	public Diffusion_Structural_Module<InputDataType, OutputDataType>
 {
 public:
-	Reconstruction(T);
+	Reconstruction(InputDataType);
 	~Reconstruction();
 
 private:

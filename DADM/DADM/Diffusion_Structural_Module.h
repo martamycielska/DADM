@@ -2,9 +2,9 @@
 #include "MRI_Module.h"
 typedef enum DataType {STRUCTURAL_DATA, DIFFUSION_DATA} DataType;
 
-template <class T, class U>
+template <class InputDataType, class OutputDataType>
 class Diffusion_Structural_Module:
-	public MRI_Module<T, U>
+	public MRI_Module<InputDataType, OutputDataType>
 {
 public:
 	Diffusion_Structural_Module() {};
