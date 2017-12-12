@@ -7,7 +7,7 @@ class Non_stationary_noise_estimation:
 {
 public:
 	Non_stationary_noise_estimation(InputDataType, DataType);
-	~Non_stationary_noise_estimation();
+	~Non_stationary_noise_estimation() {};
 
 private:
 	virtual void StructuralDataAlgorithm();

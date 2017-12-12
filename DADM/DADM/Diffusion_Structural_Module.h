@@ -8,7 +8,18 @@ class Diffusion_Structural_Module:
 {
 public:
 	Diffusion_Structural_Module() {};
-	virtual void Start();
+	virtual void Start() {
+		switch (dtype) {
+		case STRUCTURAL_DATA:
+			StructuralDataAlgorithm();
+			break;
+		case DIFFUSION_DATA:
+			DiffusionDataAlgorithm();
+			break;
+		default:
+			break;
+		}
+	};
 	virtual ~Diffusion_Structural_Module() {};
 
 protected:

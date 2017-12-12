@@ -10,8 +10,8 @@ class Reconstruction :
 	public Diffusion_Structural_Module<InputDataType, OutputDataType>
 {
 public:
-	Reconstruction(InputDataType);
-	~Reconstruction();
+	Reconstruction(InputDataType, DataType);
+	~Reconstruction() {};
 
 private:
 	virtual void StructuralDataAlgorithm();
