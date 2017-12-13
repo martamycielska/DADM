@@ -1,6 +1,8 @@
 #include "dadm.h"
 #include "visualization3d.h"
 #include "mri.h"
+#include "Upsampling_GUI.h"
+#include "ObliqueImaging_GUI.h"
 #include "classes/helpermethods.h"
 #include "Globals.h"
 #include <QDebug>
@@ -14,6 +16,8 @@ DADM::DADM(QWidget *parent): QMainWindow(parent)
 	vis3D = new Visualization3D();
 	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
 	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
+	connect(ui.UpsamplingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowUpsampling()));
+	connect(ui.ObliqueImagingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowObliqueImaging()));
 }
 
 void DADM::mri_reconstruct() {
@@ -25,6 +29,19 @@ void DADM::mri_reconstruct() {
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
 	worker->start();
 }
+
+void DADM::openNewWindowUpsampling() {
+	UpsamplingWindow = new Upsampling_GUI();
+	UpsamplingWindow->setWindowTitle("Upsampling");
+	UpsamplingWindow->show();
+}
+
+void DADM::openNewWindowObliqueImaging() {
+	ObliqueImagingWindow = new ObliqueImaging_GUI();
+	ObliqueImagingWindow->setWindowTitle("Oblique Imaging");
+	ObliqueImagingWindow->show();
+}
+
 
 void DADM::visualization3d() {
 	vis3D = new Visualization3D();
