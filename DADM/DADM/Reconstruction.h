@@ -2,8 +2,11 @@
 #include "Diffusion_Structural_Module.h"
 #include <Eigen\Eigenvalues>
 
-typedef Tensor<std::complex<double>, 3> Data3DRaw;
-typedef Tensor<std::complex<double>, 4> Data4DRaw;
+//typedef Tensor<std::complex<double>, 3> Data3DRaw;
+//typedef Tensor<std::complex<double>, 4> Data4DRaw;
+
+typedef std::vector<MatrixXcd> Data3DRaw;
+typedef std::vector<std::vector<MatrixXcd>> Data4DRaw;
 
 class Reconstruction :
 	public Diffusion_Structural_Module
