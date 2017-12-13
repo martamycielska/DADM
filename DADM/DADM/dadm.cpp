@@ -5,9 +5,6 @@
 #include "Globals.h"
 #include <QDebug>
 #include <QMessageBox>
-#include "Non_stationary_noise_estimation.h"
-//#include "Reconstruction.h"
-#include "Intensity_inhomogenity_correction.h"
 #include <Eigen\Dense>
 #include <unsupported\Eigen\CXX11\Tensor>
 
@@ -21,8 +18,7 @@ DADM::DADM(QWidget *parent): QMainWindow(parent)
 
 void DADM::mri_reconstruct() {
 	qRegisterMetaType<Data3D>("Data3D");
-	Data3DRaw input(3, 3, 3);
-	input.setZero();
+	Data3DRaw input;
 
 	worker = new Worker(input);
 	connect(worker, &Worker::resultReady, this, &DADM::onReconstructionFinished);
