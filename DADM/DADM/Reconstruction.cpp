@@ -2,29 +2,24 @@
 #include "qdebug.h"
 
 
-template <class InputDataType, class OutputDataType>
-Reconstruction<InputDataType, OutputDataType>::Reconstruction(InputDataType data, DataType type)
+Reconstruction::Reconstruction(Data3DRaw data)
 {
 	qDebug() << "Reconstruction constructor called";
-	inputData = data;
-	dtype = type;
+	data3DRaw_input = data;
+	dtype = STRUCTURAL_DATA;
 }
 
-template Reconstruction<Data3DRaw, Data3D>::Reconstruction(Data3DRaw data, DataType type);
-template Reconstruction<Data4DRaw, Data4D>::Reconstruction(Data4DRaw data, DataType type);
-
-template <class InputDataType, class OutputDataType>
-void Reconstruction<InputDataType, OutputDataType>::StructuralDataAlgorithm() {
-
+Reconstruction::Reconstruction(Data4DRaw data)
+{
+	qDebug() << "Reconstruction constructor called";
+	data4DRaw_input = data;
+	dtype = DIFFUSION_DATA;
 }
 
-template void Reconstruction<Data3DRaw, Data3D>::StructuralDataAlgorithm();
-template void Reconstruction<Data4DRaw, Data4D>::StructuralDataAlgorithm();
-
-template <class InputDataType, class OutputDataType>
-void Reconstruction<InputDataType, OutputDataType>::DiffusionDataAlgorithm() {
+void Reconstruction::StructuralDataAlgorithm() {
 
 }
 
-template void Reconstruction<Data3DRaw, Data3D>::DiffusionDataAlgorithm();
-template void Reconstruction<Data4DRaw, Data4D>::DiffusionDataAlgorithm();
+void Reconstruction::DiffusionDataAlgorithm() {
+
+}

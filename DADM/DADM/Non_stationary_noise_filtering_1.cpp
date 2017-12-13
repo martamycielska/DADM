@@ -1,33 +1,26 @@
 #include "Non_stationary_noise_filtering_1.h"
 #include "qdebug.h"
 
-template <class InputDataType, class EstimatorDataType, class OutputDataType>
-Non_stationary_noise_filtering_1<InputDataType, EstimatorDataType, OutputDataType>::Non_stationary_noise_filtering_1(InputDataType images, EstimatorDataType estim, DataType type)
+Non_stationary_noise_filtering_1::Non_stationary_noise_filtering_1(Data3D images, Data3D estim)
 {
 	qDebug() << "Non stationary noise filtering 1 constructor called";
-	this->inputData = images;
-	estimator = estim;
-	dtype = type;
+	this->data3D_input = images;
+	estimator3D = estim;
+	dtype = STRUCTURAL_DATA;
 }
 
-template Non_stationary_noise_filtering_1<Data3D, Data3D, Data3D>::Non_stationary_noise_filtering_1(Data3D data, Data3D estim, DataType type);
-template Non_stationary_noise_filtering_1<Data4D, Data4D, Data4D>::Non_stationary_noise_filtering_1(Data4D data, Data4D estim, DataType type);
-template Non_stationary_noise_filtering_1<Data4D, Data3D, Data4D>::Non_stationary_noise_filtering_1(Data4D data, Data3D estim, DataType type);
-
-template <class InputDataType, class EstimatorDataType, class OutputDataType>
-void Non_stationary_noise_filtering_1<InputDataType, EstimatorDataType, OutputDataType>::StructuralDataAlgorithm() {
-
+Non_stationary_noise_filtering_1::Non_stationary_noise_filtering_1(Data4D images, Data4D estim)
+{
+	qDebug() << "Non stationary noise filtering 1 constructor called";
+	this->data4D_input = images;
+	estimator4D = estim;
+	dtype = DIFFUSION_DATA;
 }
 
-template void Non_stationary_noise_filtering_1<Data3D, Data3D, Data3D>::StructuralDataAlgorithm();
-template void Non_stationary_noise_filtering_1<Data4D, Data4D, Data4D>::StructuralDataAlgorithm();
-template void Non_stationary_noise_filtering_1<Data4D, Data3D, Data4D>::StructuralDataAlgorithm();
-
-template <class InputDataType, class EstimatorDataType, class OutputDataType>
-void Non_stationary_noise_filtering_1<InputDataType, EstimatorDataType, OutputDataType>::DiffusionDataAlgorithm() {
+void Non_stationary_noise_filtering_1::StructuralDataAlgorithm() {
 
 }
 
-template void Non_stationary_noise_filtering_1<Data3D, Data3D, Data3D>::DiffusionDataAlgorithm();
-template void Non_stationary_noise_filtering_1<Data4D, Data4D, Data4D>::DiffusionDataAlgorithm();
-template void Non_stationary_noise_filtering_1<Data4D, Data3D, Data4D>::DiffusionDataAlgorithm();
+void Non_stationary_noise_filtering_1::DiffusionDataAlgorithm() {
+
+}

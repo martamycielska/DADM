@@ -57,8 +57,8 @@ Worker::Worker(Data3DRaw input)
 
 void Worker::run()
 {
-	Reconstruction<Data3DRaw, Data3D> *reconstruction = new Reconstruction<Data3DRaw, Data3D>(input, STRUCTURAL_DATA);
+	Reconstruction *reconstruction = new Reconstruction(input);
 	reconstruction->Start();
-	Data3D out = reconstruction->getData();
+	Data3D out = reconstruction->getData3D();
 	emit resultReady(out);
 }

@@ -1,12 +1,12 @@
 #pragma once
 #include "Diffusion_Structural_Module.h"
 
-template <class InputDataType, class OutputDataType>
 class Skull_stripping:
-	public Diffusion_Structural_Module<InputDataType, OutputDataType>
+	public Diffusion_Structural_Module
 {
 public:
-	Skull_stripping(InputDataType, DataType);
+	Skull_stripping(Data3D);
+	Skull_stripping(Data4D);
 	~Skull_stripping() {};
 
 private:
