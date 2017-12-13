@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>665</width>
+    <height>354</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="reconstructionPushButton">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>50</y>
+      <x>240</x>
+      <y>100</y>
       <width>171</width>
       <height>41</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QPushButton" name="visualizationBtn">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>120</y>
+      <x>240</x>
+      <y>200</y>
       <width>171</width>
       <height>41</height>
      </rect>
@@ -40,13 +40,39 @@
      <string>Visualization</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="UpsamplingButton">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>200</y>
+      <width>171</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Upsampling</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ObliqueImagingButton">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>200</y>
+      <width>171</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Oblique Imaging</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>665</width>
      <height>21</height>
     </rect>
    </property>
