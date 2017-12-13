@@ -1,17 +1,18 @@
 #pragma once
 #include "Diffusion_Structural_Module.h"
 
-template <class InputDataType, class EstimatorDataType, class OutputDataType>
 class Non_stationary_noise_filtering_2:
-	public Diffusion_Structural_Module<InputDataType, OutputDataType>
+	public Diffusion_Structural_Module
 {
 public:
-	Non_stationary_noise_filtering_2(InputDataType, EstimatorDataType, DataType);
+	Non_stationary_noise_filtering_2(Data3D, Data3D);
+	Non_stationary_noise_filtering_2(Data4D, Data4D);
 	~Non_stationary_noise_filtering_2() {};
 
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
-	EstimatorDataType estimator;
+	Data3D estimator3D;
+	Data4D estimator4D;
 };
 

@@ -1,12 +1,12 @@
 #pragma once
 #include "Diffusion_Structural_Module.h"
 
-template <class InputDataType, class OutputDataType>
 class Intensity_inhomogenity_correction:
-	public Diffusion_Structural_Module<InputDataType, OutputDataType>
+	public Diffusion_Structural_Module
 {
 public:
-	Intensity_inhomogenity_correction(InputDataType, DataType);
+	Intensity_inhomogenity_correction(Data3D);
+	Intensity_inhomogenity_correction(Data4D);
 	~Intensity_inhomogenity_correction() {};
 
 private:
