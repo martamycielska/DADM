@@ -31,24 +31,6 @@ typedef vtkSmartPointer<vtkMarchingCubes> MarchingCubes;
 typedef vtkSmartPointer<vtkPolyDataConnectivityFilter> Confilter;
 typedef vtkSmartPointer<vtkPolyDataMapper> Mapper;
 
-class MyCallback : public vtkCommand
-{
-public:
-	static MyCallback * New()
-	{
-		return new MyCallback;
-	}
-	virtual void Execute(vtkObject* caller, unsigned long, void*)
-	{
-		vtkImplicitPlaneWidget2* planeWidget = reinterpret_cast<vtkImplicitPlaneWidget2*>(caller);
-		vtkImplicitPlaneRepresentation* rep = reinterpret_cast<vtkImplicitPlaneRepresentation*>(planeWidget->GetRepresentation());
-		rep->GetPlane(this->Plane);
-	}
-
-	MyCallback() : Plane(0) {}
-	vtkPlane* Plane;
-};
-
 class Brain_3D :
 	public MRI_Module<Data3D, Renderer>
 {
