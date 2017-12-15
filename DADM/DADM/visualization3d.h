@@ -2,7 +2,29 @@
 #define VISUALIZATION3D_H
 #include <QMainWindow>
 #include <QThread>
+
+#include "vtkSmartPointer.h"
+#include "vtkRenderer.h"
+#include <vtkMarchingCubes.h>
+#include <vtkSmartPointer.h>
+#include <vtkStructuredPointsReader.h>
+#include <vtkPolyDataConnectivityFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkCamera.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkImageReader.h>
+#include <vtkNamedColors.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkBorderWidget.h>
+#include <vtkPlane.h>
+#include <vtkImplicitPlaneRepresentation.h>
+#include <vtkClipPolyData.h>
 #include <vtkImplicitPlaneWidget2.h>
+#include <QVTKOpenGLWidget.h>
 
 #include "Brain_3D.h"
 
@@ -44,6 +66,12 @@ class Visualization3D : public QMainWindow
 		int yspace;
 		int zspace;
 		bool visualizationDone;
+		bool setCutOptionEnable;
+		vtkSmartPointer<vtkPlane> plane;
+		vtkSmartPointer<vtkClipPolyData> clipper;
+		vtkSmartPointer<MyCallback> myCallback;
+		vtkSmartPointer<vtkImplicitPlaneRepresentation> rep;
+		vtkSmartPointer<vtkImplicitPlaneWidget2> planeWidget;
 		void InitValue();
 		void InitUI();
 		void SetConnections();
@@ -54,6 +82,7 @@ class Visualization3D : public QMainWindow
 		void AcceptThreshold();
 		void SliderValueChanged(int);
 	    void ShrinkSliderValueChanged(int);
+		void CutEnableChanged(bool);
 		void AddRendererAndPlaneWidget();
 };
 

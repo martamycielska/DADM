@@ -31,6 +31,24 @@ typedef vtkSmartPointer<vtkMarchingCubes> MarchingCubes;
 typedef vtkSmartPointer<vtkPolyDataConnectivityFilter> Confilter;
 typedef vtkSmartPointer<vtkPolyDataMapper> Mapper;
 
+class MyCallback : public vtkCommand
+{
+public:
+	static MyCallback * New()
+	{
+		return new MyCallback;
+	}
+	virtual void Execute(vtkObject* caller, unsigned long, void*)
+	{
+		vtkImplicitPlaneWidget2* planeWidget = reinterpret_cast<vtkImplicitPlaneWidget2*>(caller);
+		vtkImplicitPlaneRepresentation* rep = reinterpret_cast<vtkImplicitPlaneRepresentation*>(planeWidget->GetRepresentation());
+		rep->GetPlane(this->Plane);
+	}
+
+	MyCallback() : Plane(0) {}
+	vtkPlane* Plane;
+};
+
 class Brain_3D :
 	public MRI_Module<Data3D, Renderer>
 {
@@ -47,19 +65,16 @@ public:
 	void setThreshold(int t);
 	void setShrinkFactor(int t);
 	virtual void Start();
-	//virtual Renderer getResult();
 
 private:
 	Data3D profiles;
 	void initialize(QString path);
-	//Renderer getRenderer();
 	QString path;
 	int shrinkingFactor;
 	float threshold;
 	int xspace;
 	int yspace;
 	int zspace;
-	//Renderer render;
 	MarchingCubes mc;
 	vtkSmartPointer<vtkPolyDataConnectivityFilter> confilter;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
