@@ -1,6 +1,7 @@
 #pragma once
 #include "Diffusion_Structural_Module.h"
 #include <Eigen\Eigenvalues>
+#include <unsupported/Eigen/FFT>
 
 //typedef Tensor<std::complex<double>, 3> Data3DRaw;
 //typedef Tensor<std::complex<double>, 4> Data4DRaw;
@@ -19,6 +20,7 @@ public:
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
+	void FourierTransform();
 	Data3DRaw data3DRaw_input;
 	Data4DRaw data4DRaw_input;
 };
