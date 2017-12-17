@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <fstream>
 #include <sstream>
-
+#include <QDebug>
 #include <Eigen/Eigen>
 #include <Eigen/Dense>
 //#include <unsupported/Eigen/NonLinearOptimization>
