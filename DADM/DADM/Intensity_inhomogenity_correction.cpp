@@ -1,5 +1,12 @@
 #include "Intensity_inhomogenity_correction.h"
-#include "qdebug.h"
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+
+#include <Eigen/Eigen>
+#include <Eigen/Dense>
+//#include <unsupported/Eigen/NonLinearOptimization>
 
 Intensity_inhomogenity_correction::Intensity_inhomogenity_correction(Data3D data)
 {
