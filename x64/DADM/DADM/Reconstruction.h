@@ -13,7 +13,7 @@ class Reconstruction :
 	public Diffusion_Structural_Module
 {
 public:
-	Reconstruction(Data3DRaw);
+	Reconstruction(Data3DRaw, Data3DRaw, int, int);
 	Reconstruction(Data4DRaw);
 	~Reconstruction() {};
 
@@ -23,4 +23,8 @@ private:
 	void FourierTransform();
 	Data3DRaw data3DRaw_input;
 	Data4DRaw data4DRaw_input;
+	Data3DRaw rawData3D;
+	Data3DRaw sensitivityMaps3D;
+	int L;
+	int r;
 };

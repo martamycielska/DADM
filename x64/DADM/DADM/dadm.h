@@ -46,6 +46,6 @@ private:
 	void visualization3d();
 	void openNewWindowUpsampling();
 	void openNewWindowObliqueImaging();
-	void openFile();
+	void importStructuralData();
 };
 #endif // DADM_H
