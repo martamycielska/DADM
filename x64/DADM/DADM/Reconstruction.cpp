@@ -2,10 +2,13 @@
 #include "qdebug.h"
 
 
-Reconstruction::Reconstruction(Data3DRaw data)
+Reconstruction::Reconstruction(Data3DRaw raw_data, Data3DRaw sensitivity_maps, int L, int r)
 {
 	qDebug() << "Reconstruction constructor called";
-	data3DRaw_input = data;
+	rawData3D = raw_data;
+	sensitivityMaps3D = sensitivity_maps;
+	this->L = L;
+	this->r = r;
 	dtype = STRUCTURAL_DATA;
 }
 
@@ -26,7 +29,7 @@ void Reconstruction::DiffusionDataAlgorithm() {
 }
 
 void Reconstruction::FourierTransform() {
-	
+
 	Data3DRaw raw_data = data3DRaw_input;
 	Eigen::FFT_REVERSE;
 	size_t dim_x = 28, dim_y = 126;
