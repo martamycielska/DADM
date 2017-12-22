@@ -24,18 +24,6 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.UpsamplingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowUpsampling()));
 	connect(ui.ObliqueImagingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowObliqueImaging()));
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
-
-	//MATFile *pmat;
-	//const char **dir;
-	//const char *name;
-	//int	  ndir;
-	//int	  i;
-	//mxArray *pa;
-	//const char *file = "T1_synthetic_normal_1mm_L8_r2.mat";
-
-	//printf("Reading file %s...\n\n", file);
-
-	//pmat = matOpen(file, "r");
 }
 
 void DADM::mri_reconstruct() {
@@ -117,21 +105,21 @@ void DADM::importStructuralData()
 				qDebug() << "Otwarto sensitivity_maps";
 
 				//unsigned int xSize = matVar->nbytes / matVar->data_size;
-				const mat_complex_split_t *xData = static_cast<const mat_complex_split_t*>(matVar->data);
+				const mat_complex_split_t *xData = static_cast<const mat_complex_split_t*>(s_matVar->data);
 				const double *xRe = static_cast<const double*>(xData->Re);
 				const double *xIm = static_cast<const double*>(xData->Im);
 
-				qDebug() << matVar->dims[0];
-				qDebug() << matVar->dims[1];
-				qDebug() << matVar->dims[2];
+				qDebug() << s_matVar->dims[0];
+				qDebug() << s_matVar->dims[1];
+				qDebug() << s_matVar->dims[2];
 
 				std::vector<MatrixXcd> sensitivity_maps;
 				//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 				int val_num = 0;
-				for (int i = 0; i < matVar->dims[2]; i++) {
-					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-					for (int j = 0; j < matVar->dims[1]; j++) {
-						for (int k = 0; k < matVar->dims[0]; k++) {
+				for (int i = 0; i < s_matVar->dims[2]; i++) {
+					MatrixXcd m(s_matVar->dims[0], s_matVar->dims[1]);
+					for (int j = 0; j < s_matVar->dims[1]; j++) {
+						for (int k = 0; k < s_matVar->dims[0]; k++) {
 							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
 							val_num++;
 							//qDebug() << xRe[val_num] << xIm[val_num];
@@ -149,7 +137,7 @@ void DADM::importStructuralData()
 
 		if (l_matVar) {
 			qDebug() << "Otwarto L";
-			const int *xData = static_cast<const int*>(matVar->data);
+			const int *xData = static_cast<const int*>(l_matVar->data);
 			int L = xData[0];
 		}
 
@@ -158,7 +146,7 @@ void DADM::importStructuralData()
 
 		if (r_matVar) {
 			qDebug() << "Otwarto r";
-			const int *xData = static_cast<const int*>(matVar->data);
+			const int *xData = static_cast<const int*>(r_matVar->data);
 			int r = xData[0];
 		}
 
