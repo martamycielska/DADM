@@ -152,6 +152,8 @@ void DADM::importStructuralData()
 
 	}
 
+	Mat_Close(mat);
+
 	QMessageBox msgBox;
 	msgBox.setText("File imported");
 	msgBox.exec();
