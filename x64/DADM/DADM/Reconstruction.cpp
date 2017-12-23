@@ -5,7 +5,7 @@
 Reconstruction::Reconstruction(Data3DRaw raw_data, Data3DRaw sensitivity_maps, int L, int r)
 {
 	qDebug() << "Reconstruction constructor called";
-	rawData3D = raw_data;
+	data3DRaw_input = raw_data;
 	sensitivityMaps3D = sensitivity_maps;
 	this->L = L;
 	this->r = r;

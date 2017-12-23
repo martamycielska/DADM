@@ -23,7 +23,6 @@ private:
 	void FourierTransform();
 	Data3DRaw data3DRaw_input;
 	Data4DRaw data4DRaw_input;
-	Data3DRaw rawData3D;
 	Data3DRaw sensitivityMaps3D;
 	int L;
 	int r;
