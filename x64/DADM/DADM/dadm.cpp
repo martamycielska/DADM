@@ -90,13 +90,14 @@ void DADM::importStructuralData()
 					for (int k = 0; k < matVar->dims[0]; k++) {
 						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
 						val_num++;
+						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
 						//qDebug() << xRe[val_num] << xIm[val_num];
 					}
 				}
 				raw_data.push_back(m);
 			}
 
-			Data3DRaw structuralRawData = raw_data;
+			Global::structuralRawData = raw_data;
 
 			matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -122,23 +123,23 @@ void DADM::importStructuralData()
 						for (int k = 0; k < s_matVar->dims[0]; k++) {
 							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
 							val_num++;
-							//qDebug() << xRe[val_num] << xIm[val_num];
+							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
+							qDebug() << xRe[val_num] << xIm[val_num];
 						}
 					}
 					sensitivity_maps.push_back(m);
 				}
 
-				Data3DRaw structuralSensitivityMaps = sensitivity_maps;
+				Global::structuralSensitivityMaps = sensitivity_maps;
 			}
 		}
 
 		matvar_t *l_matVar = 0;
 		l_matVar = Mat_VarRead(mat, (char*)"L");
-
 		if (l_matVar) {
 			qDebug() << "Otwarto L";
-			const int *xData = static_cast<const int*>(l_matVar->data);
-			int L = xData[0];
+			const double *xData = static_cast<const double*>(l_matVar->data);
+			Global::L = xData[0];
 		}
 
 		matvar_t *r_matVar = 0;
@@ -146,16 +147,16 @@ void DADM::importStructuralData()
 
 		if (r_matVar) {
 			qDebug() << "Otwarto r";
-			const int *xData = static_cast<const int*>(r_matVar->data);
-			int r = xData[0];
+			const double *xData = static_cast<const double*>(r_matVar->data);
+			Global::r = xData[0];
 		}
 
 	}
-
+	qDebug() << Global::L;
+	qDebug() << Global::r;
 	Mat_Close(mat);
-
 	QMessageBox msgBox;
-	msgBox.setText("File imported");
+	msgBox.setText("Data imported");
 	msgBox.exec();
 }
 
