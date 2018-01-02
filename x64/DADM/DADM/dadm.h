@@ -24,6 +24,24 @@ private:
 
 };
 
+class ImportWorker : public QThread
+{
+	Q_OBJECT
+
+public:
+	ImportWorker(QString, DataType);
+	void run();
+	void diffusionDataImport();
+	void structuralDataImport();
+
+signals:
+	void importDone();
+
+private:
+	DataType dtype;
+	QString path;
+};
+
 class DADM : public QMainWindow
 {
 	Q_OBJECT
@@ -47,5 +65,7 @@ private:
 	void openNewWindowUpsampling();
 	void openNewWindowObliqueImaging();
 	void importStructuralData();
+	void importDiffusionData();
+	void onImportDone();
 };
 #endif // DADM_H

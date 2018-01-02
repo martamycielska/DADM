@@ -6,11 +6,14 @@
 #include "Reconstruction.h"
 
 namespace Global {
+	extern double b_value;
+	extern MatrixXd gradients;
 	extern Data3D structuralData;
 	extern Data3DRaw structuralRawData;
 	extern Data3DRaw structuralSensitivityMaps;
 	extern double L;
 	extern double r;
+	extern Data4DRaw diffusionRawData;
 	extern Data4D diffusionData4D;
 	extern Data3D diffusionData3D;
 	extern SegmentationData segmentationData;
