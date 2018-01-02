@@ -85,6 +85,7 @@
       <string>Import from file</string>
      </property>
      <addaction name="actionStructural_data"/>
+     <addaction name="actionDiffusion_data"/>
     </widget>
     <addaction name="menuImport_from_file"/>
    </widget>
@@ -102,6 +103,11 @@
   <action name="actionStructural_data">
    <property name="text">
     <string>Structural data</string>
+   </property>
+  </action>
+  <action name="actionDiffusion_data">
+   <property name="text">
+    <string>Diffusion data</string>
    </property>
   </action>
  </widget>
