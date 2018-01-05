@@ -225,7 +225,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="8bit.raw" />
     <None Include="libmatio.dll" />
   </ItemGroup>
 </Project>
