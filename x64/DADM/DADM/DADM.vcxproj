@@ -340,7 +340,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="8bit.raw" />
     <None Include="libmatio.dll" />
     <CustomBuild Include="ObliqueImaging_GUI.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
