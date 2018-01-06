@@ -128,7 +128,7 @@ void DADM::structuralTestDataImport()
 		matVar = Mat_VarRead(mat, (char*)"dataset_T1");
 
 		if (matVar) {
-			qDebug() << "Otwarto raw_data";
+			qDebug() << "Otwarto strukturê";
 
 			//unsigned int xSize = matVar->nbytes / matVar->data_size;
 			const double *xData = static_cast<const double*>(matVar->data);

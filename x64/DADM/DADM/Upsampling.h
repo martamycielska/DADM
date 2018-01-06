@@ -7,5 +7,8 @@ public:
 	Upsampling(MatrixXd);
 	virtual void Start();
 	~Upsampling();
+
+private:
+	int Rozmiar_uz();
 };
 
