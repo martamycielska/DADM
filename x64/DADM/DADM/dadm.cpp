@@ -25,6 +25,8 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.ObliqueImagingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowObliqueImaging()));
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
+
+	connect(ui.actionImport_test_data, &QAction::triggered, this, &DADM::structuralTestDataImport);
 }
 
 void DADM::mri_reconstruct() {
@@ -57,6 +59,7 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
+	ui.statusBar->showMessage("Busy");
 	QString path = url.path().remove(0, 1);
 	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
@@ -85,6 +88,7 @@ void DADM::onImportDone()
 	QMessageBox msgBox;
 	msgBox.setText("Data imported");
 	msgBox.exec();
+	ui.statusBar->showMessage("Ready");
 }
 
 void DADM::visualization3d() {
@@ -99,6 +103,63 @@ void DADM::onReconstructionFinished(Data3D data)
 	QMessageBox msgBox;
 	msgBox.setText("Finished");
 	msgBox.exec();
+}
+
+void DADM::structuralTestDataImport()
+{
+	qDebug() << "Slot called";
+	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Mat file (*.mat) (*mat)");
+
+	if (url.isEmpty())
+		return;
+
+	QString path = url.path().remove(0, 1);
+
+	QByteArray ba = path.toLatin1();
+	const char *fileName = ba.data();
+	//const char *fileName = "T1_synthetic_normal_1mm_L8_r2.mat";
+	mat_t *mat = Mat_Open(fileName, MAT_ACC_RDONLY);
+
+	if (mat) {
+		qDebug() << "Otwarto plik";
+
+		matvar_t *matVar = 0;
+
+		matVar = Mat_VarRead(mat, (char*)"dataset_T1");
+
+		if (matVar) {
+			qDebug() << "Otwarto raw_data";
+
+			//unsigned int xSize = matVar->nbytes / matVar->data_size;
+			const double *xData = static_cast<const double*>(matVar->data);
+
+			qDebug() << matVar->dims[0];
+			qDebug() << matVar->dims[1];
+			qDebug() << matVar->dims[2];
+
+			std::vector<MatrixXd> data;
+			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+			int val_num = 0;
+			for (int i = 0; i < matVar->dims[2]; i++) {
+				MatrixXd m(matVar->dims[0], matVar->dims[1]);
+				for (int j = 0; j < matVar->dims[1]; j++) {
+					for (int k = 0; k < matVar->dims[0]; k++) {
+						m(k, j) = xData[val_num];
+						val_num++;
+						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
+						//qDebug() << xData[val_num];
+					}
+				}
+				data.push_back(m);
+			}
+			Global::structuralData = data;
+		}
+
+		Mat_Close(mat);
+		QMessageBox msgBox;
+		msgBox.setText("Finished");
+		msgBox.exec();
+	}
 }
 
 DADM::~DADM()

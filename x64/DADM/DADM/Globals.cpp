@@ -12,9 +12,9 @@ namespace Global {
 	extern Data4DRaw diffusionRawData = Data4DRaw(0);
 	extern Data4D diffusionData4D = Data4D(0);
 	extern Data3D diffusionData3D = Data3D(0);
-	extern SegmentationData segmentationData;
-	extern MatrixXd FA;
-	extern MatrixXd MD;
-	extern MatrixXd RA;
-	extern MatrixXd VR;
+	extern SegmentationData segmentationData = { {"white_matter", Data3D(0)}, { "gray_matter", Data3D(0) }, { "cerebrospinal_fluid", Data3D(0) } };
+	extern MatrixXd FA = MatrixXd(0, 0);
+	extern MatrixXd MD = MatrixXd(0, 0);
+	extern MatrixXd RA = MatrixXd(0, 0);
+	extern MatrixXd VR = MatrixXd(0, 0);
 }
