@@ -67,5 +67,6 @@ private:
 	void importStructuralData();
 	void importDiffusionData();
 	void onImportDone();
+	void structuralTestDataImport();
 };
 #endif // DADM_H

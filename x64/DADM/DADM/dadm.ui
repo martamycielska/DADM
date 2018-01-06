@@ -88,6 +88,7 @@
      <addaction name="actionDiffusion_data"/>
     </widget>
     <addaction name="menuImport_from_file"/>
+    <addaction name="actionImport_test_data"/>
    </widget>
    <addaction name="menuFIle"/>
   </widget>
@@ -108,6 +109,11 @@
   <action name="actionDiffusion_data">
    <property name="text">
     <string>Diffusion data</string>
+   </property>
+  </action>
+  <action name="actionImport_test_data">
+   <property name="text">
+    <string>Import test data</string>
    </property>
   </action>
  </widget>
