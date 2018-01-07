@@ -1,7 +1,7 @@
 #pragma once
 #include "qthread.h"
 #include <Eigen\Dense>
-#include <unsupported\Eigen\CXX11\Tensor>
+//#include "unsupported\Eigen\CXX11\Tensor"
 
 using namespace Eigen;
 

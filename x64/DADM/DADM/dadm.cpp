@@ -7,7 +7,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <Eigen\Dense>
-#include <unsupported\Eigen\CXX11\Tensor>
+//#include <unsupported\Eigen\CXX11\Tensor>
 #include "matio.h"
 #include "qaction.h"
 #include "qfiledialog.h"

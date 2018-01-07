@@ -29,9 +29,9 @@ void Reconstruction::DiffusionDataAlgorithm() {
 }
 
 void Reconstruction::FourierTransform() {
-
+	
 	Data3DRaw raw_data = data3DRaw_input;
-	Eigen::FFT_REVERSE;
+	//Eigen::FFT_REVERSE;
 	size_t dim_x = 28, dim_y = 126;
 	Eigen::FFT<float> fft;
 	Eigen::MatrixXf in = Eigen::MatrixXf::Random(dim_x, dim_y);
@@ -50,6 +50,6 @@ void Reconstruction::FourierTransform() {
 		out.col(k) = tmpOut;
 	}
 
-
+	
 
 }
