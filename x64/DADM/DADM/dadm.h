@@ -8,19 +8,22 @@
 #include "Upsampling_GUI.h"
 #include "ObliqueImaging_GUI.h"
 
+typedef enum FilteringType {LMMSE, UNLM} FilteringType;
+
 class Worker : public QThread
 {
 	Q_OBJECT
 
 public:
-	Worker(Data3DRaw);
+	Worker(DataType, FilteringType);
 	void run();
 
 signals:
-	void resultReady(Data3D);
+	void resultReady();
 
 private:
-	Data3DRaw input;
+	DataType dtype;
+	FilteringType ftype;
 
 };
 
@@ -68,5 +71,6 @@ private:
 	void importDiffusionData();
 	void onImportDone();
 	void structuralTestDataImport();
+	void onPreprocessingDone();
 };
 #endif // DADM_H
