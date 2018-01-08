@@ -2,6 +2,14 @@
 #include "visualization3d.h"
 #include "Upsampling_GUI.h"
 #include "ObliqueImaging_GUI.h"
+#include "Reconstruction.h"
+#include "Non_stationary_noise_estimation.h"
+#include "Non_stationary_noise_filtering_1.h"
+#include "Non_stationary_noise_filtering_2.h"
+#include "Intensity_inhomogenity_correction.h"
+#include "Intensity_inhomogenity_correction.h"
+#include "Skull_stripping.h"
+#include "Diffusion_tensor_imaging.h"
 #include "helpermethods.h"
 #include "Globals.h"
 #include <QDebug>
@@ -30,6 +38,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 }
 
 void DADM::mri_reconstruct() {
+	/*
 	qRegisterMetaType<Data3D>("Data3D");
 	Data3DRaw input;
 
@@ -37,6 +46,7 @@ void DADM::mri_reconstruct() {
 	connect(worker, &Worker::resultReady, this, &DADM::onReconstructionFinished);
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
 	worker->start();
+	*/
 }
 
 void DADM::openNewWindowUpsampling() {
@@ -59,6 +69,7 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
+	Global::dtype = STRUCTURAL_DATA;
 	ui.statusBar->showMessage("Busy");
 	QString path = url.path().remove(0, 1);
 	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
@@ -75,11 +86,12 @@ void DADM::importDiffusionData()
 	if (url.isEmpty())
 		return;
 
+	Global::dtype = DIFFUSION_DATA;
 	QString path = url.path().remove(0, 1);
 
 	ImportWorker* iw = new ImportWorker(path, DIFFUSION_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
-	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
+	connect(iw, &ImportWorker::finished, iw, &QObject::deleteLater);
 	iw->start();
 }
 
@@ -89,6 +101,13 @@ void DADM::onImportDone()
 	msgBox.setText("Data imported");
 	msgBox.exec();
 	ui.statusBar->showMessage("Ready");
+
+	/*
+	Worker* worker = new Worker(Global::dtype, LMMSE);
+	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
+	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
+	worker->start();
+	*/
 }
 
 void DADM::visualization3d() {
@@ -162,25 +181,111 @@ void DADM::structuralTestDataImport()
 	}
 }
 
+void DADM::onPreprocessingDone()
+{
+	QMessageBox msgBox;
+	msgBox.setText("Preprocessing Done");
+	msgBox.exec();
+}
+
 DADM::~DADM()
 {
 	if (vis3D)
 		delete vis3D;
 }
 
-Worker::Worker(Data3DRaw input)
+Worker::Worker(DataType dtype, FilteringType ftype)
 {
-	this->input = input;
+	this->dtype = dtype;
+	this->ftype = ftype;
 }
 
 void Worker::run()
 {
-	/*
-	Reconstruction *reconstruction = new Reconstruction(input);
-	reconstruction->Start();
-	Data3D out = reconstruction->getData3D();
-	emit resultReady(out);
-	*/
+	Data3D images3D;
+	Data4D images4D;
+	Data3D rice3D;
+	Data4D rice4D;
+	switch (dtype)
+	{
+	case STRUCTURAL_DATA:
+	{
+		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
+		reconstruction->Start();
+		images3D = reconstruction->getData3D();
+		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
+		estimation->Start();
+		rice3D = estimation->getData3D(RICE);
+		switch (ftype)
+		{
+		case LMMSE:
+		{
+			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images3D, rice3D);
+			lmmse->Start();
+			images3D.clear();
+			images3D = lmmse->getData3D();
+			break;
+		}
+		case UNLM:
+		{
+			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
+			unlm->Start();
+			images3D.clear();
+			images3D = unlm->getData3D();
+			break;
+		}
+		}
+		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images3D);
+		correction->Start();
+		Global::structuralData = correction->getData3D();
+		break;
+	}
+	case DIFFUSION_DATA:
+	{
+		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
+		reconstruction->Start();
+		images4D = reconstruction->getData4D();
+		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
+		estimation->Start();
+		rice4D = estimation->getData4D(RICE);
+		switch (ftype)
+		{
+		case LMMSE:
+		{
+			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images4D, rice4D);
+			lmmse->Start();
+			images4D.clear();
+			images4D = lmmse->getData4D();
+			break;
+		}
+		case UNLM:
+		{
+			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images4D, rice4D);
+			unlm->Start();
+			images4D.clear();
+			images4D = unlm->getData4D();
+			break;
+		}
+		}
+		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
+		correction->Start();
+		images4D.clear();
+		images4D = correction->getData4D();
+		Skull_stripping *skull_stripping = new Skull_stripping(images4D);
+		skull_stripping->Start();
+		images4D.clear();
+		images4D = skull_stripping->getData4D();
+		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
+		diff->Start();
+		Global::diffusionData3D = diff->getData();
+		Global::FA = diff->getFA();
+		Global::RA = diff->getRA();
+		Global::MD = diff->getMD();
+		Global::VR = diff->getVR();
+		break;
+	}
+	}
+	emit resultReady();
 }
 
 ImportWorker::ImportWorker(QString path, DataType type) {
@@ -312,7 +417,7 @@ void ImportWorker::diffusionDataImport()
 					sensitivity_maps.push_back(m);
 				}
 
-				Global::structuralSensitivityMaps = sensitivity_maps;
+				Global::diffusionSensitivityMaps = sensitivity_maps;
 			}
 		}
 

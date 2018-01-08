@@ -14,7 +14,7 @@ class Reconstruction :
 {
 public:
 	Reconstruction(Data3DRaw, Data3DRaw, int, int);
-	Reconstruction(Data4DRaw);
+	Reconstruction(Data4DRaw, Data3DRaw, int, int);
 	~Reconstruction() {};
 
 private:
