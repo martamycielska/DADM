@@ -1,7 +1,5 @@
 #include "dadm.h"
 #include "visualization3d.h"
-#include "Upsampling_GUI.h"
-#include "ObliqueImaging_GUI.h"
 #include "Reconstruction.h"
 #include "Non_stationary_noise_estimation.h"
 #include "Non_stationary_noise_filtering_1.h"
@@ -27,14 +25,12 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 {
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
-	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
-	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
-	connect(ui.UpsamplingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowUpsampling()));
-	connect(ui.ObliqueImagingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowObliqueImaging()));
+	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
 
 	connect(ui.actionImport_test_data, &QAction::triggered, this, &DADM::structuralTestDataImport);
+	ui.progressBar->hide();
 }
 
 void DADM::mri_reconstruct() {
@@ -47,18 +43,6 @@ void DADM::mri_reconstruct() {
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
 	worker->start();
 	*/
-}
-
-void DADM::openNewWindowUpsampling() {
-	UpsamplingWindow = new Upsampling_GUI();
-	UpsamplingWindow->setWindowTitle("Upsampling");
-	UpsamplingWindow->show();
-}
-
-void DADM::openNewWindowObliqueImaging() {
-	ObliqueImagingWindow = new ObliqueImaging_GUI();
-	ObliqueImagingWindow->setWindowTitle("Oblique Imaging");
-	ObliqueImagingWindow->show();
 }
 
 void DADM::importStructuralData()
