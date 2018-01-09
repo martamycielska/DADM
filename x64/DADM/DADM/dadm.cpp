@@ -673,3 +673,4 @@ void ImportWorker::structuralDataImport()
 	Mat_Close(mat);
 	emit importDone();
 }
+

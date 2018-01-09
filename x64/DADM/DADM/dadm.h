@@ -59,6 +59,8 @@ private:
 	Visualization3D *vis3D;
 	Worker *worker;
 
+	
+
 private slots:
 	void mri_reconstruct();
 	void onReconstructionFinished(Data3D);
