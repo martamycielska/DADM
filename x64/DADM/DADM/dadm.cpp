@@ -28,8 +28,21 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
-
+	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
+	connect(ui.actionInformation, &QAction::triggered, this, &DADM::showProgramInformation);
 	connect(ui.actionImport_test_data, &QAction::triggered, this, &DADM::structuralTestDataImport);
+
+	connect(ui.LMMSERadioButton, &QRadioButton::isChecked, this, &DADM::LMMSEFiltrationSet);
+	connect(ui.UNLMRadioButton, &QRadioButton::isChecked, this, &DADM::UNLMFiltrationSet);
+	connect(ui.alphaPlaneSpinBox, SIGNAL(valueChanged(int)), this, SLOT(alphaAngleValueChanged(int)));
+	connect(ui.betaPlaneSpinBox, SIGNAL(valueChanged(int)), this, SLOT(betaAngleValueChanged(int)));
+	connect(ui.resolutionWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(resolutionWidthValueChanged(int)));
+	connect(ui.resolutionHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(resolutionHeightValueChanged(int)));
+	connect(ui.diffSlicesRadioButton, &QRadioButton::isChecked, this, &DADM::diffusionSlicesSet);
+	connect(ui.diffFARadioButton, &QRadioButton::isChecked, this, &DADM::diffusionFASet);
+	connect(ui.diffMDRadioButton, &QRadioButton::isChecked, this, &DADM::diffusionMDSet);
+	connect(ui.difRARadioButton, &QRadioButton::isChecked, this, &DADM::diffusionRASet);
+	connect(ui.diffVRRadioButton, &QRadioButton::isChecked, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
 }
 
@@ -90,10 +103,7 @@ void DADM::onImportDone()
 	msgBox.exec();
 	ui.statusBar->showMessage("Ready");
 
-	if(ui.LMMSERadioButton->isChecked())
-		Worker* worker = new Worker(Global::dtype, LMMSE);
-	else
-		Worker* worker = new Worker(Global::dtype, UNLM);
+	Worker* worker = new Worker(Global::dtype, Global::ftype);
 	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
 	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
@@ -189,6 +199,60 @@ void DADM::onImportProgress(int progress, int max)
 void DADM::onProccesing(QString msg)
 {
 	ui.statusBar->showMessage(msg);
+}
+
+void DADM::alphaAngleValueChanged(int)
+{
+}
+
+void DADM::betaAngleValueChanged(int)
+{
+}
+
+void DADM::resolutionWidthValueChanged(int)
+{
+}
+
+void DADM::resolutionHeightValueChanged(int)
+{
+}
+
+void DADM::diffusionSlicesSet()
+{
+}
+
+void DADM::diffusionFASet()
+{
+}
+
+void DADM::diffusionMDSet()
+{
+}
+
+void DADM::diffusionRASet()
+{
+}
+
+void DADM::diffusionVRSet()
+{
+}
+
+void DADM::LMMSEFiltrationSet()
+{
+	Global::ftype = LMMSE;
+}
+
+void DADM::UNLMFiltrationSet()
+{
+	Global::ftype = UNLM;
+}
+
+void DADM::restoreDefault()
+{
+}
+
+void DADM::showProgramInformation()
+{
 }
 
 DADM::~DADM()
