@@ -70,5 +70,20 @@ private slots:
 	void onPreprocessingDone();
 	void onImportProgress(int, int);
 	void onProccesing(QString);
+
+	void alphaAngleValueChanged(int);
+	void betaAngleValueChanged(int);
+	void resolutionWidthValueChanged(int);
+	void resolutionHeightValueChanged(int);
+	void diffusionSlicesSet();
+	void diffusionFASet();
+	void diffusionMDSet();
+	void diffusionRASet();
+	void diffusionVRSet();
+	void LMMSEFiltrationSet();
+	void UNLMFiltrationSet();
+
+	void restoreDefault();
+	void showProgramInformation();
 };
 #endif // DADM_H
