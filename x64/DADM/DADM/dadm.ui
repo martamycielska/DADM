@@ -6,73 +6,356 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>984</width>
+    <height>656</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>DADM</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="reconstructionPushButton">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>130</y>
-      <width>171</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Reconstruction</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="ObliqueImagingButton">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>230</y>
-      <width>171</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Oblique Imaging</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="visualizationBtn">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>230</y>
-      <width>171</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Visualization</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="UpsamplingButton">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>230</y>
-      <width>171</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Upsampling</string>
-    </property>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout_13">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="maximumSize">
+         <size>
+          <width>159</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Settings</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <widget class="QToolBox" name="SettingsToolBox">
+           <property name="maximumSize">
+            <size>
+             <width>159</width>
+             <height>250</height>
+            </size>
+           </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <property name="lineWidth">
+            <number>1</number>
+           </property>
+           <property name="currentIndex">
+            <number>3</number>
+           </property>
+           <widget class="QWidget" name="FiltrationPage">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>135</width>
+              <height>138</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Filtration</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QRadioButton" name="LMMSERadioButton">
+               <property name="text">
+                <string>LMMSE</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="UNLMRadioButton">
+               <property name="text">
+                <string>UNLM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>2</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="PlanePage">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>135</width>
+              <height>138</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Plane</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_11">
+               <item>
+                <widget class="QLabel" name="label_7">
+                 <property name="maximumSize">
+                  <size>
+                   <width>7</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>α</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="alphaPlaneSpinBox">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <item>
+                <widget class="QLabel" name="label_8">
+                 <property name="maximumSize">
+                  <size>
+                   <width>7</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>β</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="betaPlaneSpinBox"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="ResolutionPage">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>135</width>
+              <height>138</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Resolution</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_13">
+               <item>
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>Width</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="resolutionWidthSpinBox"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_14">
+               <item>
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Height</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="resolutionHeightSpinBox"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>50</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="DiffusionPage">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>135</width>
+              <height>138</height>
+             </rect>
+            </property>
+            <attribute name="label">
+             <string>Diffusion images</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_11">
+             <item>
+              <widget class="QRadioButton" name="diffSlicesRadioButton">
+               <property name="text">
+                <string>Slices</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="diffFARadioButton">
+               <property name="text">
+                <string>FA</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="diffMDRadioButton">
+               <property name="text">
+                <string>MD</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="difRARadioButton">
+               <property name="text">
+                <string>RA</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="diffVRRadioButton">
+               <property name="text">
+                <string>VR</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_9">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>1</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_10">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>148</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_12">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_15">
+          <item>
+           <widget class="QOpenGLWidget" name="VTK_Frontal"/>
+          </item>
+          <item>
+           <widget class="QOpenGLWidget" name="VTK_Saggital"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_16">
+          <item>
+           <widget class="QOpenGLWidget" name="VTK_Horizontal"/>
+          </item>
+          <item>
+           <widget class="QWidget" name="Unused_Widget" native="true"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>984</width>
      <height>21</height>
     </rect>
    </property>
@@ -89,8 +372,23 @@
     </widget>
     <addaction name="menuImport_from_file"/>
     <addaction name="actionImport_test_data"/>
+    <addaction name="actionRestore_default"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionVisualization_3D"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionInformation"/>
    </widget>
    <addaction name="menuFIle"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -103,17 +401,32 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionStructural_data">
    <property name="text">
-    <string>Structural data</string>
+    <string>Structural data...</string>
    </property>
   </action>
   <action name="actionDiffusion_data">
    <property name="text">
-    <string>Diffusion data</string>
+    <string>Diffusion data...</string>
    </property>
   </action>
   <action name="actionImport_test_data">
    <property name="text">
-    <string>Import test data</string>
+    <string>Import test data...</string>
+   </property>
+  </action>
+  <action name="actionRestore_default">
+   <property name="text">
+    <string>Restore default</string>
+   </property>
+  </action>
+  <action name="actionVisualization_3D">
+   <property name="text">
+    <string>Visualization 3D...</string>
+   </property>
+  </action>
+  <action name="actionInformation">
+   <property name="text">
+    <string>Information...</string>
    </property>
   </action>
  </widget>

@@ -5,8 +5,6 @@
 #include "ui_dadm.h"
 #include "visualization3d.h"
 #include "Reconstruction.h"
-#include "Upsampling_GUI.h"
-#include "ObliqueImaging_GUI.h"
 
 typedef enum FilteringType {LMMSE, UNLM} FilteringType;
 
@@ -58,15 +56,11 @@ private:
 	Ui::DADMClass ui;
 	Visualization3D *vis3D;
 	Worker *worker;
-	Upsampling_GUI *UpsamplingWindow;
-	ObliqueImaging_GUI *ObliqueImagingWindow;
 
 	private slots:
 	void mri_reconstruct();
 	void onReconstructionFinished(Data3D);
 	void visualization3d();
-	void openNewWindowUpsampling();
-	void openNewWindowObliqueImaging();
 	void importStructuralData();
 	void importDiffusionData();
 	void onImportDone();
