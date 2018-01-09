@@ -55,9 +55,11 @@ void DADM::importStructuralData()
 
 	Global::dtype = STRUCTURAL_DATA;
 	ui.statusBar->showMessage("Busy");
+	ui.progressBar->show();
 	QString path = url.path().remove(0, 1);
 	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
+	connect(iw, &ImportWorker::importProgress, this, &DADM::onImportProgress);
 	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
 	iw->start();
 }
@@ -72,9 +74,11 @@ void DADM::importDiffusionData()
 
 	Global::dtype = DIFFUSION_DATA;
 	QString path = url.path().remove(0, 1);
-
+	ui.statusBar->showMessage("Busy");
+	ui.progressBar->show();
 	ImportWorker* iw = new ImportWorker(path, DIFFUSION_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
+	connect(iw, &ImportWorker::importProgress, this, &DADM::onImportProgress);
 	connect(iw, &ImportWorker::finished, iw, &QObject::deleteLater);
 	iw->start();
 }
@@ -86,12 +90,14 @@ void DADM::onImportDone()
 	msgBox.exec();
 	ui.statusBar->showMessage("Ready");
 
-	/*
-	Worker* worker = new Worker(Global::dtype, LMMSE);
+	if(ui.LMMSERadioButton->isChecked())
+		Worker* worker = new Worker(Global::dtype, LMMSE);
+	else
+		Worker* worker = new Worker(Global::dtype, UNLM);
 	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
+	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
 	worker->start();
-	*/
 }
 
 void DADM::visualization3d() {
@@ -167,9 +173,22 @@ void DADM::structuralTestDataImport()
 
 void DADM::onPreprocessingDone()
 {
+	ui.progressBar->hide();
+	ui.statusBar->showMessage("Ready");
 	QMessageBox msgBox;
 	msgBox.setText("Preprocessing Done");
 	msgBox.exec();
+}
+
+void DADM::onImportProgress(int progress, int max)
+{
+	ui.progressBar->setMaximum(max);
+	ui.progressBar->setValue(progress);
+}
+
+void DADM::onProccesing(QString msg)
+{
+	ui.statusBar->showMessage(msg);
 }
 
 DADM::~DADM()
@@ -194,9 +213,11 @@ void Worker::run()
 	{
 	case STRUCTURAL_DATA:
 	{
+		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
 		estimation->Start();
 		rice3D = estimation->getData3D(RICE);
@@ -204,6 +225,7 @@ void Worker::run()
 		{
 		case LMMSE:
 		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
 			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images3D, rice3D);
 			lmmse->Start();
 			images3D.clear();
@@ -212,6 +234,7 @@ void Worker::run()
 		}
 		case UNLM:
 		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
 			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
 			unlm->Start();
 			images3D.clear();
@@ -219,6 +242,7 @@ void Worker::run()
 			break;
 		}
 		}
+		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images3D);
 		correction->Start();
 		Global::structuralData = correction->getData3D();
@@ -226,9 +250,11 @@ void Worker::run()
 	}
 	case DIFFUSION_DATA:
 	{
+		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images4D = reconstruction->getData4D();
+		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
 		estimation->Start();
 		rice4D = estimation->getData4D(RICE);
@@ -236,6 +262,7 @@ void Worker::run()
 		{
 		case LMMSE:
 		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
 			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images4D, rice4D);
 			lmmse->Start();
 			images4D.clear();
@@ -244,6 +271,7 @@ void Worker::run()
 		}
 		case UNLM:
 		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
 			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images4D, rice4D);
 			unlm->Start();
 			images4D.clear();
@@ -251,14 +279,17 @@ void Worker::run()
 			break;
 		}
 		}
+		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
 		correction->Start();
 		images4D.clear();
 		images4D = correction->getData4D();
+		emit currentProcess("Preprocessing: Skull stripping...");
 		Skull_stripping *skull_stripping = new Skull_stripping(images4D);
 		skull_stripping->Start();
 		images4D.clear();
 		images4D = skull_stripping->getData4D();
+		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
 		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
 		diff->Start();
 		Global::diffusionData3D = diff->getData();
@@ -303,8 +334,23 @@ void ImportWorker::diffusionDataImport()
 		qDebug() << "Otwarto plik";
 
 		matvar_t *g_matVar = 0;
+		matvar_t *matVar = 0;
+		matvar_t *s_matVar = 0;
 
 		g_matVar = Mat_VarRead(mat, (char*)"gradients");
+		matVar = Mat_VarRead(mat, (char*)"raw_data");
+		s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
+
+		int max = 0;
+		if (matVar) {
+			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3];
+		}
+
+		if (s_matVar) {
+			max += s_matVar->dims[0]*s_matVar->dims[1]*s_matVar->dims[2];
+		}
+
+		int status = 0;
 
 		if (g_matVar) {
 			qDebug() << "Otwarto gradients";
@@ -314,6 +360,7 @@ void ImportWorker::diffusionDataImport()
 
 			qDebug() << g_matVar->dims[0];
 			qDebug() << g_matVar->dims[1];
+			max += g_matVar->dims[0]*g_matVar->dims[1];
 
 			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
@@ -321,16 +368,18 @@ void ImportWorker::diffusionDataImport()
 			for (int i = 0; i < g_matVar->dims[1]; i++) {
 				for (int j = 0; j < g_matVar->dims[0]; j++) {
 					m(j, i) = xData[val_num];
+					status++;
 					val_num++;
 					if (val_num >= g_matVar->dims[0] * g_matVar->dims[1]) break;
 					//qDebug() << xData[val_num];
 				}
+				emit importProgress(status, max);
 			}
 
 			Global::gradients = m;
 		}
 
-		matvar_t *matVar = 0;
+		//matvar_t *matVar = 0;
 
 		matVar = Mat_VarRead(mat, (char*)"raw_data");
 
@@ -358,10 +407,12 @@ void ImportWorker::diffusionDataImport()
 					for (int j = 0; j < matVar->dims[1]; j++) {
 						for (int k = 0; k < matVar->dims[0]; k++) {
 							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
 							val_num++;
 							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
+						emit importProgress(status, max);
 					}
 					raw_data_part.push_back(m);
 				}
@@ -370,7 +421,7 @@ void ImportWorker::diffusionDataImport()
 
 			Global::diffusionRawData = raw_data;
 
-			matvar_t *s_matVar = 0;
+			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
 			if (s_matVar) {
@@ -393,10 +444,12 @@ void ImportWorker::diffusionDataImport()
 					for (int j = 0; j < s_matVar->dims[1]; j++) {
 						for (int k = 0; k < s_matVar->dims[0]; k++) {
 							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
 							val_num++;
 							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
+						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
 				}
@@ -449,8 +502,20 @@ void ImportWorker::structuralDataImport()
 		qDebug() << "Otwarto plik";
 
 		matvar_t *matVar = 0;
-
 		matVar = Mat_VarRead(mat, (char*)"raw_data");
+		matvar_t *s_matVar = 0;
+		s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
+
+		int max = 0;
+		if (matVar) {
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2];
+		}
+
+		if (s_matVar) {
+			max += s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2];
+		}
+
+		int status = 0;
 
 		if (matVar) {
 			qDebug() << "Otwarto raw_data";
@@ -472,17 +537,19 @@ void ImportWorker::structuralDataImport()
 				for (int j = 0; j < matVar->dims[1]; j++) {
 					for (int k = 0; k < matVar->dims[0]; k++) {
 						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+						status++;
 						val_num++;
 						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
 						//qDebug() << xRe[val_num] << xIm[val_num];
 					}
+					emit importProgress(status, max);
 				}
 				raw_data.push_back(m);
 			}
 
 			Global::structuralRawData = raw_data;
 
-			matvar_t *s_matVar = 0;
+			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
 			if (s_matVar) {
@@ -505,10 +572,12 @@ void ImportWorker::structuralDataImport()
 					for (int j = 0; j < s_matVar->dims[1]; j++) {
 						for (int k = 0; k < s_matVar->dims[0]; k++) {
 							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
 							val_num++;
 							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
+						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
 				}

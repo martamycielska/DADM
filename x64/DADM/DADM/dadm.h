@@ -18,6 +18,7 @@ public:
 
 signals:
 	void resultReady();
+	void currentProcess(QString);
 
 private:
 	DataType dtype;
@@ -37,6 +38,7 @@ public:
 
 signals:
 	void importDone();
+	void importProgress(int, int);
 
 private:
 	DataType dtype;
@@ -57,7 +59,7 @@ private:
 	Visualization3D *vis3D;
 	Worker *worker;
 
-	private slots:
+private slots:
 	void mri_reconstruct();
 	void onReconstructionFinished(Data3D);
 	void visualization3d();
@@ -66,5 +68,7 @@ private:
 	void onImportDone();
 	void structuralTestDataImport();
 	void onPreprocessingDone();
+	void onImportProgress(int, int);
+	void onProccesing(QString);
 };
 #endif // DADM_H
