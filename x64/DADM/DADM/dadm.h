@@ -19,6 +19,7 @@ public:
 signals:
 	void resultReady();
 	void currentProcess(QString);
+	void progress(int, int);
 
 private:
 	DataType dtype;
@@ -68,14 +69,14 @@ private slots:
 	void onImportDone();
 	void structuralTestDataImport();
 	void onPreprocessingDone();
-	void onImportProgress(int, int);
+	void onProgress(int, int);
 	void onProccesing(QString);
 
 	void alphaAngleValueChanged(int);
 	void betaAngleValueChanged(int);
 	void resolutionWidthValueChanged(int);
 	void resolutionHeightValueChanged(int);
-	void diffusionSlicesSet();
+	void diffusionGradientsSet();
 	void diffusionFASet();
 	void diffusionMDSet();
 	void diffusionRASet();
@@ -85,5 +86,6 @@ private slots:
 
 	void restoreDefault();
 	void showProgramInformation();
+	void gradientChanged(int);
 };
 #endif // DADM_H
