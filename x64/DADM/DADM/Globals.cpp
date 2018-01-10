@@ -1,7 +1,6 @@
 #include "Globals.h"
 
 namespace Global {
-	extern int current_gradient = 0;
 	extern int current_slice = 0;
 	extern FilteringType ftype = LMMSE;
 	extern DataType dtype = STRUCTURAL_DATA;

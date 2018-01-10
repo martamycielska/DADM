@@ -2,7 +2,7 @@
 #include "qdebug.h"
 
 
-Upsampling::Upsampling(MatrixXd data, int width, int height)
+Upsampling::Upsampling(Data3D data, int width, int height)
 {
 	qDebug() << "Upsampling constructor called";
 	this->inputData = data;

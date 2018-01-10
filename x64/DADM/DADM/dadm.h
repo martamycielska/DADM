@@ -7,6 +7,7 @@
 #include "Reconstruction.h"
 
 typedef enum FilteringType {LMMSE, UNLM} FilteringType;
+typedef enum Profile { FRONTAL, SAGGITAL, HORIZONTAL } Profile;
 
 class Worker : public QThread
 {
@@ -25,6 +26,46 @@ private:
 	DataType dtype;
 	FilteringType ftype;
 
+};
+
+class ObliqueImagingWorker : public QThread
+{
+	Q_OBJECT
+
+public:
+	ObliqueImagingWorker(Data3D, double, double, Profile);
+	void run();
+
+signals:
+	void resultReadyFrontal(Data3D);
+	void resultReadySggital(Data3D);
+	void resultReadyHorizontal(Data3D);
+
+private:
+	Profile profile;
+	Data3D data;
+	double a;
+	double b;
+};
+
+class UpsamplingWorker : public QThread
+{
+	Q_OBJECT
+
+public:
+	UpsamplingWorker(Data3D, int, int, Profile);
+	void run();
+
+signals:
+	void resultReadyFrontal(Data3D);
+	void resultReadySggital(Data3D);
+	void resultReadyHorizontal(Data3D);
+
+private:
+	Profile profile;
+	Data3D data;
+	int width;
+	int height;
 };
 
 class ImportWorker : public QThread
@@ -72,11 +113,8 @@ private slots:
 	void onProgress(int, int);
 	void onProccesing(QString);
 
-	void alphaAngleValueChanged(int);
-	void betaAngleValueChanged(int);
-	void resolutionWidthValueChanged(int);
-	void resolutionHeightValueChanged(int);
-	void diffusionGradientsSet();
+	void resolutionValuesChanged();
+	void planeValuesChanged();
 	void diffusionFASet();
 	void diffusionMDSet();
 	void diffusionRASet();
@@ -86,6 +124,12 @@ private slots:
 
 	void restoreDefault();
 	void showProgramInformation();
-	void gradientChanged(int);
+
+	void onUpsamplingFrontalDone(Data3D);
+	void onUpsamplingSaggitalDone(Data3D);
+	void onUpsamplingHorizontalDone(Data3D);
+	void onObliqueImagingFrontalDone(Data3D);
+	void onObliqueImagingSaggitalDone(Data3D);
+	void onObliqueImagingHorizontalDone(Data3D);
 };
 #endif // DADM_H
