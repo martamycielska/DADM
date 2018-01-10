@@ -53,15 +53,15 @@
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="FiltrationPage">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>64</height>
+              <width>135</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -252,7 +252,7 @@
              </rect>
             </property>
             <attribute name="label">
-             <string>Diffusion images</string>
+             <string>Biomarkers</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_11">
              <item>

@@ -12,6 +12,9 @@ namespace Global {
 	extern DataType dtype;
 	extern double b_value;
 	extern MatrixXd gradients;
+	extern Data3D dataFrontal;
+	extern Data3D dataSaggital;
+	extern Data3D dataHorizontal;
 	extern Data3D temporaryDataFrontal;
 	extern Data3D temporaryDataSaggital;
 	extern Data3D temporaryDataHorizontal;

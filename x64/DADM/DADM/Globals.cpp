@@ -7,6 +7,9 @@ namespace Global {
 	extern double b_value = 0;
 	extern MatrixXd gradients = MatrixXd(0,0);
 	extern Data3D structuralData = Data3D(0);
+	extern Data3D dataFrontal = Data3D(0);
+	extern Data3D dataSaggital = Data3D(0);
+	extern Data3D dataHorizontal = Data3D(0);
 	extern Data3D temporaryDataFrontal = Data3D(0);
 	extern Data3D temporaryDataSaggital = Data3D(0);
 	extern Data3D temporaryDataHorizontal = Data3D(0);
