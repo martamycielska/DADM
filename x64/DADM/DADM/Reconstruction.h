@@ -3,6 +3,9 @@
 #include <Eigen\Eigenvalues>
 #include <complex>
 
+#include <fstream>
+#include <iostream>
+#include <string>
 #include <fftw3.h>
 
 //typedef Tensor<std::complex<double>, 3> Data3DRaw;
@@ -22,13 +25,14 @@ public:
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
-	Data3D FourierTransform();
-	std::vector<MatrixXd> ifft(Data3DRaw raw_data);
-	void LSreconstruction(Data3D data);
+	Data3D FourierTransform(Data3DRaw raw_data);
+	Data3D ifft(Data3DRaw raw_data);
+	MatrixXd LSreconstruction(Data3D data);
 	Data3DRaw data3DRaw_input;
 	Data4DRaw data4DRaw_input;
 	Data3DRaw sensitivityMaps3D;
 	int L;
 	int r;
 	Data3D xspacedata;
+	void writeToCSVfile(std::string name, MatrixXd matrix);
 };
