@@ -1,10 +1,10 @@
 #pragma once
 #include "MRI_Module.h"
 class Upsampling:
-	public MRI_Module<MatrixXd, MatrixXd>
+	public MRI_Module<Data3D, Data3D>
 {
 public:
-	Upsampling(MatrixXd, int, int);
+	Upsampling(Data3D, int, int);
 	virtual void Start();
 	~Upsampling();
 

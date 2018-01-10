@@ -7,7 +7,6 @@
 #include "dadm.h"
 
 namespace Global {
-	extern int current_gradient;
 	extern int current_slice;
 	extern FilteringType ftype;
 	extern DataType dtype;

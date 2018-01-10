@@ -8,6 +8,8 @@
 #include "Intensity_inhomogenity_correction.h"
 #include "Skull_stripping.h"
 #include "Diffusion_tensor_imaging.h"
+#include "Oblique_imaging.h"
+#include "Upsampling.h"
 #include "helpermethods.h"
 #include "Globals.h"
 #include <QDebug>
@@ -34,12 +36,10 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 
 	connect(ui.LMMSERadioButton, &QRadioButton::toggled, this, &DADM::LMMSEFiltrationSet);
 	connect(ui.UNLMRadioButton, &QRadioButton::toggled, this, &DADM::UNLMFiltrationSet);
-	connect(ui.alphaPlaneSpinBox, SIGNAL(valueChanged(int)), this, SLOT(alphaAngleValueChanged(int)));
-	connect(ui.betaPlaneSpinBox, SIGNAL(valueChanged(int)), this, SLOT(betaAngleValueChanged(int)));
-	connect(ui.resolutionWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(resolutionWidthValueChanged(int)));
-	connect(ui.resolutionHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(resolutionHeightValueChanged(int)));
-	connect(ui.diffGradientsRadioButton, &QRadioButton::toggled, this, &DADM::diffusionGradientsSet);
-	connect(ui.gradientSpinBox, SIGNAL(valueChanged(int)), this, SLOT(gradientChanged(int)));
+
+	connect(ui.planeApplyPushButton, SIGNAL(clicked()), this, SLOT(planeValuesChanged()));
+	connect(ui.resolutionApplyPushButton, SIGNAL(clicked()), this, SLOT(resolutionValuesChanged()));
+	
 	connect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
 	connect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
@@ -203,63 +203,65 @@ void DADM::onProccesing(QString msg)
 	ui.statusBar->showMessage(msg);
 }
 
-void DADM::alphaAngleValueChanged(int)
+void DADM::resolutionValuesChanged()
 {
+	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::temporaryDataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
+	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
+	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
+	worker_frontal->start();
+
+	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::temporaryDataSaggital, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
+	connect(worker_saggital, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
+	connect(worker_saggital, &ObliqueImagingWorker::finished, worker_saggital, &QObject::deleteLater);
+	worker_saggital->start();
+
+	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::temporaryDataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
+	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
+	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
+	worker_horizontal->start();
 }
 
-void DADM::betaAngleValueChanged(int)
+void DADM::planeValuesChanged()
 {
+	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::temporaryDataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
+	connect(worker_frontal, &UpsamplingWorker::resultReadyFrontal, this, &DADM::onUpsamplingFrontalDone);
+	connect(worker_frontal, &UpsamplingWorker::finished, worker_frontal, &QObject::deleteLater);
+	worker_frontal->start();
+
+	UpsamplingWorker *worker_saggital = new UpsamplingWorker(Global::temporaryDataSaggital, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), SAGGITAL);
+	connect(worker_saggital, &UpsamplingWorker::resultReadySggital, this, &DADM::onUpsamplingSaggitalDone);
+	connect(worker_saggital, &UpsamplingWorker::finished, worker_saggital, &QObject::deleteLater);
+	worker_saggital->start();
+
+	UpsamplingWorker *worker_horizontal = new UpsamplingWorker(Global::temporaryDataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), HORIZONTAL);
+	connect(worker_horizontal, &UpsamplingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingFrontalDone);
+	connect(worker_horizontal, &UpsamplingWorker::finished, worker_horizontal, &QObject::deleteLater);
+	worker_horizontal->start();
 }
 
-void DADM::resolutionWidthValueChanged(int)
-{
-}
-
-void DADM::resolutionHeightValueChanged(int)
-{
-}
-
-void DADM::diffusionGradientsSet()
-{
-	if (!ui.diffGradientsRadioButton->isChecked())
-		return;
-	ui.gradientSpinBox->setEnabled(true);
-}
 
 void DADM::diffusionFASet()
 {
 	if (!ui.diffFARadioButton->isChecked())
 		return;
-
-	if (ui.gradientSpinBox->isEnabled())
-		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::diffusionMDSet()
 {
 	if (!ui.diffMDRadioButton->isChecked())
 		return;
-
-	if (ui.gradientSpinBox->isEnabled())
-		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::diffusionRASet()
 {
 	if (!ui.difRARadioButton->isChecked())
 		return;
-
-	if (ui.gradientSpinBox->isEnabled())
-		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::diffusionVRSet()
 {
 	if (!ui.diffVRRadioButton->isChecked())
 		return;
-
-	if (ui.gradientSpinBox->isEnabled())
-		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::LMMSEFiltrationSet()
@@ -288,9 +290,28 @@ void DADM::showProgramInformation()
 {
 }
 
-void DADM::gradientChanged(int gradient)
+void DADM::onUpsamplingFrontalDone(Data3D)
 {
-	Global::current_gradient = gradient;
+}
+
+void DADM::onUpsamplingSaggitalDone(Data3D)
+{
+}
+
+void DADM::onUpsamplingHorizontalDone(Data3D)
+{
+}
+
+void DADM::onObliqueImagingFrontalDone(Data3D)
+{
+}
+
+void DADM::onObliqueImagingSaggitalDone(Data3D)
+{
+}
+
+void DADM::onObliqueImagingHorizontalDone(Data3D)
+{
 }
 
 DADM::~DADM()
@@ -353,6 +374,18 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
+		//TODO k¹ty do ustalenia
+		/*
+		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
+		frontal->Start();
+		Global::temporaryDataFrontal = frontal->getData();
+		Oblique_imaging *saggital = new Oblique_imaging(Global::structuralData, 0, 0);
+		saggital->Start();
+		Global::temporaryDataSaggital = frontal->getData();
+		Oblique_imaging *horizontal = new Oblique_imaging(Global::structuralData, 0, 0);
+		horizontal->Start();
+		Global::temporaryDataHorizontal = frontal->getData();
+		*/
 		break;
 	}
 	case DIFFUSION_DATA:
@@ -411,6 +444,18 @@ void Worker::run()
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
 		emit progress(6, 6);
+		//TODO k¹ty do ustalenia
+		/* 
+		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
+		frontal->Start();
+		Global::temporaryDataFrontal = frontal->getData();
+		Oblique_imaging *saggital = new Oblique_imaging(Global::FA, 0, 0);
+		saggital->Start();
+		Global::temporaryDataSaggital = frontal->getData();
+		Oblique_imaging *horizontal = new Oblique_imaging(Global::FA, 0, 0);
+		horizontal->Start();
+		Global::temporaryDataHorizontal = frontal->getData();
+		*/
 		break;
 	}
 	}
@@ -722,4 +767,52 @@ void ImportWorker::structuralDataImport()
 	qDebug() << Global::r;
 	Mat_Close(mat);
 	emit importDone();
+}
+
+ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
+	qRegisterMetaType<Data3D>("Data3D");
+	this->profile = profile;
+	this->data = data;
+	this->a = a;
+	this->b = b;
+}
+
+void ObliqueImagingWorker::run() {
+	Oblique_imaging *imaging = new Oblique_imaging(data, a, b);
+	imaging->Start();
+	Data3D d = imaging->getData();
+	switch (profile) {
+	case FRONTAL:
+		emit resultReadyFrontal(d);
+		break;
+	case SAGGITAL:
+		emit resultReadySggital(d);
+		break;
+	case HORIZONTAL:
+		emit resultReadyHorizontal(d);
+	}
+}
+
+UpsamplingWorker::UpsamplingWorker(Data3D data, int width, int height, Profile profile) {
+	qRegisterMetaType<Data3D>("Data3D");
+	this->profile = profile;
+	this->data = data;
+	this->width = width;
+	this->height = height;
+}
+
+void UpsamplingWorker::run() {
+	Upsampling *upsampling = new Upsampling(data, width, height);
+	upsampling->Start();
+	Data3D d = upsampling->getData();
+	switch (profile) {
+	case FRONTAL:
+		emit resultReadyFrontal(d);
+		break;
+	case SAGGITAL:
+		emit resultReadySggital(d);
+		break;
+	case HORIZONTAL:
+		emit resultReadyHorizontal(d);
+	}
 }

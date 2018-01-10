@@ -28,13 +28,13 @@
         <property name="title">
          <string>Settings</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QToolBox" name="SettingsToolBox">
            <property name="maximumSize">
             <size>
              <width>159</width>
-             <height>280</height>
+             <height>230</height>
             </size>
            </property>
            <property name="acceptDrops">
@@ -53,7 +53,7 @@
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="FiltrationPage">
             <property name="geometry">
@@ -105,8 +105,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>74</height>
+              <width>135</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -129,7 +129,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="alphaPlaneSpinBox">
+                <widget class="QDoubleSpinBox" name="alphaPlaneSpinBox">
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
@@ -153,9 +153,16 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="betaPlaneSpinBox"/>
+                <widget class="QDoubleSpinBox" name="betaPlaneSpinBox"/>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="planeApplyPushButton">
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="verticalSpacer_7">
@@ -177,8 +184,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>98</width>
-              <height>74</height>
+              <width>135</width>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -214,6 +221,13 @@
               </layout>
              </item>
              <item>
+              <widget class="QPushButton" name="resolutionApplyPushButton">
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="verticalSpacer_8">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -234,7 +248,7 @@
               <x>0</x>
               <y>0</y>
               <width>135</width>
-              <height>168</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -242,22 +256,12 @@
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_11">
              <item>
-              <widget class="QRadioButton" name="diffGradientsRadioButton">
-               <property name="text">
-                <string>Gradient</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="gradientSpinBox"/>
-             </item>
-             <item>
               <widget class="QRadioButton" name="diffFARadioButton">
                <property name="text">
                 <string>FA</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
