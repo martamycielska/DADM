@@ -67,6 +67,7 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
+	ui.DiffusionPage->hide();
 	Global::dtype = STRUCTURAL_DATA;
 	ui.statusBar->showMessage("Busy");
 	ui.progressBar->show();
@@ -85,6 +86,23 @@ void DADM::importDiffusionData()
 
 	if (url.isEmpty())
 		return;
+
+	ui.DiffusionPage->show();
+	
+	disconnect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
+	disconnect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
+	disconnect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
+	disconnect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
+
+	ui.diffFARadioButton->setChecked(true);
+	ui.diffMDRadioButton->setChecked(false);
+	ui.diffVRRadioButton->setChecked(false);
+	ui.difRARadioButton->setChecked(false);
+
+	connect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
+	connect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
+	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
+	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 
 	Global::dtype = DIFFUSION_DATA;
 	QString path = url.path().remove(0, 1);
@@ -185,6 +203,9 @@ void DADM::structuralTestDataImport()
 
 void DADM::onPreprocessingDone()
 {
+	Global::temporaryDataFrontal = Global::dataFrontal;
+	Global::temporaryDataHorizontal = Global::dataHorizontal;
+	Global::temporaryDataSaggital = Global::dataSaggital;
 	ui.statusBar->showMessage("Ready");
 	QMessageBox msgBox;
 	msgBox.setText("Preprocessing Done");
@@ -205,17 +226,17 @@ void DADM::onProccesing(QString msg)
 
 void DADM::resolutionValuesChanged()
 {
-	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::temporaryDataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
+	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
 	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
 	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
 	worker_frontal->start();
 
-	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::temporaryDataSaggital, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
+	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::dataSaggital, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
 	connect(worker_saggital, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
 	connect(worker_saggital, &ObliqueImagingWorker::finished, worker_saggital, &QObject::deleteLater);
 	worker_saggital->start();
 
-	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::temporaryDataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
+	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::dataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
 	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
 	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
 	worker_horizontal->start();
@@ -223,17 +244,17 @@ void DADM::resolutionValuesChanged()
 
 void DADM::planeValuesChanged()
 {
-	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::temporaryDataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
+	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
 	connect(worker_frontal, &UpsamplingWorker::resultReadyFrontal, this, &DADM::onUpsamplingFrontalDone);
 	connect(worker_frontal, &UpsamplingWorker::finished, worker_frontal, &QObject::deleteLater);
 	worker_frontal->start();
 
-	UpsamplingWorker *worker_saggital = new UpsamplingWorker(Global::temporaryDataSaggital, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), SAGGITAL);
+	UpsamplingWorker *worker_saggital = new UpsamplingWorker(Global::dataSaggital, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), SAGGITAL);
 	connect(worker_saggital, &UpsamplingWorker::resultReadySggital, this, &DADM::onUpsamplingSaggitalDone);
 	connect(worker_saggital, &UpsamplingWorker::finished, worker_saggital, &QObject::deleteLater);
 	worker_saggital->start();
 
-	UpsamplingWorker *worker_horizontal = new UpsamplingWorker(Global::temporaryDataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), HORIZONTAL);
+	UpsamplingWorker *worker_horizontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), HORIZONTAL);
 	connect(worker_horizontal, &UpsamplingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingFrontalDone);
 	connect(worker_horizontal, &UpsamplingWorker::finished, worker_horizontal, &QObject::deleteLater);
 	worker_horizontal->start();
@@ -284,34 +305,48 @@ void DADM::UNLMFiltrationSet()
 
 void DADM::restoreDefault()
 {
+	Global::temporaryDataFrontal = Global::dataFrontal;
+	Global::temporaryDataHorizontal = Global::dataHorizontal;
+	Global::temporaryDataSaggital = Global::dataSaggital;
+
+	ui.alphaPlaneSpinBox->setValue(0);
+	ui.betaPlaneSpinBox->setValue(0);
+	ui.resolutionWidthSpinBox->setValue(0);
+	ui.resolutionHeightSpinBox->setValue(0);
 }
 
 void DADM::showProgramInformation()
 {
 }
 
-void DADM::onUpsamplingFrontalDone(Data3D)
+void DADM::onUpsamplingFrontalDone(Data3D data)
 {
+	Global::temporaryDataFrontal = data;
 }
 
-void DADM::onUpsamplingSaggitalDone(Data3D)
+void DADM::onUpsamplingSaggitalDone(Data3D data)
 {
+	Global::temporaryDataSaggital = data;
 }
 
-void DADM::onUpsamplingHorizontalDone(Data3D)
+void DADM::onUpsamplingHorizontalDone(Data3D data)
 {
+	Global::temporaryDataHorizontal = data;
 }
 
-void DADM::onObliqueImagingFrontalDone(Data3D)
+void DADM::onObliqueImagingFrontalDone(Data3D data)
 {
+	Global::temporaryDataFrontal = data;
 }
 
-void DADM::onObliqueImagingSaggitalDone(Data3D)
+void DADM::onObliqueImagingSaggitalDone(Data3D data)
 {
+	Global::temporaryDataSaggital = data;
 }
 
-void DADM::onObliqueImagingHorizontalDone(Data3D)
+void DADM::onObliqueImagingHorizontalDone(Data3D data)
 {
+	Global::temporaryDataHorizontal = data;
 }
 
 DADM::~DADM()
@@ -378,13 +413,13 @@ void Worker::run()
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
 		frontal->Start();
-		Global::temporaryDataFrontal = frontal->getData();
+		Global::dataFrontal = frontal->getData();
 		Oblique_imaging *saggital = new Oblique_imaging(Global::structuralData, 0, 0);
 		saggital->Start();
-		Global::temporaryDataSaggital = frontal->getData();
+		Global::dataSaggital = frontal->getData();
 		Oblique_imaging *horizontal = new Oblique_imaging(Global::structuralData, 0, 0);
 		horizontal->Start();
-		Global::temporaryDataHorizontal = frontal->getData();
+		Global::dataHorizontal = frontal->getData();
 		*/
 		break;
 	}
@@ -448,13 +483,13 @@ void Worker::run()
 		/* 
 		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
 		frontal->Start();
-		Global::temporaryDataFrontal = frontal->getData();
+		Global::dataFrontal = frontal->getData();
 		Oblique_imaging *saggital = new Oblique_imaging(Global::FA, 0, 0);
 		saggital->Start();
-		Global::temporaryDataSaggital = frontal->getData();
+		Global::dataSaggital = frontal->getData();
 		Oblique_imaging *horizontal = new Oblique_imaging(Global::FA, 0, 0);
 		horizontal->Start();
-		Global::temporaryDataHorizontal = frontal->getData();
+		Global::dataHorizontal = frontal->getData();
 		*/
 		break;
 	}
