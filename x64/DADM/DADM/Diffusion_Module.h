@@ -1,20 +1,20 @@
 #pragma once
 #include "MRI_Module.h"
 class Diffusion_Module :
-	public MRI_Module<Data4D, Data3D>
+	public MRI_Module<Data4D, Data4D>
 {
 public:
 	Diffusion_Module() {};
-	virtual MatrixXd getFA() { return FA; };
-	virtual MatrixXd getMD() { return MD; };
-	virtual MatrixXd getRA() { return RA; };
-	virtual MatrixXd getVR() { return VR; };
+	virtual Data3D getFA() { return FA; };
+	virtual Data3D getMD() { return MD; };
+	virtual Data3D getRA() { return RA; };
+	virtual Data3D getVR() { return VR; };
 	virtual ~Diffusion_Module() {};
 
 protected:
-	MatrixXd FA;
-	MatrixXd MD;
-	MatrixXd RA;
-	MatrixXd VR;
+	Data3D FA;
+	Data3D MD;
+	Data3D RA;
+	Data3D VR;
 };
 

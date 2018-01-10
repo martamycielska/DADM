@@ -32,17 +32,18 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.actionInformation, &QAction::triggered, this, &DADM::showProgramInformation);
 	connect(ui.actionImport_test_data, &QAction::triggered, this, &DADM::structuralTestDataImport);
 
-	connect(ui.LMMSERadioButton, &QRadioButton::isChecked, this, &DADM::LMMSEFiltrationSet);
-	connect(ui.UNLMRadioButton, &QRadioButton::isChecked, this, &DADM::UNLMFiltrationSet);
+	connect(ui.LMMSERadioButton, &QRadioButton::toggled, this, &DADM::LMMSEFiltrationSet);
+	connect(ui.UNLMRadioButton, &QRadioButton::toggled, this, &DADM::UNLMFiltrationSet);
 	connect(ui.alphaPlaneSpinBox, SIGNAL(valueChanged(int)), this, SLOT(alphaAngleValueChanged(int)));
 	connect(ui.betaPlaneSpinBox, SIGNAL(valueChanged(int)), this, SLOT(betaAngleValueChanged(int)));
 	connect(ui.resolutionWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(resolutionWidthValueChanged(int)));
 	connect(ui.resolutionHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(resolutionHeightValueChanged(int)));
-	connect(ui.diffSlicesRadioButton, &QRadioButton::isChecked, this, &DADM::diffusionSlicesSet);
-	connect(ui.diffFARadioButton, &QRadioButton::isChecked, this, &DADM::diffusionFASet);
-	connect(ui.diffMDRadioButton, &QRadioButton::isChecked, this, &DADM::diffusionMDSet);
-	connect(ui.difRARadioButton, &QRadioButton::isChecked, this, &DADM::diffusionRASet);
-	connect(ui.diffVRRadioButton, &QRadioButton::isChecked, this, &DADM::diffusionVRSet);
+	connect(ui.diffGradientsRadioButton, &QRadioButton::toggled, this, &DADM::diffusionGradientsSet);
+	connect(ui.gradientSpinBox, SIGNAL(valueChanged(int)), this, SLOT(gradientChanged(int)));
+	connect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
+	connect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
+	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
+	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
 }
 
@@ -72,7 +73,7 @@ void DADM::importStructuralData()
 	QString path = url.path().remove(0, 1);
 	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
-	connect(iw, &ImportWorker::importProgress, this, &DADM::onImportProgress);
+	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
 	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
 	iw->start();
 }
@@ -91,7 +92,7 @@ void DADM::importDiffusionData()
 	ui.progressBar->show();
 	ImportWorker* iw = new ImportWorker(path, DIFFUSION_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
-	connect(iw, &ImportWorker::importProgress, this, &DADM::onImportProgress);
+	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
 	connect(iw, &ImportWorker::finished, iw, &QObject::deleteLater);
 	iw->start();
 }
@@ -106,6 +107,7 @@ void DADM::onImportDone()
 	Worker* worker = new Worker(Global::dtype, Global::ftype);
 	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
 	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
+	connect(worker, &Worker::progress, this, &DADM::onProgress);
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
 	worker->start();
 }
@@ -183,14 +185,14 @@ void DADM::structuralTestDataImport()
 
 void DADM::onPreprocessingDone()
 {
-	ui.progressBar->hide();
 	ui.statusBar->showMessage("Ready");
 	QMessageBox msgBox;
 	msgBox.setText("Preprocessing Done");
 	msgBox.exec();
+	ui.progressBar->hide();
 }
 
-void DADM::onImportProgress(int progress, int max)
+void DADM::onProgress(int progress, int max)
 {
 	ui.progressBar->setMaximum(max);
 	ui.progressBar->setValue(progress);
@@ -217,33 +219,64 @@ void DADM::resolutionHeightValueChanged(int)
 {
 }
 
-void DADM::diffusionSlicesSet()
+void DADM::diffusionGradientsSet()
 {
+	if (!ui.diffGradientsRadioButton->isChecked())
+		return;
+	ui.gradientSpinBox->setEnabled(true);
 }
 
 void DADM::diffusionFASet()
 {
+	if (!ui.diffFARadioButton->isChecked())
+		return;
+
+	if (ui.gradientSpinBox->isEnabled())
+		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::diffusionMDSet()
 {
+	if (!ui.diffMDRadioButton->isChecked())
+		return;
+
+	if (ui.gradientSpinBox->isEnabled())
+		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::diffusionRASet()
 {
+	if (!ui.difRARadioButton->isChecked())
+		return;
+
+	if (ui.gradientSpinBox->isEnabled())
+		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::diffusionVRSet()
 {
+	if (!ui.diffVRRadioButton->isChecked())
+		return;
+
+	if (ui.gradientSpinBox->isEnabled())
+		ui.gradientSpinBox->setEnabled(false);
 }
 
 void DADM::LMMSEFiltrationSet()
 {
+	if (!ui.LMMSERadioButton->isChecked())
+		return;
+
+	qDebug() << "LMMSE";
 	Global::ftype = LMMSE;
 }
 
 void DADM::UNLMFiltrationSet()
 {
+	if (!ui.UNLMRadioButton->isChecked())
+		return;
+
+	qDebug() << "UNLM";
 	Global::ftype = UNLM;
 }
 
@@ -253,6 +286,11 @@ void DADM::restoreDefault()
 
 void DADM::showProgramInformation()
 {
+}
+
+void DADM::gradientChanged(int gradient)
+{
+	Global::current_gradient = gradient;
 }
 
 DADM::~DADM()
@@ -278,13 +316,16 @@ void Worker::run()
 	case STRUCTURAL_DATA:
 	{
 		emit currentProcess("Preprocessing: Reconstruction...");
+		emit progress(0, 4);
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
 		estimation->Start();
 		rice3D = estimation->getData3D(RICE);
+		emit progress(2, 4);
 		switch (ftype)
 		{
 		case LMMSE:
@@ -306,22 +347,27 @@ void Worker::run()
 			break;
 		}
 		}
+		emit progress(3, 4);
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images3D);
 		correction->Start();
 		Global::structuralData = correction->getData3D();
+		emit progress(4, 4);
 		break;
 	}
 	case DIFFUSION_DATA:
 	{
+		emit progress(0, 6);
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images4D = reconstruction->getData4D();
+		emit progress(1, 6);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
 		estimation->Start();
 		rice4D = estimation->getData4D(RICE);
+		emit progress(2, 6);
 		switch (ftype)
 		{
 		case LMMSE:
@@ -343,24 +389,28 @@ void Worker::run()
 			break;
 		}
 		}
+		emit progress(3, 6);
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
 		correction->Start();
 		images4D.clear();
 		images4D = correction->getData4D();
+		emit progress(4, 6);
 		emit currentProcess("Preprocessing: Skull stripping...");
 		Skull_stripping *skull_stripping = new Skull_stripping(images4D);
 		skull_stripping->Start();
 		images4D.clear();
 		images4D = skull_stripping->getData4D();
+		emit progress(5,6);
 		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
 		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
 		diff->Start();
-		Global::diffusionData3D = diff->getData();
+		Global::diffusionData4D = diff->getData();
 		Global::FA = diff->getFA();
 		Global::RA = diff->getRA();
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
+		emit progress(6, 6);
 		break;
 	}
 	}

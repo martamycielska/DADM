@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>984</width>
-    <height>656</height>
+    <width>1088</width>
+    <height>689</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
            <property name="maximumSize">
             <size>
              <width>159</width>
-             <height>250</height>
+             <height>280</height>
             </size>
            </property>
            <property name="acceptDrops">
@@ -60,8 +60,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>138</height>
+              <width>98</width>
+              <height>64</height>
              </rect>
             </property>
             <attribute name="label">
@@ -105,8 +105,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>138</height>
+              <width>98</width>
+              <height>74</height>
              </rect>
             </property>
             <attribute name="label">
@@ -177,8 +177,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>138</height>
+              <width>98</width>
+              <height>74</height>
              </rect>
             </property>
             <attribute name="label">
@@ -234,7 +234,7 @@
               <x>0</x>
               <y>0</y>
               <width>135</width>
-              <height>138</height>
+              <height>168</height>
              </rect>
             </property>
             <attribute name="label">
@@ -242,14 +242,17 @@
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_11">
              <item>
-              <widget class="QRadioButton" name="diffSlicesRadioButton">
+              <widget class="QRadioButton" name="diffGradientsRadioButton">
                <property name="text">
-                <string>Slices</string>
+                <string>Gradient</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
               </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="gradientSpinBox"/>
              </item>
              <item>
               <widget class="QRadioButton" name="diffFARadioButton">
@@ -355,7 +358,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>984</width>
+     <width>1088</width>
      <height>21</height>
     </rect>
    </property>
