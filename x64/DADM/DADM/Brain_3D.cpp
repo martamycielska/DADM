@@ -1,9 +1,4 @@
 #include "Brain_3D.h"
-#include "qdebug.h"
-
-#include "vtkAutoInit.h"
-VTK_MODULE_INIT(vtkRenderingOpenGL2);
-VTK_MODULE_INIT(vtkInteractionStyle);
 
 Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor)
 {
@@ -56,20 +51,9 @@ void Brain_3D::initialize(QString path) {
 	mc->ComputeGradientsOn();
 	mc->SetValue(0, threshold);
 
-	// To remain largest region
-	confilter = vtkSmartPointer<vtkPolyDataConnectivityFilter>::New();
-	confilter->SetInputConnection(mc->GetOutputPort());
-	confilter->SetExtractionModeToLargestRegion();
-
 	// Create a mapper
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-
-	if (extractLargest)
-		mapper->SetInputConnection(confilter->GetOutputPort());
-	else
-		mapper->SetInputConnection(mc->GetOutputPort());
-
-	// Set utilize actor's property (color)
+    mapper->SetInputConnection(mc->GetOutputPort());
 	mapper->ScalarVisibilityOff();
 
 	// Create Actor and set color
@@ -125,11 +109,6 @@ Brain_3D::~Brain_3D()
 Mapper Brain_3D::getMapper()
 {
 	return mapper;
-}
-
-Confilter Brain_3D::getConfilter()
-{
-	return confilter;
 }
 
 void Brain_3D::setShrinkFactor(int value)
