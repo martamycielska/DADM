@@ -1,13 +1,4 @@
 #include "visualization3d.h"
-#include "ui_visualization3d.h"
-#include "helpermethods.h"
-#include <QThread>
-#include <QDebug>
-#include <QUrl>
-#include <QString>
-#include <QFileDialog>
-#include <QTimer>
-#include "Globals.h"
 
 #pragma region VISUALIZATION3D class
 Visualization3D::Visualization3D(QWidget *parent) :
@@ -57,10 +48,14 @@ void Visualization3D::ShrinkSliderValueChanged(int sliderValue) {
 
 void Visualization3D::CutEnableChanged(bool cutEnable) {
 	if (visualizationDone) {
-		if (cutEnable)
-			planeWidget -> On();
-		else
-			planeWidget -> Off();
+		if (cutEnable) {
+			brain_3D->getMapper()->SetInputConnection(clipper->GetOutputPort());
+			planeWidget->On();
+		}
+		else {
+			brain_3D->getMapper()->SetInputConnection(brain_3D->getMarchingCubes()->GetOutputPort());
+			planeWidget->Off();
+		}
 
 		ui -> qvtkWidget -> GetRenderWindow() -> Render();
 	}
@@ -104,7 +99,7 @@ void Visualization3D::InitValue() {
 	xspace = 180;
 	yspace = 216;
 	zspace = 180;
-	threshold = 84;
+	threshold = 32;
 	shrinkingFactor = 2;
 	visualizationDone = false;
 	setCutOptionEnable = true;
@@ -154,7 +149,7 @@ void Visualization3D::AddRendererAndPlaneWidget() {
 	if (setCutOptionEnable)
 		planeWidget->On();
 
-	clipper->SetInputConnection(brain_3D->getConfilter()->GetOutputPort());
+	clipper->SetInputConnection(brain_3D->getMarchingCubes()->GetOutputPort());
 	brain_3D->getMapper()->SetInputConnection(clipper->GetOutputPort());
 
 	plane->SetOrigin(xspace / 2., yspace / 2., zspace / 2.);
@@ -193,7 +188,6 @@ void Visualization3D::UpdateProcessStateText(QString text) {
 VisualizationWorker::VisualizationWorker(Brain_3D *brain_3D) : brain_3D(brain_3D) {
 	qRegisterMetaType<Renderer>("Renderer");
 	qRegisterMetaType<MarchingCubes>("MarchingCubes");
-	qRegisterMetaType<MarchingCubes>("Confilter");
 	qRegisterMetaType<MarchingCubes>("Mapper");
 }
 
