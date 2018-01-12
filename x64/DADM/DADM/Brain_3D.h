@@ -12,10 +12,10 @@
 #include <vtkImplicitPlaneRepresentation.h>
 #include <vtkImplicitPlaneWidget2.h>
 #include <vtkImageShrink3D.h>
-#include <vtkImageReader.h>
 #include <vtkImageData.h>
 #include <vtkAutoInit.h>
 #include <Segmentation.h>
+#include <vtkDecimatePro.h>
 #include <QDebug>
 
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
@@ -24,6 +24,7 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 typedef vtkSmartPointer<vtkRenderer> Renderer;
 typedef vtkSmartPointer<vtkMarchingCubes> MarchingCubes;
 typedef vtkSmartPointer<vtkPolyDataMapper> Mapper;
+typedef vtkSmartPointer<vtkDecimatePro> Decimate;
 
 class MyCallback : public vtkCommand
 {
@@ -47,12 +48,12 @@ class Brain_3D :
 	public MRI_Module<Data3D, Renderer>
 {
 public:
-	Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);
-	Brain_3D(Data3D, int threshold);
+	Brain_3D(Data3D data, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor);
 	~Brain_3D();
 	MarchingCubes getMarchingCubes();
 	float getThreshold();
 	Mapper getMapper();
+	Decimate getDecimate();
 	void setRenderer(Renderer renderer);
 	void setMarchingCubes(MarchingCubes _mc);
 	void setThreshold(int t);
@@ -61,8 +62,7 @@ public:
 
 private:
 	Data3D profiles;
-	void initialize(QString path);
-	QString path;
+	void initialize(Data3D inputData);
 	int shrinkingFactor;
 	float threshold;
 	int xspace;
@@ -70,9 +70,10 @@ private:
 	int zspace;
 	MarchingCubes mc;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
+	vtkSmartPointer<vtkDecimatePro> decimater;
 	vtkSmartPointer<vtkActor> actor;
 	vtkSmartPointer<vtkNamedColors> colors;
-	vtkSmartPointer<vtkImageReader> reader;
 	vtkSmartPointer<vtkImageShrink3D> shrink;
+	vtkSmartPointer<vtkImageData> imageData;
 };
 
