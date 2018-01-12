@@ -65,7 +65,7 @@ void Reconstruction::DiffusionDataAlgorithm()
 			//Rekonstrukcja obrazu
 			reconstructed_data = LSreconstruction(data);
 			//tymczasowy zapis do pliku
-			writeToCSVfile("myimage.csv", reconstructed_data);
+			//writeToCSVfile("myimage.csv", reconstructed_data);
 			reconstructed_data_3D.at(j) = reconstructed_data;
 		}
 		slices.at(i) = reconstructed_data_3D;
