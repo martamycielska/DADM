@@ -4,7 +4,7 @@
 #include "MRI_Module.h"
 #include "Segmentation.h"
 #include "Reconstruction.h"
-#include "dadm.h"
+#include "helpermethods.h"
 
 namespace Global {
 	extern int current_slice;

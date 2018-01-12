@@ -5,8 +5,8 @@
 #include "ui_dadm.h"
 #include "visualization3d.h"
 #include "Reconstruction.h"
+#include "helpermethods.h"
 
-typedef enum FilteringType {LMMSE, UNLM} FilteringType;
 typedef enum Profile { FRONTAL, SAGGITAL, HORIZONTAL } Profile;
 
 class Worker : public QThread
