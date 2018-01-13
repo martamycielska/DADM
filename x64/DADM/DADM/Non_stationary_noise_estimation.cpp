@@ -204,3 +204,55 @@ MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log) {
 	return K;
 
 }
+
+MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd coeff) {
+
+	MatrixXd F = coeff(1)*pow(SNR.array(), 0) + coeff(2)*pow(SNR.array(), 1) + coeff(3)*pow(SNR.array(), 2)
+		+ coeff(4)*pow(SNR.array(), 3) + coeff(5)*pow(SNR.array(), 4) + coeff(6)*pow(SNR.array(), 5)
+		+ coeff(7)* pow(SNR.array(), 6) + coeff(8)*pow(SNR.array(), 7) + coeff(9)*pow(SNR.array(), 8);
+	return F;
+}
+
+MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b) {
+	int row = a.rows();
+	int col = a.cols();
+	MatrixXd x = MatrixXd::Zero(row, col);
+	for (int i = 0; i < row;i++) {
+		for (int j = 0; j < col; j++) {
+			x(i, j) = a(i, j)*b(i, j);
+		}
+	}
+	return x;
+}
+
+MatrixXd Non_stationary_noise_estimation::dctCorrect(MatrixXd a) {
+	int row = a.rows();
+	int col = a.cols();
+	MatrixXd m = MatrixXd::Zero(row, col);
+	for (int i = 0; i < row;i++) {
+		for (int j = 0; j < col; j++) {
+			m(i, j) = a(i, j) / (4 * sqrt(row / 2)*sqrt(col / 2));
+			if (i == 0)
+				m(i, j) = m(i, j) / sqrt(2);
+			if (j == 0)
+				m(i, j) = m(i, j) / sqrt(2);
+		}
+	}
+	return m;
+}
+
+MatrixXd Non_stationary_noise_estimation::idctCorrect(MatrixXd a) {
+	int row = a.rows();
+	int col = a.cols();
+	MatrixXd m = MatrixXd::Zero(row, col);
+	for (int i = 0; i < row;i++) {
+		for (int j = 0; j < col; j++) {
+			m(i, j) = a(i, j) / (4 * sqrt(row / 2)*sqrt(col / 2));
+			if (i == 0)
+				m(i, j) = m(i, j) / sqrt(2);
+			if (j == 0)
+				m(i, j) = m(i, j) / sqrt(2);
+		}
+	}
+	return m;
+}
