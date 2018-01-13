@@ -813,7 +813,18 @@ ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Prof
 }
 
 void ObliqueImagingWorker::run() {
-	Oblique_imaging *imaging = new Oblique_imaging(data, a, b);
+	Oblique_imaging *imaging;
+	switch (profile) {
+	case FRONTAL:
+		imaging = new Oblique_imaging(data, a, b, FRONTAL);
+		break;
+	case SAGGITAL:
+		imaging = new Oblique_imaging(data, a, b, SAGGITAL);
+		break;
+	case HORIZONTAL:
+		imaging = new Oblique_imaging(data, a, b, HORIZONTAL);
+		break;
+	}
 	imaging->Start();
 	Data3D d = imaging->getData();
 	switch (profile) {
@@ -825,6 +836,7 @@ void ObliqueImagingWorker::run() {
 		break;
 	case HORIZONTAL:
 		emit resultReadyHorizontal(d);
+		break;
 	}
 }
 
@@ -849,5 +861,6 @@ void UpsamplingWorker::run() {
 		break;
 	case HORIZONTAL:
 		emit resultReadyHorizontal(d);
+		break;
 	}
 }

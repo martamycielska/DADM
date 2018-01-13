@@ -6,8 +6,7 @@
 #include "visualization3d.h"
 #include "Reconstruction.h"
 #include "helpermethods.h"
-
-typedef enum Profile { FRONTAL, SAGGITAL, HORIZONTAL } Profile;
+#include "Oblique_imaging.h"
 
 class Worker : public QThread
 {
