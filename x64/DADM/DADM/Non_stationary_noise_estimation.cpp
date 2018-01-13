@@ -1,5 +1,13 @@
 #include "Non_stationary_noise_estimation.h"
 #include "qdebug.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <Eigen/Dense>
+#include <vector>
+#include <cstdlib>
+#include <cmath> 
+#include "fftw3.h"
 
 Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data3D data)
 {
@@ -20,7 +28,7 @@ void Non_stationary_noise_estimation::StructuralDataAlgorithm() {
 }
 
 void Non_stationary_noise_estimation::DiffusionDataAlgorithm() {
-
+	//data4D_input
 }
 
 double Non_stationary_noise_estimation::localMeanCalculate(int startRowIndex, int startColumnIndex, MatrixXd matrix, MatrixXd meanMatrix)
@@ -143,4 +151,56 @@ MatrixXd Non_stationary_noise_estimation::gaussianKernel(MatrixXd K, MatrixXd im
 		}
 	}
 	return kernel;
+}
+
+MatrixXd Non_stationary_noise_estimation::dct(MatrixXd log) {
+
+	int m = log.rows();
+	int n = log.cols();
+	std::vector<double> a(m*n);
+	int count = 1;
+
+	for (int i = 0; i<m;i++) {
+		for (int j = 0; j<n;j++) {
+			a[i*n + j] = log(i, j);
+			count++;
+		}
+	}
+	std::vector<double> b(m*n);
+	fftw_plan plan = fftw_plan_r2r_2d(n, m, &a[0], &b[0], FFTW_REDFT10, FFTW_REDFT10, FFTW_ESTIMATE);
+	fftw_execute(plan);
+
+	MatrixXd K = MatrixXd::Zero(m, n);
+	for (int i = 0; i<m;i++)
+		for (int j = 0; j<n;j++)
+			K(i, j) = b[i*n + j];
+
+	return K;
+}
+
+MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log) {
+
+	int m = log.rows();
+	int n = log.cols();
+	std::vector<double> a(m*n);
+	int count = 1;
+
+	for (int i = 0; i<m;i++) {
+		for (int j = 0; j<n;j++) {
+			a[i*n + j] = log(i, j);//[1 2 ;3 4]
+			count++;
+		}
+	}
+
+	std::vector<double> b(m*n);
+	fftw_plan plan = fftw_plan_r2r_2d(n, m, &a[0], &b[0], FFTW_REDFT01, FFTW_REDFT01, FFTW_MEASURE);
+	fftw_execute(plan);
+
+	MatrixXd K = MatrixXd::Zero(m, n);
+	for (int i = 0; i<m;i++)
+		for (int j = 0; j<n;j++)
+			K(i, j) = b[i*n + j];
+
+	return K;
+
 }
