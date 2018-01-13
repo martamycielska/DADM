@@ -1,6 +1,8 @@
 #pragma once
 #include "MRI_Module.h"
 #include <unsupported/Eigen/CXX11/Tensor>
+#include <Eigen/Geometry>
+
 
 class Oblique_imaging:
 	public MRI_Module<Data3D, MatrixXd>
