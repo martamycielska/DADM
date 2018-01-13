@@ -74,3 +74,73 @@ double Non_stationary_noise_estimation::localMeanCalculate(int startRowIndex, in
 	}
 	return (meanValue / (rowsDimension * colsDimension));
 }
+
+MatrixXd Non_stationary_noise_estimation::absoluteValue(MatrixXd matrix) {
+	return matrix.cwiseAbs();
+}
+
+MatrixXd Non_stationary_noise_estimation::logCalculate(MatrixXd matrix) {
+
+	for (int i = 0; i < matrix.rows();i++) {
+		for (int j = 0; j < matrix.cols(); j++) {
+			if (matrix(i, j) == 0) {
+				matrix(i, j) = 0.001;
+			}
+		}
+	}
+	return matrix.array().log();
+}
+
+MatrixXd Non_stationary_noise_estimation::expCalculate(MatrixXd matrix) {
+	for (int x = 0; x < matrix.rows(); x++)
+	{
+		for (int y = 0; y < matrix.cols(); y++) {
+			double z = matrix(x, y);
+			matrix(x, y) = exp(z);
+		}
+	}
+	return matrix;
+}
+
+MatrixXd Non_stationary_noise_estimation::noiseEstimation(MatrixXd matrix) {
+	MatrixXd noiseEstimator = MatrixXd::Zero(matrix.rows(), matrix.cols());
+	for (int i = 0; i < matrix.rows();i++) {
+		for (int j = 0; j < matrix.cols(); j++) {
+			noiseEstimator(i, j) = ((matrix(i, j) * 2) / sqrt(2))*exp(e / 2);
+		}
+	}
+	return noiseEstimator;
+}
+
+MatrixXd Non_stationary_noise_estimation::gaussianKernel(MatrixXd K, MatrixXd image) {
+	MatrixXd kernel = MatrixXd::Zero(image.rows(), image.cols());
+	double sigma = 2 * 3.4;
+	int column = 2 * image.cols();
+	int row = 2 * image.rows();
+	double half = row / 2;
+	double maximum = K(0, 0);
+	for (int x = 0; x < row; ++x)
+		for (int y = 0; y < column; ++y) {
+			K(x, y) = exp(-0.5 * (pow((x - half) / sigma, 2.0) + pow((y - half) / sigma, 2.0)))
+				/ (2 * pi * sigma * sigma);
+		}
+	// Normalize the kernel
+	for (int x = 0; x < row; ++x) {
+		for (int y = 0; y < column; ++y) {
+			if (K(x, y) > maximum)
+				maximum = K(x, y);
+		}
+	}
+	for (int x = 0; x < row; ++x) {
+		for (int y = 0; y < column; ++y) {
+			K(x, y) /= maximum;
+		}
+	}
+	for (int x = image.rows(); x < row; x++)
+	{
+		for (int y = image.rows(); y < column; y++) {
+			kernel(x - image.rows(), y - image.rows()) = K(x, y);
+		}
+	}
+	return kernel;
+}
