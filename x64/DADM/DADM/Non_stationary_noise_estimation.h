@@ -23,7 +23,7 @@ private:
 	MatrixXd Non_stationary_noise_estimation::dct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd coeff);
-	MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b);
+	MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b, int power = 0, bool isDivided = false);
 	MatrixXd Non_stationary_noise_estimation::dctCorrect(MatrixXd a);
 	MatrixXd Non_stationary_noise_estimation::idctCorrect(MatrixXd a);
 };

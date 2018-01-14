@@ -213,13 +213,32 @@ MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd 
 	return F;
 }
 
-MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b) {
+MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b, int power, bool isDivided ) {
 	int row = a.rows();
 	int col = a.cols();
 	MatrixXd x = MatrixXd::Zero(row, col);
 	for (int i = 0; i < row;i++) {
 		for (int j = 0; j < col; j++) {
-			x(i, j) = a(i, j)*b(i, j);
+			if (power == 0)
+			{
+				if (isDivided) {
+					x(i, j) = a(i, j) / b(i, j);
+				}
+				else {
+					x(i, j) = a(i, j)*b(i, j);
+				}
+			}
+			else
+			{
+				double powerResult = 0;
+				for (int popwerIndex = 0; popwerIndex < power; popwerIndex++)
+				{
+					powerResult += a(i, j)*b(i, j);
+				}
+
+				x(i, j) = powerResult;
+			}
+
 		}
 	}
 	return x;
