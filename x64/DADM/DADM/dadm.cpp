@@ -1,7 +1,15 @@
 #include "dadm.h"
 #include "visualization3d.h"
-#include "Upsampling_GUI.h"
-#include "ObliqueImaging_GUI.h"
+#include "Reconstruction.h"
+#include "Non_stationary_noise_estimation.h"
+#include "Non_stationary_noise_filtering_1.h"
+#include "Non_stationary_noise_filtering_2.h"
+#include "Intensity_inhomogenity_correction.h"
+#include "Intensity_inhomogenity_correction.h"
+#include "Skull_stripping.h"
+#include "Diffusion_tensor_imaging.h"
+#include "Oblique_imaging.h"
+#include "Upsampling.h"
 #include "helpermethods.h"
 #include "Globals.h"
 #include <QDebug>
@@ -19,14 +27,28 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 {
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
-	connect(ui.reconstructionPushButton, SIGNAL(clicked(bool)), this, SLOT(mri_reconstruct()));
-	connect(ui.visualizationBtn, SIGNAL(clicked(bool)), this, SLOT(visualization3d()));
-	connect(ui.UpsamplingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowUpsampling()));
-	connect(ui.ObliqueImagingButton, SIGNAL(clicked(bool)), this, SLOT(openNewWindowObliqueImaging()));
+	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
+	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
+	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
+	connect(ui.actionInformation, &QAction::triggered, this, &DADM::showProgramInformation);
+	connect(ui.actionImport_test_data, &QAction::triggered, this, &DADM::structuralTestDataImport);
+
+	connect(ui.LMMSERadioButton, &QRadioButton::toggled, this, &DADM::LMMSEFiltrationSet);
+	connect(ui.UNLMRadioButton, &QRadioButton::toggled, this, &DADM::UNLMFiltrationSet);
+
+	connect(ui.planeApplyPushButton, SIGNAL(clicked()), this, SLOT(planeValuesChanged()));
+	connect(ui.resolutionApplyPushButton, SIGNAL(clicked()), this, SLOT(resolutionValuesChanged()));
+	
+	connect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
+	connect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
+	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
+	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
+	ui.progressBar->hide();
 }
 
 void DADM::mri_reconstruct() {
+	/*
 	qRegisterMetaType<Data3D>("Data3D");
 	Data3DRaw input;
 
@@ -34,18 +56,7 @@ void DADM::mri_reconstruct() {
 	connect(worker, &Worker::resultReady, this, &DADM::onReconstructionFinished);
 	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
 	worker->start();
-}
-
-void DADM::openNewWindowUpsampling() {
-	UpsamplingWindow = new Upsampling_GUI();
-	UpsamplingWindow->setWindowTitle("Upsampling");
-	UpsamplingWindow->show();
-}
-
-void DADM::openNewWindowObliqueImaging() {
-	ObliqueImagingWindow = new ObliqueImaging_GUI();
-	ObliqueImagingWindow->setWindowTitle("Oblique Imaging");
-	ObliqueImagingWindow->show();
+	*/
 }
 
 void DADM::importStructuralData()
@@ -56,7 +67,93 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
+	ui.DiffusionPage->hide();
+	Global::dtype = STRUCTURAL_DATA;
+	ui.statusBar->showMessage("Busy");
+	ui.progressBar->show();
 	QString path = url.path().remove(0, 1);
+	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
+	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
+	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
+	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
+	iw->start();
+}
+
+void DADM::importDiffusionData()
+{
+
+	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Mat file (*.mat) (*mat)");
+
+	if (url.isEmpty())
+		return;
+
+	ui.DiffusionPage->show();
+	
+	disconnect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
+	disconnect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
+	disconnect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
+	disconnect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
+
+	ui.diffFARadioButton->setChecked(true);
+	ui.diffMDRadioButton->setChecked(false);
+	ui.diffVRRadioButton->setChecked(false);
+	ui.difRARadioButton->setChecked(false);
+
+	connect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
+	connect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
+	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
+	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
+
+	Global::dtype = DIFFUSION_DATA;
+	QString path = url.path().remove(0, 1);
+	ui.statusBar->showMessage("Busy");
+	ui.progressBar->show();
+	ImportWorker* iw = new ImportWorker(path, DIFFUSION_DATA);
+	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
+	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
+	connect(iw, &ImportWorker::finished, iw, &QObject::deleteLater);
+	iw->start();
+}
+
+void DADM::onImportDone()
+{
+	QMessageBox msgBox;
+	msgBox.setText("Data imported");
+	msgBox.exec();
+	ui.statusBar->showMessage("Ready");
+
+	Worker* worker = new Worker(Global::dtype, Global::ftype);
+	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
+	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
+	connect(worker, &Worker::progress, this, &DADM::onProgress);
+	connect(worker, &Worker::finished, worker, &QObject::deleteLater);
+	worker->start();
+}
+
+void DADM::visualization3d() {
+	vis3D = new Visualization3D();
+	HelperMethods::SetCenterPosition(vis3D);
+	vis3D->show();
+}
+
+void DADM::onReconstructionFinished(Data3D data)
+{
+	Data3D structuralData = data;
+	QMessageBox msgBox;
+	msgBox.setText("Finished");
+	msgBox.exec();
+}
+
+void DADM::structuralTestDataImport()
+{
+	qDebug() << "Slot called";
+	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Mat file (*.mat) (*mat)");
+
+	if (url.isEmpty())
+		return;
+
+	QString path = url.path().remove(0, 1);
+
 	QByteArray ba = path.toLatin1();
 	const char *fileName = ba.data();
 	//const char *fileName = "T1_synthetic_normal_1mm_L8_r2.mat";
@@ -66,6 +163,417 @@ void DADM::importStructuralData()
 		qDebug() << "Otwarto plik";
 
 		matvar_t *matVar = 0;
+
+		matVar = Mat_VarRead(mat, (char*)"dataset_T1");
+
+		if (matVar) {
+			qDebug() << "Otwarto strukturê";
+
+			//unsigned int xSize = matVar->nbytes / matVar->data_size;
+			const double *xData = static_cast<const double*>(matVar->data);
+
+			qDebug() << matVar->dims[0];
+			qDebug() << matVar->dims[1];
+			qDebug() << matVar->dims[2];
+
+			std::vector<MatrixXd> data;
+			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+			int val_num = 0;
+			for (int i = 0; i < matVar->dims[2]; i++) {
+				MatrixXd m(matVar->dims[0], matVar->dims[1]);
+				for (int j = 0; j < matVar->dims[1]; j++) {
+					for (int k = 0; k < matVar->dims[0]; k++) {
+						m(k, j) = xData[val_num];
+						val_num++;
+						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
+						//qDebug() << xData[val_num];
+					}
+				}
+				data.push_back(m);
+			}
+			Global::structuralData = data;
+		}
+
+		Mat_Close(mat);
+		QMessageBox msgBox;
+		msgBox.setText("Finished");
+		msgBox.exec();
+	}
+}
+
+void DADM::onPreprocessingDone()
+{
+	Global::temporaryDataFrontal = Global::dataFrontal;
+	Global::temporaryDataHorizontal = Global::dataHorizontal;
+	Global::temporaryDataSaggital = Global::dataSaggital;
+	ui.statusBar->showMessage("Ready");
+	QMessageBox msgBox;
+	msgBox.setText("Preprocessing Done");
+	msgBox.exec();
+	ui.progressBar->hide();
+}
+
+void DADM::onProgress(int progress, int max)
+{
+	ui.progressBar->setMaximum(max);
+	ui.progressBar->setValue(progress);
+}
+
+void DADM::onProccesing(QString msg)
+{
+	ui.statusBar->showMessage(msg);
+}
+
+void DADM::resolutionValuesChanged()
+{
+	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
+	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
+	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
+	worker_frontal->start();
+
+	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::dataSaggital, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
+	connect(worker_saggital, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
+	connect(worker_saggital, &ObliqueImagingWorker::finished, worker_saggital, &QObject::deleteLater);
+	worker_saggital->start();
+
+	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::dataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
+	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
+	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
+	worker_horizontal->start();
+}
+
+void DADM::planeValuesChanged()
+{
+	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
+	connect(worker_frontal, &UpsamplingWorker::resultReadyFrontal, this, &DADM::onUpsamplingFrontalDone);
+	connect(worker_frontal, &UpsamplingWorker::finished, worker_frontal, &QObject::deleteLater);
+	worker_frontal->start();
+
+	UpsamplingWorker *worker_saggital = new UpsamplingWorker(Global::dataSaggital, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), SAGGITAL);
+	connect(worker_saggital, &UpsamplingWorker::resultReadySggital, this, &DADM::onUpsamplingSaggitalDone);
+	connect(worker_saggital, &UpsamplingWorker::finished, worker_saggital, &QObject::deleteLater);
+	worker_saggital->start();
+
+	UpsamplingWorker *worker_horizontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), HORIZONTAL);
+	connect(worker_horizontal, &UpsamplingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingFrontalDone);
+	connect(worker_horizontal, &UpsamplingWorker::finished, worker_horizontal, &QObject::deleteLater);
+	worker_horizontal->start();
+}
+
+
+void DADM::diffusionFASet()
+{
+	if (!ui.diffFARadioButton->isChecked())
+		return;
+}
+
+void DADM::diffusionMDSet()
+{
+	if (!ui.diffMDRadioButton->isChecked())
+		return;
+}
+
+void DADM::diffusionRASet()
+{
+	if (!ui.difRARadioButton->isChecked())
+		return;
+}
+
+void DADM::diffusionVRSet()
+{
+	if (!ui.diffVRRadioButton->isChecked())
+		return;
+}
+
+void DADM::LMMSEFiltrationSet()
+{
+	if (!ui.LMMSERadioButton->isChecked())
+		return;
+
+	qDebug() << "LMMSE";
+	Global::ftype = LMMSE;
+}
+
+void DADM::UNLMFiltrationSet()
+{
+	if (!ui.UNLMRadioButton->isChecked())
+		return;
+
+	qDebug() << "UNLM";
+	Global::ftype = UNLM;
+}
+
+void DADM::restoreDefault()
+{
+	Global::temporaryDataFrontal = Global::dataFrontal;
+	Global::temporaryDataHorizontal = Global::dataHorizontal;
+	Global::temporaryDataSaggital = Global::dataSaggital;
+
+	ui.alphaPlaneSpinBox->setValue(0);
+	ui.betaPlaneSpinBox->setValue(0);
+	ui.resolutionWidthSpinBox->setValue(0);
+	ui.resolutionHeightSpinBox->setValue(0);
+}
+
+void DADM::showProgramInformation()
+{
+}
+
+void DADM::onUpsamplingFrontalDone(Data3D data)
+{
+	Global::temporaryDataFrontal = data;
+}
+
+void DADM::onUpsamplingSaggitalDone(Data3D data)
+{
+	Global::temporaryDataSaggital = data;
+}
+
+void DADM::onUpsamplingHorizontalDone(Data3D data)
+{
+	Global::temporaryDataHorizontal = data;
+}
+
+void DADM::onObliqueImagingFrontalDone(Data3D data)
+{
+	Global::temporaryDataFrontal = data;
+}
+
+void DADM::onObliqueImagingSaggitalDone(Data3D data)
+{
+	Global::temporaryDataSaggital = data;
+}
+
+void DADM::onObliqueImagingHorizontalDone(Data3D data)
+{
+	Global::temporaryDataHorizontal = data;
+}
+
+DADM::~DADM()
+{
+	if (vis3D)
+		delete vis3D;
+}
+
+Worker::Worker(DataType dtype, FilteringType ftype)
+{
+	this->dtype = dtype;
+	this->ftype = ftype;
+}
+
+void Worker::run()
+{
+	Data3D images3D;
+	Data4D images4D;
+	Data3D rice3D;
+	Data4D rice4D;
+	switch (dtype)
+	{
+	case STRUCTURAL_DATA:
+	{
+		emit currentProcess("Preprocessing: Reconstruction...");
+		emit progress(0, 4);
+		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
+		reconstruction->Start();
+		images3D = reconstruction->getData3D();
+		emit progress(1, 4);
+		emit currentProcess("Preprocessing: Non stationary noise estimation...");
+		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
+		estimation->Start();
+		rice3D = estimation->getData3D(RICE);
+		emit progress(2, 4);
+		switch (ftype)
+		{
+		case LMMSE:
+		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
+			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images3D, rice3D);
+			lmmse->Start();
+			images3D.clear();
+			images3D = lmmse->getData3D();
+			break;
+		}
+		case UNLM:
+		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
+			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
+			unlm->Start();
+			images3D.clear();
+			images3D = unlm->getData3D();
+			break;
+		}
+		}
+		emit progress(3, 4);
+		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
+		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images3D);
+		correction->Start();
+		Global::structuralData = correction->getData3D();
+		emit progress(4, 4);
+		//TODO k¹ty do ustalenia
+		/*
+		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
+		frontal->Start();
+		Global::dataFrontal = frontal->getData();
+		Oblique_imaging *saggital = new Oblique_imaging(Global::structuralData, 0, 0);
+		saggital->Start();
+		Global::dataSaggital = frontal->getData();
+		Oblique_imaging *horizontal = new Oblique_imaging(Global::structuralData, 0, 0);
+		horizontal->Start();
+		Global::dataHorizontal = frontal->getData();
+		*/
+		break;
+	}
+	case DIFFUSION_DATA:
+	{
+		emit progress(0, 6);
+		emit currentProcess("Preprocessing: Reconstruction...");
+		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
+		reconstruction->Start();
+		images4D = reconstruction->getData4D();
+		emit progress(1, 6);
+		emit currentProcess("Preprocessing: Non stationary noise estimation...");
+		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
+		estimation->Start();
+		rice4D = estimation->getData4D(RICE);
+		emit progress(2, 6);
+		switch (ftype)
+		{
+		case LMMSE:
+		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
+			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images4D, rice4D);
+			lmmse->Start();
+			images4D.clear();
+			images4D = lmmse->getData4D();
+			break;
+		}
+		case UNLM:
+		{
+			emit currentProcess("Preprocessing: Non stationary noise filtering...");
+			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images4D, rice4D);
+			unlm->Start();
+			images4D.clear();
+			images4D = unlm->getData4D();
+			break;
+		}
+		}
+		emit progress(3, 6);
+		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
+		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
+		correction->Start();
+		images4D.clear();
+		images4D = correction->getData4D();
+		emit progress(4, 6);
+		emit currentProcess("Preprocessing: Skull stripping...");
+		Skull_stripping *skull_stripping = new Skull_stripping(images4D);
+		skull_stripping->Start();
+		images4D.clear();
+		images4D = skull_stripping->getData4D();
+		emit progress(5,6);
+		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
+		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
+		diff->Start();
+		Global::diffusionData4D = diff->getData();
+		Global::FA = diff->getFA();
+		Global::RA = diff->getRA();
+		Global::MD = diff->getMD();
+		Global::VR = diff->getVR();
+		emit progress(6, 6);
+		//TODO k¹ty do ustalenia
+		/* 
+		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
+		frontal->Start();
+		Global::dataFrontal = frontal->getData();
+		Oblique_imaging *saggital = new Oblique_imaging(Global::FA, 0, 0);
+		saggital->Start();
+		Global::dataSaggital = frontal->getData();
+		Oblique_imaging *horizontal = new Oblique_imaging(Global::FA, 0, 0);
+		horizontal->Start();
+		Global::dataHorizontal = frontal->getData();
+		*/
+		break;
+	}
+	}
+	emit resultReady();
+}
+
+ImportWorker::ImportWorker(QString path, DataType type) {
+	this->path = path;
+	this->dtype = type;
+}
+
+void ImportWorker::run() {
+	switch (dtype)
+	{
+	case STRUCTURAL_DATA:
+		structuralDataImport();
+		break;
+	case DIFFUSION_DATA:
+		diffusionDataImport();
+		break;
+	default:
+		break;
+	}
+
+}
+
+void ImportWorker::diffusionDataImport()
+{
+	QByteArray ba = path.toLatin1();
+	const char *fileName = ba.data();
+	//const char *fileName = "T1_synthetic_normal_1mm_L8_r2.mat";
+	mat_t *mat = Mat_Open(fileName, MAT_ACC_RDONLY);
+
+	if (mat) {
+		qDebug() << "Otwarto plik";
+
+		matvar_t *g_matVar = 0;
+		matvar_t *matVar = 0;
+		matvar_t *s_matVar = 0;
+
+		g_matVar = Mat_VarRead(mat, (char*)"gradients");
+		matVar = Mat_VarRead(mat, (char*)"raw_data");
+		s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
+
+		int max = 0;
+		if (matVar) {
+			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3];
+		}
+
+		if (s_matVar) {
+			max += s_matVar->dims[0]*s_matVar->dims[1]*s_matVar->dims[2];
+		}
+
+		int status = 0;
+
+		if (g_matVar) {
+			qDebug() << "Otwarto gradients";
+
+			//unsigned int xSize = matVar->nbytes / matVar->data_size;
+			const double *xData = static_cast<const double*>(g_matVar->data);
+
+			qDebug() << g_matVar->dims[0];
+			qDebug() << g_matVar->dims[1];
+			max += g_matVar->dims[0]*g_matVar->dims[1];
+
+			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+			int val_num = 0;
+			MatrixXd m(g_matVar->dims[0], g_matVar->dims[1]);
+			for (int i = 0; i < g_matVar->dims[1]; i++) {
+				for (int j = 0; j < g_matVar->dims[0]; j++) {
+					m(j, i) = xData[val_num];
+					status++;
+					val_num++;
+					if (val_num >= g_matVar->dims[0] * g_matVar->dims[1]) break;
+					//qDebug() << xData[val_num];
+				}
+				emit importProgress(status, max);
+			}
+
+			Global::gradients = m;
+		}
+
+		//matvar_t *matVar = 0;
 
 		matVar = Mat_VarRead(mat, (char*)"raw_data");
 
@@ -80,25 +588,34 @@ void DADM::importStructuralData()
 			qDebug() << matVar->dims[0];
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
+			qDebug() << matVar->dims[3];
 
-			std::vector<MatrixXcd> raw_data;
+			//std::vector<MatrixXcd> raw_data;
 			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			for (int i = 0; i < matVar->dims[2]; i++) {
-				MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-				for (int j = 0; j < matVar->dims[1]; j++) {
-					for (int k = 0; k < matVar->dims[0]; k++) {
-						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-						val_num++;
-						//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<MatrixXcd>> raw_data;
+			for (int l = 0; l < matVar->dims[3]; l++) {
+				std::vector<MatrixXcd> raw_data_part;
+				for (int i = 0; i < matVar->dims[2]; i++) {
+					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+					for (int j = 0; j < matVar->dims[1]; j++) {
+						for (int k = 0; k < matVar->dims[0]; k++) {
+							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
+							val_num++;
+							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
+							//qDebug() << xRe[val_num] << xIm[val_num];
+						}
+						emit importProgress(status, max);
 					}
+					raw_data_part.push_back(m);
 				}
-				raw_data.push_back(m);
+				raw_data.push_back(raw_data_part);
 			}
 
-			Data3DRaw structuralRawData = raw_data;
+			Global::diffusionRawData = raw_data;
 
-			matvar_t *s_matVar = 0;
+			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
 			if (s_matVar) {
@@ -121,24 +638,26 @@ void DADM::importStructuralData()
 					for (int j = 0; j < s_matVar->dims[1]; j++) {
 						for (int k = 0; k < s_matVar->dims[0]; k++) {
 							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
 							val_num++;
+							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
+						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
 				}
 
-				Data3DRaw structuralSensitivityMaps = sensitivity_maps;
+				Global::diffusionSensitivityMaps = sensitivity_maps;
 			}
 		}
 
 		matvar_t *l_matVar = 0;
 		l_matVar = Mat_VarRead(mat, (char*)"L");
-
 		if (l_matVar) {
 			qDebug() << "Otwarto L";
-			const int *xData = static_cast<const int*>(l_matVar->data);
-			int L = xData[0];
+			const double *xData = static_cast<const double*>(l_matVar->data);
+			Global::L = xData[0];
 		}
 
 		matvar_t *r_matVar = 0;
@@ -146,51 +665,202 @@ void DADM::importStructuralData()
 
 		if (r_matVar) {
 			qDebug() << "Otwarto r";
-			const int *xData = static_cast<const int*>(r_matVar->data);
-			int r = xData[0];
+			const double *xData = static_cast<const double*>(r_matVar->data);
+			Global::r = xData[0];
+		}
+
+		matvar_t *b_matVar = 0;
+		b_matVar = Mat_VarRead(mat, (char*)"b_value");
+
+		if (b_matVar) {
+			qDebug() << "Otwarto b_value";
+			const double *xData = static_cast<const double*>(b_matVar->data);
+			Global::b_value = xData[0];
 		}
 
 	}
-
+	qDebug() << Global::L;
+	qDebug() << Global::r;
 	Mat_Close(mat);
-
-	QMessageBox msgBox;
-	msgBox.setText("File imported");
-	msgBox.exec();
+	emit importDone();
 }
 
-
-void DADM::visualization3d() {
-	vis3D = new Visualization3D();
-	HelperMethods::SetCenterPosition(vis3D);
-	vis3D->show();
-}
-
-void DADM::onReconstructionFinished(Data3D data)
+void ImportWorker::structuralDataImport()
 {
-	Data3D structuralData = data;
-	QMessageBox msgBox;
-	msgBox.setText("Finished");
-	msgBox.exec();
+	QByteArray ba = path.toLatin1();
+	const char *fileName = ba.data();
+	//const char *fileName = "T1_synthetic_normal_1mm_L8_r2.mat";
+	mat_t *mat = Mat_Open(fileName, MAT_ACC_RDONLY);
+
+	if (mat) {
+		qDebug() << "Otwarto plik";
+
+		matvar_t *matVar = 0;
+		matVar = Mat_VarRead(mat, (char*)"raw_data");
+		matvar_t *s_matVar = 0;
+		s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
+
+		int max = 0;
+		if (matVar) {
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2];
+		}
+
+		if (s_matVar) {
+			max += s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2];
+		}
+
+		int status = 0;
+
+		if (matVar) {
+			qDebug() << "Otwarto raw_data";
+
+			//unsigned int xSize = matVar->nbytes / matVar->data_size;
+			const mat_complex_split_t *xData = static_cast<const mat_complex_split_t*>(matVar->data);
+			const double *xRe = static_cast<const double*>(xData->Re);
+			const double *xIm = static_cast<const double*>(xData->Im);
+
+			qDebug() << matVar->dims[0];
+			qDebug() << matVar->dims[1];
+			qDebug() << matVar->dims[2];
+
+			std::vector<MatrixXcd> raw_data;
+			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+			int val_num = 0;
+			for (int i = 0; i < matVar->dims[2]; i++) {
+				MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+				for (int j = 0; j < matVar->dims[1]; j++) {
+					for (int k = 0; k < matVar->dims[0]; k++) {
+						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+						status++;
+						val_num++;
+						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
+						//qDebug() << xRe[val_num] << xIm[val_num];
+					}
+					emit importProgress(status, max);
+				}
+				raw_data.push_back(m);
+			}
+
+			Global::structuralRawData = raw_data;
+
+			//matvar_t *s_matVar = 0;
+			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
+
+			if (s_matVar) {
+				qDebug() << "Otwarto sensitivity_maps";
+
+				//unsigned int xSize = matVar->nbytes / matVar->data_size;
+				const mat_complex_split_t *xData = static_cast<const mat_complex_split_t*>(s_matVar->data);
+				const double *xRe = static_cast<const double*>(xData->Re);
+				const double *xIm = static_cast<const double*>(xData->Im);
+
+				qDebug() << s_matVar->dims[0];
+				qDebug() << s_matVar->dims[1];
+				qDebug() << s_matVar->dims[2];
+
+				std::vector<MatrixXcd> sensitivity_maps;
+				//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+				int val_num = 0;
+				for (int i = 0; i < s_matVar->dims[2]; i++) {
+					MatrixXcd m(s_matVar->dims[0], s_matVar->dims[1]);
+					for (int j = 0; j < s_matVar->dims[1]; j++) {
+						for (int k = 0; k < s_matVar->dims[0]; k++) {
+							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
+							val_num++;
+							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
+							//qDebug() << xRe[val_num] << xIm[val_num];
+						}
+						emit importProgress(status, max);
+					}
+					sensitivity_maps.push_back(m);
+				}
+
+				Global::structuralSensitivityMaps = sensitivity_maps;
+			}
+		}
+
+		matvar_t *l_matVar = 0;
+		l_matVar = Mat_VarRead(mat, (char*)"L");
+		if (l_matVar) {
+			qDebug() << "Otwarto L";
+			const double *xData = static_cast<const double*>(l_matVar->data);
+			Global::L = xData[0];
+		}
+
+		matvar_t *r_matVar = 0;
+		r_matVar = Mat_VarRead(mat, (char*)"r");
+
+		if (r_matVar) {
+			qDebug() << "Otwarto r";
+			const double *xData = static_cast<const double*>(r_matVar->data);
+			Global::r = xData[0];
+		}
+
+	}
+	qDebug() << Global::L;
+	qDebug() << Global::r;
+	Mat_Close(mat);
+	emit importDone();
 }
 
-DADM::~DADM()
-{
-	if (vis3D)
-		delete vis3D;
+ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
+	qRegisterMetaType<Data3D>("Data3D");
+	this->profile = profile;
+	this->data = data;
+	this->a = a;
+	this->b = b;
 }
 
-Worker::Worker(Data3DRaw input)
-{
-	this->input = input;
+void ObliqueImagingWorker::run() {
+	Oblique_imaging *imaging;
+	switch (profile) {
+	case FRONTAL:
+		imaging = new Oblique_imaging(data, a, b, FRONTAL);
+		break;
+	case SAGGITAL:
+		imaging = new Oblique_imaging(data, a, b, SAGGITAL);
+		break;
+	case HORIZONTAL:
+		imaging = new Oblique_imaging(data, a, b, HORIZONTAL);
+		break;
+	}
+	imaging->Start();
+	Data3D d = imaging->getData();
+	switch (profile) {
+	case FRONTAL:
+		emit resultReadyFrontal(d);
+		break;
+	case SAGGITAL:
+		emit resultReadySggital(d);
+		break;
+	case HORIZONTAL:
+		emit resultReadyHorizontal(d);
+		break;
+	}
 }
 
-void Worker::run()
-{
-	/*
-	Reconstruction *reconstruction = new Reconstruction(input);
-	reconstruction->Start();
-	Data3D out = reconstruction->getData3D();
-	emit resultReady(out);
-	*/
+UpsamplingWorker::UpsamplingWorker(Data3D data, int width, int height, Profile profile) {
+	qRegisterMetaType<Data3D>("Data3D");
+	this->profile = profile;
+	this->data = data;
+	this->width = width;
+	this->height = height;
+}
+
+void UpsamplingWorker::run() {
+	Upsampling *upsampling = new Upsampling(data, width, height);
+	upsampling->Start();
+	Data3D d = upsampling->getData();
+	switch (profile) {
+	case FRONTAL:
+		emit resultReadyFrontal(d);
+		break;
+	case SAGGITAL:
+		emit resultReadySggital(d);
+		break;
+	case HORIZONTAL:
+		emit resultReadyHorizontal(d);
+		break;
+	}
 }

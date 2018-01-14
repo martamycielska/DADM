@@ -4,7 +4,7 @@
 typedef enum EstimatorType {RICE, GAUSS} EstimatorType;
 
 class Estimation_Module :
-	protected Diffusion_Structural_Module
+	public Diffusion_Structural_Module
 {
 public:
 	Estimation_Module() {};

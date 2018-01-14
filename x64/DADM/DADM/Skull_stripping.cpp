@@ -3,14 +3,14 @@
 
 Skull_stripping::Skull_stripping(Data3D data)
 {
-	qDebug() << "Non stationary noise filtering 1 constructor called";
+	qDebug() << "Skull_stripping constructor called";
 	this->data3D_input = data;
 	dtype = STRUCTURAL_DATA;
 }
 
 Skull_stripping::Skull_stripping(Data4D data)
 {
-	qDebug() << "Non stationary noise filtering 1 constructor called";
+	qDebug() << "Skull_stripping constructor called";
 	this->data4D_input = data;
 	dtype = DIFFUSION_DATA;
 }

@@ -2,13 +2,13 @@
 #include "qdebug.h"
 
 
-Oblique_imaging::Oblique_imaging(Data3D data, int profile_idx, double rot_x, double rot_y)
+Oblique_imaging::Oblique_imaging(Data3D data, double a, double b, Profile profile)
 {
 	qDebug() << "Oblique imaging constructor called";
 	this->inputData = data;
-	current_profile = profile_idx;
-	this->rot_x = rot_x;
-	this->rot_y = rot_y;
+	this->a = a;
+	this->b = b;
+	this->profile = profile;
 }
 
 void Oblique_imaging::Start() {
@@ -77,7 +77,7 @@ void Oblique_imaging::getObliqueImage() {
 }
 
 /*
-	Eigen::Affine3d create_rotation_matrix(double ax, double ay, double az) 
+	Eigen::Affine3d create_rotation_matrix(double ax, double ay, double az)
 	{
 		Eigen::Affine3d rx =
 			Eigen::Affine3d(Eigen::AngleAxisd(ax, Eigen::Vector3d(1, 0, 0)));

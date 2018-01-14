@@ -12,10 +12,13 @@ Reconstruction::Reconstruction(Data3DRaw raw_data, Data3DRaw sensitivity_maps, i
 	dtype = STRUCTURAL_DATA;
 }
 
-Reconstruction::Reconstruction(Data4DRaw data)
+Reconstruction::Reconstruction(Data4DRaw data, Data3DRaw sensitivity_maps, int L, int r)
 {
 	qDebug() << "Reconstruction constructor called";
 	data4DRaw_input = data;
+	sensitivityMaps3D = sensitivity_maps;
+	this->L = L;
+	this->r = r;
 	dtype = DIFFUSION_DATA;
 }
 
