@@ -62,7 +62,7 @@ public:
 
 private:
 	Data3D profiles;
-	void initialize(Data3D inputData);
+	void createModel3D(Data3D inputData);
 	int shrinkingFactor;
 	float threshold;
 	int xspace;

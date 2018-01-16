@@ -137,31 +137,38 @@ void Visualization3D::AddRendererAndPlaneWidget() {
 	ui->qvtkWidget->SetRenderWindow(renderWnd);
 	ui->qvtkWidget->GetRenderWindow()->AddRenderer(brain_3D->getData());
 
+	//Create plane and set normal
 	plane = vtkSmartPointer<vtkPlane>::New();
 	plane->SetNormal(1, 0, 0);
+
+	//Create object to clip data (set clip function)
 	clipper = vtkSmartPointer<vtkClipPolyData>::New();
 	clipper->SetClipFunction(plane);
 	clipper->InsideOutOn();
 
+	//Create instance of class (observer) and assign the plane
 	myCallback = vtkSmartPointer<MyCallback>::New();
 	myCallback->Plane = plane;
 
+	//Create representation to vtkImplicitPlaneWidget2 widget
 	rep = vtkSmartPointer<vtkImplicitPlaneRepresentation>::New();
-	rep->SetPlaceFactor(1.0); // This must be set prior to placing the widget
+	rep->SetPlaceFactor(1.0);
 	rep->SetNormal(plane->GetNormal());
 	rep->OutlineTranslationOff();
 	rep->ScaleEnabledOff();
 	rep->GetPlaneProperty()->SetOpacity(0.0);
 	rep->GetSelectedPlaneProperty()->SetOpacity(0.2);
 
+	//Create widget to interact with user and clip the model
 	planeWidget = vtkSmartPointer<vtkImplicitPlaneWidget2>::New();
 	planeWidget->SetInteractor(ui->qvtkWidget->GetInteractor());
 	planeWidget->SetRepresentation(rep);
 	planeWidget->AddObserver(vtkCommand::InteractionEvent, myCallback);
 
 	if (setCutOptionEnable)
-		planeWidget->On();
+		planeWidget->On(); 
 
+	//Set data to clip
 	clipper->SetInputConnection(brain_3D->getDecimate()->GetOutputPort());
 	brain_3D->getMapper()->SetInputConnection(clipper->GetOutputPort());
 
@@ -169,6 +176,7 @@ void Visualization3D::AddRendererAndPlaneWidget() {
 	plane->SetNormal(0, -1, 0);
 	rep->SetNormal(plane->GetNormal());
 
+	//Define bound size
 	double bounds[6];
 	bounds[0] = 0;
 	bounds[1] = xspace;
@@ -177,6 +185,7 @@ void Visualization3D::AddRendererAndPlaneWidget() {
 	bounds[4] = 0;
 	bounds[5] = zspace;
 
+	//Set properties of representation
 	plane->SetNormal(1., 0., 0.);
 	rep->PlaceWidget(bounds);
 	rep->SetOrigin(plane->GetOrigin());
