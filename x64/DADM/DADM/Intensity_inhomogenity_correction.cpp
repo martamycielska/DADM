@@ -30,6 +30,25 @@ Intensity_inhomogenity_correction::Intensity_inhomogenity_correction(Data4D data
 	dtype = DIFFUSION_DATA;
 }
 
+void Intensity_inhomogenity_correction::writeToCSVfile(std::string name, MatrixXd matrix)
+{
+	std::ofstream file(name.c_str());
+
+	for (int i = 0; i < matrix.rows(); i++) {
+		for (int j = 0; j < matrix.cols(); j++) {
+
+			if (j + 1 == matrix.cols()) {
+				file << (matrix(i, j));
+			}
+			else {
+				file << (matrix(i, j)) << ',';
+			}
+		}
+		file << '\n';
+	}
+	file.close();
+}
+
 void Intensity_inhomogenity_correction::SetDataSize() {
 	xspace = inputData[0].rows();
 	yspace = inputData[0].cols();
@@ -37,12 +56,12 @@ void Intensity_inhomogenity_correction::SetDataSize() {
 }
 Eigen::MatrixXd Intensity_inhomogenity_correction::selectRandomPoints(Eigen::MatrixXd &image, int n) {
 	
-	Eigen::MatrixXd values;
+	Eigen::MatrixXd values = MatrixXd::Zero();
 	
 	for (int i = 0; i < n; i++) {
 		int coordx = ceil(rand() * 256);
 		int coordy = ceil(rand() * 256);
-		values = image(coordx, coordy);
+		values(coordx,coordy) = image(coordx, coordy);
 	}
 	return values;
 }
