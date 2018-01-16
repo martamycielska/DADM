@@ -4,12 +4,12 @@
     <ShowAllFiles>false</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QTDIR>C:\Qt\5.9.2\msvc2015_64</QTDIR>
+    <QTDIR>C:\Qt\Qt5.9.3\5.9.3\msvc2015_64</QTDIR>
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b$(PATH);C:\VTK_install_64\bin;C:\matio;C:\Program Files\HDF_Group\HDF5\1.10.1\bin;C:\itk-debug\itk-install\bin</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QTDIR>C:\Qt\5.9.2\msvc2015_64</QTDIR>
+    <QTDIR>C:\Qt\Qt5.9.3\5.9.3\msvc2015_64</QTDIR>
     <LocalDebuggerEnvironment>C:\Program Files\HDF_Group\HDF5\1.10.1\bin
 PATH=$(QTDIR)\bin%3b$(PATH);C:\VTK_64_release\VTK-install\bin</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
