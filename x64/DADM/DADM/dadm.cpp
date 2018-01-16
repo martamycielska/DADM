@@ -136,6 +136,11 @@ void DADM::visualization3d() {
 	vis3D->show();
 }
 
+void DADM::closeEvent(QCloseEvent *)
+{
+	qApp->quit();
+}
+
 void DADM::onReconstructionFinished(Data3D data)
 {
 	Data3D structuralData = data;
@@ -567,8 +572,8 @@ void ImportWorker::diffusionDataImport()
 					if (val_num >= g_matVar->dims[0] * g_matVar->dims[1]) break;
 					//qDebug() << xData[val_num];
 				}
-				emit importProgress(status, max);
 			}
+			emit importProgress(status, max);
 
 			Global::gradients = m;
 		}
@@ -606,9 +611,9 @@ void ImportWorker::diffusionDataImport()
 							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
-						emit importProgress(status, max);
 					}
 					raw_data_part.push_back(m);
+					emit importProgress(status, max);
 				}
 				raw_data.push_back(raw_data_part);
 			}
@@ -643,9 +648,9 @@ void ImportWorker::diffusionDataImport()
 							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
-						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
+					emit importProgress(status, max);
 				}
 
 				Global::diffusionSensitivityMaps = sensitivity_maps;
@@ -736,9 +741,9 @@ void ImportWorker::structuralDataImport()
 						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
 						//qDebug() << xRe[val_num] << xIm[val_num];
 					}
-					emit importProgress(status, max);
 				}
 				raw_data.push_back(m);
+				emit importProgress(status, max);
 			}
 
 			Global::structuralRawData = raw_data;
@@ -771,9 +776,9 @@ void ImportWorker::structuralDataImport()
 							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
-						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
+					emit importProgress(status, max);
 				}
 
 				Global::structuralSensitivityMaps = sensitivity_maps;

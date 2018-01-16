@@ -100,6 +100,9 @@ private:
 	Visualization3D *vis3D;
 	Worker *worker;
 
+protected:
+	void closeEvent(QCloseEvent*);
+
 private slots:
 	void mri_reconstruct();
 	void onReconstructionFinished(Data3D);
