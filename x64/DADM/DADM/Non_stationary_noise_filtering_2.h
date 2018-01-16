@@ -1,4 +1,6 @@
 #pragma once
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "Diffusion_Structural_Module.h"
 
 class Non_stationary_noise_filtering_2:
