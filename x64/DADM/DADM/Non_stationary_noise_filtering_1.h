@@ -7,19 +7,15 @@ class Non_stationary_noise_filtering_1 :
 public:
 	Non_stationary_noise_filtering_1(Data3D, Data3D);
 	Non_stationary_noise_filtering_1(Data4D, Data4D);
-	Non_stationary_noise_filtering_1(int start);
 	~Non_stationary_noise_filtering_1() {};
 
-	//MatrixXd readCSV(std::string file, int rows, int cols);
-	MatrixXd filter2(MatrixXd image, MatrixXd kernel);
-	MatrixXd lmmse(MatrixXd image, int Ws, MatrixXd sigma2);
-	void importTest3D();
+	MatrixXd filter2(MatrixXd image, MatrixXd window);
+	MatrixXd lmmse(MatrixXd image, int W, MatrixXd sigma);
+	
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
 
 	Data3D estimator3D;
 	Data4D estimator4D;
-	MatrixXd image;
-	MatrixXd sigma;
 };
