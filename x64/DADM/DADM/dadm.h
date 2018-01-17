@@ -100,12 +100,9 @@ private:
 	Visualization3D *vis3D;
 	Worker *worker;
 
-<<<<<<< HEAD
-	
-=======
 protected:
 	void closeEvent(QCloseEvent*);
->>>>>>> cda4225b0e2e10c1ecf8e03ebc69b7ddad940473
+
 
 private slots:
 	void mri_reconstruct();

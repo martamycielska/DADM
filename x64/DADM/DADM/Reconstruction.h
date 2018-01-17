@@ -1,7 +1,12 @@
 #pragma once
 #include "Diffusion_Structural_Module.h"
 #include <Eigen\Eigenvalues>
-#include <unsupported/Eigen/FFT>
+#include <complex>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <fftw3.h>
+
 
 //typedef Tensor<std::complex<double>, 3> Data3DRaw;
 //typedef Tensor<std::complex<double>, 4> Data4DRaw;
@@ -20,10 +25,17 @@ public:
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
-	void FourierTransform();
+	Data3D FourierTransform(Data3DRaw raw_data);
+	Data3D ifft(Data3DRaw raw_data);
+	MatrixXd LSreconstruction(Data3D data);
+	MatrixXd TikhonovRegularization(Data3D data, MatrixXd image);
 	Data3DRaw data3DRaw_input;
 	Data4DRaw data4DRaw_input;
 	Data3DRaw sensitivityMaps3D;
+	Data3D SensMaps;
+	MatrixXd medianFilter(MatrixXd image, int windowSize);
 	int L;
 	int r;
+	Data3D xspacedata;
+	void writeToCSVfile(std::string name, MatrixXd matrix);
 };

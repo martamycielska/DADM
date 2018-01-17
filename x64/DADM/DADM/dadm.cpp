@@ -809,8 +809,7 @@ void ImportWorker::structuralDataImport()
 	emit importDone();
 }
 
-<<<<<<< HEAD
-=======
+
 ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
 	qRegisterMetaType<Data3D>("Data3D");
 	this->profile = profile;
@@ -871,4 +870,4 @@ void UpsamplingWorker::run() {
 		break;
 	}
 }
->>>>>>> cda4225b0e2e10c1ecf8e03ebc69b7ddad940473
+
