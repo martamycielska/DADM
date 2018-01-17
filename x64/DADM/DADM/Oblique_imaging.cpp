@@ -2,13 +2,13 @@
 #include "qdebug.h"
 
 
-Oblique_imaging::Oblique_imaging(Data3D data, int profile_idx, double a, double b)
+Oblique_imaging::Oblique_imaging(Data3D data, double a, double b, Profile profile)
 {
 	qDebug() << "Oblique imaging constructor called";
 	this->inputData = data;
-	current_profile = profile_idx;
 	this->a = a;
 	this->b = b;
+	this->profile = profile;
 }
 
 void Oblique_imaging::Start() {

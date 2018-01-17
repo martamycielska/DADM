@@ -4,14 +4,20 @@
 #include "MRI_Module.h"
 #include "Segmentation.h"
 #include "Reconstruction.h"
-#include "dadm.h"
+#include "helpermethods.h"
 
 namespace Global {
+	extern int current_slice;
 	extern FilteringType ftype;
 	extern DataType dtype;
 	extern double b_value;
 	extern MatrixXd gradients;
-	extern Data3D temporaryData;
+	extern Data3D dataFrontal;
+	extern Data3D dataSaggital;
+	extern Data3D dataHorizontal;
+	extern Data3D temporaryDataFrontal;
+	extern Data3D temporaryDataSaggital;
+	extern Data3D temporaryDataHorizontal;
 	extern Data3D structuralData;
 	extern Data3DRaw structuralRawData;
 	extern Data3DRaw structuralSensitivityMaps;
@@ -22,8 +28,8 @@ namespace Global {
 	extern Data4D diffusionData4D;
 	extern Data3D diffusionData3D;
 	extern SegmentationData segmentationData;
-	extern MatrixXd FA;
-	extern MatrixXd MD;
-	extern MatrixXd RA;
-	extern MatrixXd VR;
+	extern Data3D FA;
+	extern Data3D MD;
+	extern Data3D RA;
+	extern Data3D VR;
 }

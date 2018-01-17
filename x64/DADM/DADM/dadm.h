@@ -5,8 +5,8 @@
 #include "ui_dadm.h"
 #include "visualization3d.h"
 #include "Reconstruction.h"
-
-typedef enum FilteringType {LMMSE, UNLM} FilteringType;
+#include "helpermethods.h"
+#include "Oblique_imaging.h"
 
 class Worker : public QThread
 {
@@ -19,11 +19,52 @@ public:
 signals:
 	void resultReady();
 	void currentProcess(QString);
+	void progress(int, int);
 
 private:
 	DataType dtype;
 	FilteringType ftype;
 
+};
+
+class ObliqueImagingWorker : public QThread
+{
+	Q_OBJECT
+
+public:
+	ObliqueImagingWorker(Data3D, double, double, Profile);
+	void run();
+
+signals:
+	void resultReadyFrontal(Data3D);
+	void resultReadySggital(Data3D);
+	void resultReadyHorizontal(Data3D);
+
+private:
+	Profile profile;
+	Data3D data;
+	double a;
+	double b;
+};
+
+class UpsamplingWorker : public QThread
+{
+	Q_OBJECT
+
+public:
+	UpsamplingWorker(Data3D, int, int, Profile);
+	void run();
+
+signals:
+	void resultReadyFrontal(Data3D);
+	void resultReadySggital(Data3D);
+	void resultReadyHorizontal(Data3D);
+
+private:
+	Profile profile;
+	Data3D data;
+	int width;
+	int height;
 };
 
 class ImportWorker : public QThread
@@ -59,7 +100,12 @@ private:
 	Visualization3D *vis3D;
 	Worker *worker;
 
+<<<<<<< HEAD
 	
+=======
+protected:
+	void closeEvent(QCloseEvent*);
+>>>>>>> cda4225b0e2e10c1ecf8e03ebc69b7ddad940473
 
 private slots:
 	void mri_reconstruct();
@@ -70,14 +116,11 @@ private slots:
 	void onImportDone();
 	void structuralTestDataImport();
 	void onPreprocessingDone();
-	void onImportProgress(int, int);
+	void onProgress(int, int);
 	void onProccesing(QString);
 
-	void alphaAngleValueChanged(int);
-	void betaAngleValueChanged(int);
-	void resolutionWidthValueChanged(int);
-	void resolutionHeightValueChanged(int);
-	void diffusionSlicesSet();
+	void resolutionValuesChanged();
+	void planeValuesChanged();
 	void diffusionFASet();
 	void diffusionMDSet();
 	void diffusionRASet();
@@ -87,5 +130,12 @@ private slots:
 
 	void restoreDefault();
 	void showProgramInformation();
+
+	void onUpsamplingFrontalDone(Data3D);
+	void onUpsamplingSaggitalDone(Data3D);
+	void onUpsamplingHorizontalDone(Data3D);
+	void onObliqueImagingFrontalDone(Data3D);
+	void onObliqueImagingSaggitalDone(Data3D);
+	void onObliqueImagingHorizontalDone(Data3D);
 };
 #endif // DADM_H

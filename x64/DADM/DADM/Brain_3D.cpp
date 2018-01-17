@@ -1,53 +1,41 @@
 #include "Brain_3D.h"
-#include "qdebug.h"
 
-#include "vtkAutoInit.h"
-VTK_MODULE_INIT(vtkRenderingOpenGL2);
-VTK_MODULE_INIT(vtkInteractionStyle);
-
-Brain_3D::Brain_3D(QString path, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor)
+Brain_3D::Brain_3D(Data3D data, int xspace, int yspace, int zspace, int threshold, int shrinkingFactor)
 {
 	qDebug() << "Brain 3D constructor called";
-	this -> path = path;
-	this -> outputData = vtkSmartPointer<vtkRenderer>::New();
-	this -> threshold = threshold;
-	this -> xspace = xspace;
-	this -> yspace = yspace;
-	this -> zspace = zspace;
-	this -> shrinkingFactor = shrinkingFactor;
-}
-
-Brain_3D::Brain_3D(Data3D profiles, int threshold)
-{
-	this->inputData = profiles;
+	this->inputData = data;
+	this->outputData = vtkSmartPointer<vtkRenderer>::New();
 	this->threshold = threshold;
+	this->xspace = xspace;
+	this->yspace = yspace;
+	this->zspace = zspace;
+	this->shrinkingFactor = shrinkingFactor;
 }
 
 void Brain_3D::Start() {
-	initialize(path);	
+	createModel3D(inputData);
 }
 
-void Brain_3D::initialize(QString path) {
+void Brain_3D::createModel3D(Data3D inputData) {
 
-	QByteArray ba = path.toLatin1();
-	const char* fileName = ba.data();
-	int extractLargest = 0;
+	// Create a MRI image data
+	imageData = vtkSmartPointer<vtkImageData>::New();
+	imageData->SetDimensions(xspace, yspace, zspace);
+	imageData->AllocateScalars(VTK_DOUBLE, 1);
+	int* dims = imageData->GetDimensions();
 
-	//Read data from RAW file
-	reader = vtkSmartPointer<vtkImageReader>::New();
-	reader->SetFileName(fileName);
-	reader->SetFileDimensionality(3);
-	reader->SetNumberOfScalarComponents(1);
-	reader->SetDataExtent(0, xspace, 0, yspace, 0, zspace);
-	reader->SetDataScalarTypeToChar();
-	reader->Update();
+	for (int z = 0; z < dims[2]; z++)
+		for (int y = 0; y < dims[1]; y++)
+			for (int x = 0; x < dims[0]; x++)
+			{
+				double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, z));
+				pixel[0] = inputData[z](x, y);
+			}
 
 	// Shrink data to increase efficiency
 	shrink = vtkSmartPointer<vtkImageShrink3D>::New();
-	shrink->SetInputConnection(reader->GetOutputPort());
+	shrink->SetInputData(imageData);
 	shrink->SetShrinkFactors(shrinkingFactor, shrinkingFactor, shrinkingFactor);
-
-    colors = vtkSmartPointer<vtkNamedColors>::New();
 
 	// Create cortex isosurface using marching cubes
 	this->mc = vtkSmartPointer<vtkMarchingCubes>::New();
@@ -56,21 +44,21 @@ void Brain_3D::initialize(QString path) {
 	mc->ComputeGradientsOn();
 	mc->SetValue(0, threshold);
 
-	// To remain largest region
-	confilter = vtkSmartPointer<vtkPolyDataConnectivityFilter>::New();
-	confilter->SetInputConnection(mc->GetOutputPort());
-	confilter->SetExtractionModeToLargestRegion();
+	// Reduce the number of triangles (in percentage)
+	decimater = vtkSmartPointer<vtkDecimatePro>::New();
+	decimater->SetInputConnection(mc->GetOutputPort());
+	//decimate->SetTargetReduction(.99); //99% reduction (if there was 100 triangles, now there will be 1)
+	decimater->SetTargetReduction(.0); //0% reduction (if there was 100 triangles, now there will be 90)
 
-	// Create a mapper
+	// Create a mapper (mapping isosurface to graphic primitives)
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-
-	if (extractLargest)
-		mapper->SetInputConnection(confilter->GetOutputPort());
-	else
-		mapper->SetInputConnection(mc->GetOutputPort());
-
-	// Set utilize actor's property (color)
+	mapper->SetInputConnection(decimater->GetOutputPort());
+	//mapper->SetInputConnection(mc->GetOutputPort());
 	mapper->ScalarVisibilityOff();
+
+	// Create object to set colors
+	colors = vtkSmartPointer<vtkNamedColors>::New();
+	// change colors: https://gitlab.kitware.com/vtk/vtk/blob/bc8b0a565766ab3768df6a4f5f07992bdae4afd8/Common/Color/vtkNamedColors.cxx
 
 	// Create Actor and set color
 	actor = vtkSmartPointer<vtkActor>::New();
@@ -87,8 +75,6 @@ void Brain_3D::initialize(QString path) {
 	outputData->ResetCamera();
 	outputData->GetActiveCamera()->Azimuth(30.0);
 	outputData->GetActiveCamera()->Elevation(30.0);
-
-	// change colors: https://gitlab.kitware.com/vtk/vtk/blob/bc8b0a565766ab3768df6a4f5f07992bdae4afd8/Common/Color/vtkNamedColors.cxx
 }
 
 void Brain_3D::setRenderer(Renderer renderer)
@@ -127,14 +113,14 @@ Mapper Brain_3D::getMapper()
 	return mapper;
 }
 
-Confilter Brain_3D::getConfilter()
-{
-	return confilter;
-}
-
 void Brain_3D::setShrinkFactor(int value)
 {
 	shrink->SetShrinkFactors(value, value, value);
+}
+
+Decimate  Brain_3D::getDecimate()
+{
+	return decimater;
 }
 
 

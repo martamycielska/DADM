@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>984</width>
-    <height>656</height>
+    <width>1088</width>
+    <height>689</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,13 +28,13 @@
         <property name="title">
          <string>Settings</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QToolBox" name="SettingsToolBox">
            <property name="maximumSize">
             <size>
              <width>159</width>
-             <height>250</height>
+             <height>230</height>
             </size>
            </property>
            <property name="acceptDrops">
@@ -61,7 +61,7 @@
               <x>0</x>
               <y>0</y>
               <width>135</width>
-              <height>138</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -106,7 +106,7 @@
               <x>0</x>
               <y>0</y>
               <width>135</width>
-              <height>138</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -129,7 +129,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="alphaPlaneSpinBox">
+                <widget class="QDoubleSpinBox" name="alphaPlaneSpinBox">
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
@@ -153,9 +153,16 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="betaPlaneSpinBox"/>
+                <widget class="QDoubleSpinBox" name="betaPlaneSpinBox"/>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="planeApplyPushButton">
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="verticalSpacer_7">
@@ -178,7 +185,7 @@
               <x>0</x>
               <y>0</y>
               <width>135</width>
-              <height>138</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
@@ -214,6 +221,13 @@
               </layout>
              </item>
              <item>
+              <widget class="QPushButton" name="resolutionApplyPushButton">
+               <property name="text">
+                <string>Apply</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="verticalSpacer_8">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -234,27 +248,20 @@
               <x>0</x>
               <y>0</y>
               <width>135</width>
-              <height>138</height>
+              <height>118</height>
              </rect>
             </property>
             <attribute name="label">
-             <string>Diffusion images</string>
+             <string>Biomarkers</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_11">
-             <item>
-              <widget class="QRadioButton" name="diffSlicesRadioButton">
-               <property name="text">
-                <string>Slices</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
              <item>
               <widget class="QRadioButton" name="diffFARadioButton">
                <property name="text">
                 <string>FA</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -355,7 +362,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>984</width>
+     <width>1088</width>
      <height>21</height>
     </rect>
    </property>
