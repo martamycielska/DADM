@@ -26,5 +26,6 @@ private:
 	MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b, int power = 0, bool isDivided = false);
 	MatrixXd Non_stationary_noise_estimation::dctCorrect(MatrixXd a);
 	MatrixXd Non_stationary_noise_estimation::idctCorrect(MatrixXd a);
+	bool Non_stationary_noise_estimation::getSum(MatrixXd matrix);
 };
 

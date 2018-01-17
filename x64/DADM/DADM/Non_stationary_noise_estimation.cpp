@@ -275,3 +275,19 @@ MatrixXd Non_stationary_noise_estimation::idctCorrect(MatrixXd a) {
 	}
 	return m;
 }
+
+bool Non_stationary_noise_estimation::getSum(MatrixXd matrix)
+{
+	for (int j = 0; j < matrix.cols(); j++) {
+		double sumInColumn = 0;
+		for (int i = 0; i < matrix.rows(); i++) {
+			sumInColumn += matrix(i, j);
+		}
+		if (sumInColumn <= 1)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
