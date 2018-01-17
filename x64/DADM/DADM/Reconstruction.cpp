@@ -15,7 +15,6 @@ Reconstruction::Reconstruction(Data3DRaw raw_data, Data3DRaw sensitivity_maps, i
 	this->L = L;
 	this->r = r;
 	dtype = STRUCTURAL_DATA;
-	StructuralDataAlgorithm();
 }
 
 Reconstruction::Reconstruction(Data4DRaw data, Data3DRaw sensitivity_maps, int L, int r)
@@ -26,7 +25,6 @@ Reconstruction::Reconstruction(Data4DRaw data, Data3DRaw sensitivity_maps, int L
 	this->L = L;
 	this->r = r;
 	dtype = DIFFUSION_DATA;
-	DiffusionDataAlgorithm();
 }
 
 void Reconstruction::StructuralDataAlgorithm() {
@@ -48,8 +46,8 @@ void Reconstruction::StructuralDataAlgorithm() {
 		slices.at(i) = reconstructed_data;
 
 	}
-	//zapis do zmiennej globalnej
-	Global::structuralData = slices;
+	//zwracana wartoœæ
+	data3D_output = slices;
 }
 
 void Reconstruction::DiffusionDataAlgorithm()
@@ -59,7 +57,7 @@ void Reconstruction::DiffusionDataAlgorithm()
 	for (int i = 0; i < slices_no; i++)
 	{
 		Data3D data;
-
+		
 		Data4DRaw data4d_raw = data4DRaw_input;
 		int gradients_no = data4d_raw.size();
 		Data3D reconstructed_data_3D(gradients_no);
@@ -79,9 +77,9 @@ void Reconstruction::DiffusionDataAlgorithm()
 		slices.at(i) = reconstructed_data_3D;
 
 	}
-	//zapis do zmiennej globalnej
 
-	Global::diffusionData4D = slices;
+	//zwracana wartoœæ
+	data4D_output = slices;
 }
 
 Data3D Reconstruction::FourierTransform(Data3DRaw raw_data)
