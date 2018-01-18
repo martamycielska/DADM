@@ -103,6 +103,7 @@ private:
 protected:
 	void closeEvent(QCloseEvent*);
 
+
 private slots:
 	void mri_reconstruct();
 	void onReconstructionFinished(Data3D);
