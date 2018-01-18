@@ -181,6 +181,7 @@
     <ClCompile Include="Reconstruction.cpp" />
     <ClCompile Include="Segmentation.cpp" />
     <ClCompile Include="Skull_stripping.cpp" />
+    <ClCompile Include="SliceVisualizator.cpp" />
     <ClCompile Include="Upsampling.cpp" />
     <ClCompile Include="visualization3d.cpp" />
   </ItemGroup>
@@ -243,6 +244,7 @@
     <ClInclude Include="Reconstruction.h" />
     <ClInclude Include="Segmentation.h" />
     <ClInclude Include="Skull_stripping.h" />
+    <ClInclude Include="SliceVisualizator.h" />
     <ClInclude Include="Upsampling.h" />
     <CustomBuild Include="visualization3d.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

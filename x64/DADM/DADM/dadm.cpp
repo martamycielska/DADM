@@ -19,6 +19,7 @@
 #include "matio.h"
 #include "qaction.h"
 #include "qfiledialog.h"
+#include <SliceVisualizator.h>
 //#include "mat.h"
 
 //using MatFileHandler;
@@ -203,6 +204,9 @@ void DADM::structuralTestDataImport()
 		QMessageBox msgBox;
 		msgBox.setText("Finished");
 		msgBox.exec();
+
+		SliceVisualizator sliceVisualizator;
+		sliceVisualizator.visualize();
 	}
 }
 
