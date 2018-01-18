@@ -21,6 +21,18 @@
 #include "qfiledialog.h"
 //#include "mat.h"
 
+#include <vtkImageActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkSmartPointer.h>
+#include <vtkCamera.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkNamedColors.h>
+#include <vtkImageData.h>
+#include <vtkAutoInit.h>
+
 //using MatFileHandler;
 
 DADM::DADM(QWidget *parent) : QMainWindow(parent)
@@ -163,9 +175,7 @@ void DADM::structuralTestDataImport()
 		qDebug() << "Otwarto plik";
 
 		matvar_t *matVar = 0;
-
 		matVar = Mat_VarRead(mat, (char*)"dataset_T1");
-
 		if (matVar) {
 			qDebug() << "Otwarto strukturê";
 
@@ -193,7 +203,6 @@ void DADM::structuralTestDataImport()
 			}
 			Global::structuralData = data;
 		}
-
 		Mat_Close(mat);
 		QMessageBox msgBox;
 		msgBox.setText("Finished");

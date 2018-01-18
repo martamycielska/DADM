@@ -1,5 +1,18 @@
 #include "Non_stationary_noise_filtering_2.h"
 #include "qdebug.h"
+#include <vtkImageActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkSmartPointer.h>
+#include <vtkCamera.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkNamedColors.h>
+#include <vtkImageData.h>
+#include <vtkAutoInit.h>
+VTK_MODULE_INIT(vtkRenderingOpenGL2);
+VTK_MODULE_INIT(vtkInteractionStyle);
 
 Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data3D images, Data3D estim)
 {
@@ -24,7 +37,6 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 	Data3D sigmaTab = estimator3D;
 	for (int iter = 0; iter < data.size(); iter++) {
 		MatrixXd input = data[iter];
-		qDebug() << "afkj";
 		//Define constants
 		int M = input.rows();
 		int N = input.cols();
@@ -42,6 +54,7 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 				input1(i, j) = input(i - Rsim, j - Rsim);
 			}
 		}
+
 		//Generate Gaussian Kernel
 		MatrixXd gauss_kernel = MatrixXd::Zero(2 * Rsim + 1, 2 * Rsim + 1);
 		double kernel_sum = 0;
@@ -63,8 +76,9 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 		int test = 0;
 		//Count UNLM
 		int i_1, j_1, k1, k2, l1, l2;
+		MatrixXd output = MatrixXd::Zero(M, N);
 		double w, wmax, Z, d, Yq;
-		MatrixXd Np, Nq, result1, result2, result3, output;
+		MatrixXd Np, Nq, result1, result2, result3;
 		for (int i = 0; i < M; i++) {
 			for (int j = 0; j < N; j++) {
 				wmax = 0;
@@ -75,7 +89,6 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 				i_1 = i + Rsim;
 				j_1 = j + Rsim;
 				Np = input1.block(i, j, 2 * Rsim + 1, 2 * Rsim + 1);
-
 				k1 = max(i_1 - Rsearch, Rsim + 1) - 1;
 				k2 = min(i_1 + Rsearch, M + Rsim) - 1;
 				l1 = max(j_1 - Rsearch, Rsim + 1) - 1;
@@ -93,7 +106,7 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 							result2 = result1.cwiseProduct(result1);
 							result3 = gauss_kernel.cwiseProduct(result2);
 							d = result3.sum();
-							h = 1.22*sigma(i, j);
+							h = 1.22*sigma(i,j);
 							w = exp(-d / (h*h));
 
 							if (w > wmax) {
@@ -112,9 +125,43 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 				else {
 					output(i, j) = input1(i, j);
 				}
+				qDebug() << test++;
+				qDebug() << "\n";
 			}
 		}
 		data[iter] = output;
+		MatrixXd inputData = output;
+		int xspace = inputData.rows();
+		int yspace = inputData.cols();
+	
+		vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+		imageData->SetDimensions(xspace, yspace, 1);
+		imageData->AllocateScalars(VTK_DOUBLE, 1);
+		int* dims = imageData->GetDimensions();
+
+		for (int y = 0; y < dims[1]; y++)
+			for (int x = 0; x < dims[0]; x++)
+			{
+				double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, 0));
+				pixel[0] = inputData(x, y);
+			}
+
+		vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
+		actor->SetInputData(imageData);
+
+		vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+		renderer->AddActor(actor);
+		renderer->ResetCamera();
+
+		vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+		renderWindow->AddRenderer(renderer);
+
+		vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+		vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
+		renderWindowInteractor->SetInteractorStyle(style);
+		renderWindowInteractor->SetRenderWindow(renderWindow);
+		renderWindowInteractor->Initialize();
+		renderWindowInteractor->Start();
 	}
 }
 
@@ -164,8 +211,9 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 			int test = 0;
 			//Count UNLM
 			int i_1, j_1, k1, k2, l1, l2;
+			MatrixXd output = MatrixXd::Zero(M, N);
 			double w, wmax, Z, d, Yq;
-			MatrixXd Np, Nq, result1, result2, result3, output;
+			MatrixXd Np, Nq, result1, result2, result3;
 			for (int i = 0; i < M; i++) {
 				for (int j = 0; j < N; j++) {
 					wmax = 0;
