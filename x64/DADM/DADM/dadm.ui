@@ -6,17 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1088</width>
-    <height>689</height>
+    <width>1020</width>
+    <height>691</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>DADM</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_13">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="maximumSize">
@@ -320,24 +320,24 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_12">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QOpenGLWidget" name="VTK_Frontal"/>
+           <widget class="QVTKOpenGLWidget" name="VTK_Frontal" native="true"/>
           </item>
           <item>
-           <widget class="QOpenGLWidget" name="VTK_Saggital"/>
+           <widget class="QVTKOpenGLWidget" name="VTK_Frontal_2" native="true"/>
           </item>
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QOpenGLWidget" name="VTK_Horizontal"/>
+           <widget class="QVTKOpenGLWidget" name="VTK_Horizontal" native="true"/>
           </item>
           <item>
-           <widget class="QWidget" name="Unused_Widget" native="true"/>
+           <widget class="QWidget" name="widget" native="true"/>
           </item>
          </layout>
         </item>
@@ -362,7 +362,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1088</width>
+     <width>1020</width>
      <height>21</height>
     </rect>
    </property>
@@ -430,6 +430,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QVTKOpenGLWidget</class>
+   <extends>QWidget</extends>
+   <header>QVTKOpenGLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="dadm.qrc"/>
  </resources>

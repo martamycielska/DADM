@@ -205,8 +205,15 @@ void DADM::structuralTestDataImport()
 		msgBox.setText("Finished");
 		msgBox.exec();
 
+		#pragma region SliceVisualizator
+		vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+		ui.VTK_Frontal->SetRenderWindow(renderWnd);
+
 		SliceVisualizator sliceVisualizator;
 		sliceVisualizator.visualize();
+
+		//ui.VTK_Frontal->GetRenderWindow()->AddRenderer(sliceVisualizator->getData());
+		#pragma region SliceVisualizator
 	}
 }
 

@@ -1,15 +1,6 @@
 #include <SliceVisualizator.h>
 #include <Globals.h>
 
-class StatusMessage {
-public:
-	static std::string Format(int slice, int maxSlice) {
-		std::stringstream tmp;
-		tmp << "Slice " << slice + 1 << "/" << maxSlice + 1;
-		return tmp.str();
-	}
-};
-
 
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
 {
@@ -32,17 +23,11 @@ public:
 		_Slice = _MinSlice;
 	}
 
-	void SetStatusMapper(vtkTextMapper* statusMapper) {
-		_StatusMapper = statusMapper;
-	}
-
 protected:
 	void MoveSliceForward() {
 		if (_Slice < _MaxSlice) {
 			_Slice += 1;
 			_ImageViewer->SetSlice(_Slice);
-			std::string msg = StatusMessage::Format(_Slice, _MaxSlice);
-			_StatusMapper->SetInput(msg.c_str());
 			_ImageViewer->Render();
 		}
 	}
@@ -51,8 +36,6 @@ protected:
 		if (_Slice > _MinSlice) {
 			_Slice -= 1;
 			_ImageViewer->SetSlice(_Slice);
-			std::string msg = StatusMessage::Format(_Slice, _MaxSlice);
-			_StatusMapper->SetInput(msg.c_str());
 			_ImageViewer->Render();
 		}
 	}
@@ -92,7 +75,6 @@ SliceVisualizator::SliceVisualizator()
 
 void SliceVisualizator::visualize()
 {
-	// Create a MRI image data
 	vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
 	imageData->SetDimensions(x, y, z);
 	imageData->AllocateScalars(VTK_DOUBLE, 1);
@@ -116,15 +98,6 @@ void SliceVisualizator::visualize()
 	sliceTextProp->SetVerticalJustificationToBottom();
 	sliceTextProp->SetJustificationToLeft();
 
-	vtkSmartPointer<vtkTextMapper> sliceTextMapper = vtkSmartPointer<vtkTextMapper>::New();
-	std::string msg = StatusMessage::Format(imageViewer->GetSliceMin(), imageViewer->GetSliceMax());
-	sliceTextMapper->SetInput(msg.c_str());
-	sliceTextMapper->SetTextProperty(sliceTextProp);
-
-	vtkSmartPointer<vtkActor2D> sliceTextActor = vtkSmartPointer<vtkActor2D>::New();
-	sliceTextActor->SetMapper(sliceTextMapper);
-	sliceTextActor->SetPosition(15, 10);
-
 	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
 		vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
@@ -132,13 +105,10 @@ void SliceVisualizator::visualize()
 		vtkSmartPointer<myVtkInteractorStyleImage>::New();
 
 	myInteractorStyle->SetImageViewer(imageViewer);
-	myInteractorStyle->SetStatusMapper(sliceTextMapper);
 
 	imageViewer->SetupInteractor(renderWindowInteractor);
 
 	renderWindowInteractor->SetInteractorStyle(myInteractorStyle);
-
-	imageViewer->GetRenderer()->AddActor2D(sliceTextActor);
 
 	imageViewer->GetRenderWindow()->SetSize(700, 600);
 	imageViewer->Render();
