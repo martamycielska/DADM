@@ -24,28 +24,27 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 	Data3D sigmaTab = estimator3D;
 	for (int iter = 0; iter < data.size(); iter++) {
 		MatrixXd input = data[iter];
+		qDebug() << "afkj";
 		//Define constants
 		int M = input.rows();
 		int N = input.cols();
 		int Rsim = 2;
 		int Rsearch = 5;
-		//sigma -> macierz
 		double h;
 		MatrixXd sigma = sigmaTab[iter];
-
 		//Resize initialized Matrix
-		MatrixXd input1 = MatrixXd::Zero(100 + 2 * Rsim, 100 + 2 * Rsim);
+		MatrixXd input1 = MatrixXd::Zero(M + 2 * Rsim, N + 2 * Rsim);
 		int M1 = input1.rows();
 		int N1 = input1.cols();
-		for (int i = Rsim; i <= M1 - Rsim; i++) {
-			for (int j = Rsim; j <= N1 - Rsim; j++) {
+
+		for (int i = Rsim; i < M1 - Rsim; i++) {
+			for (int j = Rsim; j < N1 - Rsim; j++) {
 				input1(i, j) = input(i - Rsim, j - Rsim);
 			}
 		}
-		qDebug() << "Resize Done";
 		//Generate Gaussian Kernel
-		MatrixXd gauss_kernel = MatrixXd::Zero(Rsim, Rsim);
-		int kernel_sum = 0;
+		MatrixXd gauss_kernel = MatrixXd::Zero(2 * Rsim + 1, 2 * Rsim + 1);
+		double kernel_sum = 0;
 		int g_sigma = 1;
 		double e;
 		for (int i = -Rsim; i <= Rsim; i++) {
@@ -61,7 +60,7 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 				gauss_kernel(i + Rsim, j + Rsim) = gauss_kernel(i + Rsim, j + Rsim) / kernel_sum;
 			}
 		}
-		qDebug() << "Gauss Done";
+		int test = 0;
 		//Count UNLM
 		int i_1, j_1, k1, k2, l1, l2;
 		double w, wmax, Z, d, Yq;
@@ -75,13 +74,8 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 				//Create main pixel neighbourhood
 				i_1 = i + Rsim;
 				j_1 = j + Rsim;
-				/*for (int i1 = i; i1 <= i_1 + Rsim; i1++) {
-					for (int j1 = j; j1 <= j_1 + Rsim; j1++) {
-						Np(i1 - i, j1 - j) = input1(i1, j1);
-					}
-				}*/
-				Np = input1.block(i, j, i_1 + Rsim, j_1 + Rsim);
-				qDebug() << "Np Done";
+				Np = input1.block(i, j, 2 * Rsim + 1, 2 * Rsim + 1);
+
 				k1 = max(i_1 - Rsearch, Rsim + 1) - 1;
 				k2 = min(i_1 + Rsearch, M + Rsim) - 1;
 				l1 = max(j_1 - Rsearch, Rsim + 1) - 1;
@@ -94,22 +88,11 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 						}
 						else {
 							//Create comparable pixel neighbourhood
-							int i3 = 0;
-							int j3 = 0;
-							/*for (int i2 = k - Rsim; i2 <= k + Rsim; i2++) {
-								for (int j2 = l - Rsim; j2 <= l + Rsim; j2++) {
-									Nq(i3, j3) = input1(i2, j2);
-									j3++;
-								}
-								i3++;
-							}*/
-							Nq = input1.block(k - Rsim, l - Rsim, k + Rsim, l + Rsim);
-							qDebug() << "Nq Done";
+							Nq = input1.block(k - Rsim, l - Rsim, 2 * Rsim + 1, 2 * Rsim + 1);
 							result1 = Np - Nq;
 							result2 = result1.cwiseProduct(result1);
 							result3 = gauss_kernel.cwiseProduct(result2);
 							d = result3.sum();
-							qDebug() << "Count Done";
 							h = 1.22*sigma(i, j);
 							w = exp(-d / (h*h));
 
@@ -118,16 +101,16 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 							}
 						}
 						Z += w;
-						Yq = Yq + w*input(k, l);
+						Yq += w*input1(k, l);
 					}
 				}
 				Z += wmax;
-				Yq += wmax*input(i_1, j_1);
+				Yq += wmax*input1(i_1, j_1);
 				if (Z > 0) {
-					output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow((sigma(i, j)), 2));
+					output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow(sigma(i,j), 2));
 				}
 				else {
-					output(i, j) = input(i, j);
+					output(i, j) = input1(i, j);
 				}
 			}
 		}
@@ -142,29 +125,27 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 		Data3D data1 = data[iter];
 		Data3D sigmaTab1 = sigmaTab[iter];
 		for (int iter1 = 0; iter1 < data.size(); iter1++) {
-			MatrixXd input = data1[iter1];
+			MatrixXd input = data1[iter];
 			//Define constants
 			int M = input.rows();
 			int N = input.cols();
 			int Rsim = 2;
 			int Rsearch = 5;
-			//sigma -> macierz
 			double h;
-			MatrixXd sigma = sigmaTab1[iter1];
-
+			MatrixXd sigma = sigmaTab1[iter];
 			//Resize initialized Matrix
-			MatrixXd input1 = MatrixXd::Zero(100 + 2 * Rsim, 100 + 2 * Rsim);
+			MatrixXd input1 = MatrixXd::Zero(M + 2 * Rsim, N + 2 * Rsim);
 			int M1 = input1.rows();
 			int N1 = input1.cols();
-			for (int i = Rsim; i <= M1 - Rsim; i++) {
-				for (int j = Rsim; j <= N1 - Rsim; j++) {
+
+			for (int i = Rsim; i < M1 - Rsim; i++) {
+				for (int j = Rsim; j < N1 - Rsim; j++) {
 					input1(i, j) = input(i - Rsim, j - Rsim);
 				}
 			}
-			qDebug() << "Resize Done";
 			//Generate Gaussian Kernel
-			MatrixXd gauss_kernel = MatrixXd::Zero(Rsim, Rsim);
-			int kernel_sum = 0;
+			MatrixXd gauss_kernel = MatrixXd::Zero(2 * Rsim + 1, 2 * Rsim + 1);
+			double kernel_sum = 0;
 			int g_sigma = 1;
 			double e;
 			for (int i = -Rsim; i <= Rsim; i++) {
@@ -180,7 +161,7 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 					gauss_kernel(i + Rsim, j + Rsim) = gauss_kernel(i + Rsim, j + Rsim) / kernel_sum;
 				}
 			}
-			qDebug() << "Gauss Done";
+			int test = 0;
 			//Count UNLM
 			int i_1, j_1, k1, k2, l1, l2;
 			double w, wmax, Z, d, Yq;
@@ -194,13 +175,8 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 					//Create main pixel neighbourhood
 					i_1 = i + Rsim;
 					j_1 = j + Rsim;
-					/*for (int i1 = i; i1 <= i_1 + Rsim; i1++) {
-					for (int j1 = j; j1 <= j_1 + Rsim; j1++) {
-					Np(i1 - i, j1 - j) = input1(i1, j1);
-					}
-					}*/
-					Np = input1.block(i, j, i_1 + Rsim, j_1 + Rsim);
-					qDebug() << "Np Done";
+					Np = input1.block(i, j, 2 * Rsim + 1, 2 * Rsim + 1);
+
 					k1 = max(i_1 - Rsearch, Rsim + 1) - 1;
 					k2 = min(i_1 + Rsearch, M + Rsim) - 1;
 					l1 = max(j_1 - Rsearch, Rsim + 1) - 1;
@@ -213,22 +189,11 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 							}
 							else {
 								//Create comparable pixel neighbourhood
-								int i3 = 0;
-								int j3 = 0;
-								/*for (int i2 = k - Rsim; i2 <= k + Rsim; i2++) {
-								for (int j2 = l - Rsim; j2 <= l + Rsim; j2++) {
-								Nq(i3, j3) = input1(i2, j2);
-								j3++;
-								}
-								i3++;
-								}*/
-								Nq = input1.block(k - Rsim, l - Rsim, k + Rsim, l + Rsim);
-								qDebug() << "Nq Done";
+								Nq = input1.block(k - Rsim, l - Rsim, 2 * Rsim + 1, 2 * Rsim + 1);
 								result1 = Np - Nq;
 								result2 = result1.cwiseProduct(result1);
 								result3 = gauss_kernel.cwiseProduct(result2);
 								d = result3.sum();
-								qDebug() << "Count Done";
 								h = 1.22*sigma(i, j);
 								w = exp(-d / (h*h));
 
@@ -237,20 +202,21 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 								}
 							}
 							Z += w;
-							Yq = Yq + w*input(k, l);
+							Yq += w*input1(k, l);
 						}
 					}
 					Z += wmax;
-					Yq += wmax*input(i_1, j_1);
+					Yq += wmax*input1(i_1, j_1);
 					if (Z > 0) {
-						output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow((sigma(i, j)), 2));
+						output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow(sigma(i, j), 2));
 					}
 					else {
-						output(i, j) = input(i, j);
+						output(i, j) = input1(i, j);
 					}
 				}
 			}
 			data1[iter1] = output;
 		}
+		data[iter] = data1;
 	}
 }
