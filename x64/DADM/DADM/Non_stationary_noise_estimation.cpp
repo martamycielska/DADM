@@ -193,8 +193,13 @@ MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log) {
 	}
 
 	std::vector<double> b(m*n);
-	fftw_plan plan = fftw_plan_r2r_2d(n, m, &a[0], &b[0], FFTW_REDFT01, FFTW_REDFT01, FFTW_MEASURE);
+	fftw_plan plan = fftw_plan_r2r_2d(n, m, &a[0], &b[0], FFTW_REDFT01, FFTW_REDFT01, FFTW_PATIENT);
 	fftw_execute(plan);
+
+	double f = sqrt(1 / 2 / N);
+	for (int i = 0, f = N << 1;i < N;++i) {
+		b[i] /= f * 2;
+	}
 
 	MatrixXd K = MatrixXd::Zero(m, n);
 	for (int i = 0; i<m;i++)
