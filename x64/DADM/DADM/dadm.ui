@@ -60,8 +60,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>98</width>
+              <height>64</height>
              </rect>
             </property>
             <attribute name="label">
@@ -105,8 +105,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>98</width>
+              <height>103</height>
              </rect>
             </property>
             <attribute name="label">
@@ -184,8 +184,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>98</width>
+              <height>103</height>
              </rect>
             </property>
             <attribute name="label">
@@ -304,6 +304,23 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>XY</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="xySlider">
+           <property name="maximum">
+            <number>180</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_10">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -386,6 +403,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionVisualization_3D"/>
+    <addaction name="actionVisualize_2D"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -426,6 +444,11 @@
   <action name="actionInformation">
    <property name="text">
     <string>Information...</string>
+   </property>
+  </action>
+  <action name="actionVisualize_2D">
+   <property name="text">
+    <string>Visualize 2D</string>
    </property>
   </action>
  </widget>

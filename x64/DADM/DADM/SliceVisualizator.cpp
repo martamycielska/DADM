@@ -1,7 +1,6 @@
 #include <SliceVisualizator.h>
 #include <Globals.h>
 
-
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
 {
 public:
@@ -65,8 +64,9 @@ protected:
 vtkStandardNewMacro(myVtkInteractorStyleImage);
 
 
-SliceVisualizator::SliceVisualizator()
+SliceVisualizator::SliceVisualizator(RenderWindow renderWnd)
 {
+	this->renderWnd = renderWnd;
 	this->inputData = Global::structuralData;
 	this->x = inputData[0].rows();
 	this->y = inputData[0].cols();
@@ -75,7 +75,7 @@ SliceVisualizator::SliceVisualizator()
 
 void SliceVisualizator::visualize()
 {
-	vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+	imageData = vtkSmartPointer<vtkImageData>::New();
 	imageData->SetDimensions(x, y, z);
 	imageData->AllocateScalars(VTK_DOUBLE, 1);
 	int* dims = imageData->GetDimensions();
@@ -85,37 +85,27 @@ void SliceVisualizator::visualize()
 			for (int x = 0; x < dims[0]; x++)
 			{
 				double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, z));
-				pixel[0] = inputData[z](x, y);
+				pixel[0] = Global::structuralData[z](x, y);
 			}
 
-	vtkSmartPointer<vtkImageViewer2> imageViewer =
-		vtkSmartPointer<vtkImageViewer2>::New();
-	imageViewer->SetInputData(imageData);
-
-	vtkSmartPointer<vtkTextProperty> sliceTextProp = vtkSmartPointer<vtkTextProperty>::New();
-	sliceTextProp->SetFontFamilyToCourier();
-	sliceTextProp->SetFontSize(20);
-	sliceTextProp->SetVerticalJustificationToBottom();
-	sliceTextProp->SetJustificationToLeft();
-
-	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-		vtkSmartPointer<vtkRenderWindowInteractor>::New();
-
-	vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyle =
-		vtkSmartPointer<myVtkInteractorStyleImage>::New();
-
+	imageViewer = vtkSmartPointer<vtkImageViewer2>::New();
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyle = vtkSmartPointer<myVtkInteractorStyleImage>::New();
 	myInteractorStyle->SetImageViewer(imageViewer);
-
 	imageViewer->SetupInteractor(renderWindowInteractor);
-
 	renderWindowInteractor->SetInteractorStyle(myInteractorStyle);
 
-	imageViewer->GetRenderWindow()->SetSize(700, 600);
-	imageViewer->Render();
-	imageViewer->GetRenderWindow()->SetWindowName("Visualization 2D");
-	imageViewer->GetRenderer()->ResetCamera();
+	imageViewer->SetInputData(imageData);
+	imageViewer->SetRenderWindow(renderWnd);
+	imageViewer->SetSliceOrientationToXY();
+	imageViewer->SetSlice(0);
 	imageViewer->Render();
 	renderWindowInteractor->Start();
+}
+
+Viewer SliceVisualizator::getImageViewer()
+{
+	return imageViewer;
 }
 
 SliceVisualizator::~SliceVisualizator()

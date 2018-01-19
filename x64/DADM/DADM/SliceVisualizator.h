@@ -18,17 +18,24 @@
 #include <sstream>
 #include <vtkImageData.h>
 #include <MRI_Module.h>
+#include <vtkGenericOpenGLRenderWindow.h>
 
+typedef vtkSmartPointer<vtkGenericOpenGLRenderWindow> RenderWindow;
+typedef vtkSmartPointer<vtkImageViewer2> Viewer;
 
 class SliceVisualizator
 {
 public:
-	SliceVisualizator();
+	SliceVisualizator(RenderWindow renderWnd);
 	~SliceVisualizator();
+	Viewer getImageViewer();
 	void visualize();	
 
 private:
 	Data3D inputData;
+	RenderWindow renderWnd;
+	vtkSmartPointer<vtkImageViewer2> imageViewer;
+	vtkSmartPointer<vtkImageData> imageData;
 	int x;
 	int y; 
 	int z;

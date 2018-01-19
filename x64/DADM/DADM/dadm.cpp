@@ -29,6 +29,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
+	connect(ui.actionVisualize_2D, &QAction::triggered, this, &DADM::visualization2d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
 	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
@@ -46,6 +47,8 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
+
+	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
 }
 
 void DADM::mri_reconstruct() {
@@ -137,6 +140,24 @@ void DADM::visualization3d() {
 	vis3D->show();
 }
 
+void DADM::visualization2d() {
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui.VTK_Frontal->SetRenderWindow(renderWnd);
+
+	if (Global::structuralData.size() != 0) {
+		sliceVisualizator = new SliceVisualizator(renderWnd);
+		sliceVisualizator->visualize();
+	}
+}
+
+void DADM::xySliderValueChanged(int sliderValue) {
+	if (sliceVisualizator != NULL) {
+		qDebug() << sliceVisualizator;
+		sliceVisualizator->getImageViewer()->SetSlice(sliderValue);
+		sliceVisualizator->getImageViewer()->Render();
+	}
+}
+
 void DADM::closeEvent(QCloseEvent *)
 {
 	qApp->quit();
@@ -204,16 +225,6 @@ void DADM::structuralTestDataImport()
 		QMessageBox msgBox;
 		msgBox.setText("Finished");
 		msgBox.exec();
-
-		#pragma region SliceVisualizator
-		vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-		ui.VTK_Frontal->SetRenderWindow(renderWnd);
-
-		SliceVisualizator sliceVisualizator;
-		sliceVisualizator.visualize();
-
-		//ui.VTK_Frontal->GetRenderWindow()->AddRenderer(sliceVisualizator->getData());
-		#pragma region SliceVisualizator
 	}
 }
 
