@@ -25,10 +25,10 @@ public:
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
-	Data3D FourierTransform(Data3DRaw raw_data);
-	Data3D ifft(Data3DRaw raw_data);
-	MatrixXd LSreconstruction(Data3D data);
-	MatrixXd TikhonovRegularization(Data3D data, MatrixXd image);
+	Data3DRaw FourierTransform(Data3DRaw raw_data);
+	Data3DRaw ifft(Data3DRaw raw_data);
+	MatrixXd LSreconstruction(Data3DRaw data);
+	MatrixXd TikhonovRegularization(Data3DRaw data, MatrixXd image);
 	Data3DRaw data3DRaw_input;
 	Data4DRaw data4DRaw_input;
 	Data3DRaw sensitivityMaps3D;
