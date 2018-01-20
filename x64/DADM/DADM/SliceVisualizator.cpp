@@ -1,5 +1,6 @@
 #include <SliceVisualizator.h>
 #include <Globals.h>
+#include <vtkImageCast.h>
 
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
 {
@@ -88,14 +89,21 @@ void SliceVisualizator::visualize()
 				pixel[0] = Global::structuralData[z](x, y);
 			}
 
+	vtkSmartPointer<vtkImageCast> imageCast = vtkSmartPointer<vtkImageCast>::New();
+	imageCast->SetInputData(imageData);
+	imageCast->SetOutputScalarTypeToUnsignedShort();
+
 	imageViewer = vtkSmartPointer<vtkImageViewer2>::New();
 	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 	vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyle = vtkSmartPointer<myVtkInteractorStyleImage>::New();
 	myInteractorStyle->SetImageViewer(imageViewer);
 	imageViewer->SetupInteractor(renderWindowInteractor);
 	renderWindowInteractor->SetInteractorStyle(myInteractorStyle);
-
-	imageViewer->SetInputData(imageData);
+	
+	imageViewer->SetInputConnection(imageCast->GetOutputPort());
+	imageViewer->SetSliceOrientationToXY();
+	imageViewer->SetColorLevel(127);
+	imageViewer->SetColorWindow(255);
 	imageViewer->SetRenderWindow(renderWnd);
 	imageViewer->SetSliceOrientationToXY();
 	imageViewer->SetSlice(0);

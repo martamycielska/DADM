@@ -403,6 +403,9 @@ void Worker::run()
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
+		/*
+
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
@@ -436,6 +439,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
+		*/
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -448,6 +452,7 @@ void Worker::run()
 		horizontal->Start();
 		Global::dataHorizontal = frontal->getData();
 		*/
+		
 		break;
 	}
 	case DIFFUSION_DATA:

@@ -1,7 +1,7 @@
 #include "Reconstruction.h"
 #include "qdebug.h"
 #include <fftw3.h>
-#include "Globals.h"
+#include <Globals.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -46,14 +46,29 @@ void Reconstruction::StructuralDataAlgorithm() {
 		qDebug() << "LS reconstruction done";
 
 		reconstructed_data = TikhonovRegularization(data_raw, reconstructed_data);
+		qDebug() << "Tikhonov regularization done";
 		writeToCSVfile("myImageS.csv", reconstructed_data);
-		slices.at(i) = reconstructed_data;
 
+		//------------------
+		//normalizacja wartoœci
+		double min = reconstructed_data.minCoeff();
+		double max = reconstructed_data.maxCoeff();
+		for (int z = 0; z < 256; z++)
+		{
+			for (int a = 0; a < 256; a++)
+			{
+				reconstructed_data(z,a)=((reconstructed_data(z, a)-min)*255)/(max-min);
+			}
+		}
+		slices.at(i) = reconstructed_data;
+		
 
 	}
 	//zwracana wartoœæ
 	//data3D_output = slices;
-}
+	Global::structuralData = slices;
+	qDebug() << Global::structuralData.size();
+} 
 
 void Reconstruction::DiffusionDataAlgorithm()
 {
@@ -111,7 +126,7 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 
 		std::vector<std::complex<double>> a(sizex*sizey);//zdefiniowanie wektora wejœciowego
 		int count = 1;
-		//#pragma omp parallel for shared(log, a, count, sizey, sizex) private(i, j)
+		#pragma omp parallel for shared(log, a, count, sizey, sizex) private(i, j)
 		for (int i = 0; i < sizey; i++)
 		{
 			for (int j = 0; j < sizex; j++)
@@ -131,7 +146,7 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 		fftw_cleanup();
 		std::complex<double> tmp;
 		//powrót do macierzy
-		//#pragma omp parallel for shared(b, tmp, afteridftmatrix, sizey, sizex) private(i, j)
+		#pragma omp parallel for shared(b, tmp, afteridftmatrix, sizey, sizex) private(i, j)
 		for (int i = 0; i < sizey; i++)
 		{
 			for (int j = 0; j < sizex; j++)
