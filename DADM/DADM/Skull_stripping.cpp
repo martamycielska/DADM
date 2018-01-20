@@ -450,9 +450,6 @@ MatrixXd median_filter(MatrixXd slice) {
 }
 
 
-//function to level sety
-
-double f;
 
 
 MatrixXd Dirac(MatrixXd x, double sigma) {
@@ -463,7 +460,7 @@ MatrixXd Dirac(MatrixXd x, double sigma) {
 	f2 = f2.cos();
 	f2.array() += 1;
 	f = f1*f2.array();
-	b = (x.array<= sigma) && (x.array() >= -sigma); %dla | x | < sigma
+	b = (x.array<= sigma) && (x.array() >= -sigma); //dla | x | < sigma
 	f = f.array()*b.array();
 	return f;
 }
@@ -481,9 +478,48 @@ MatrixXd div(MatrixXd nx, MatrixXd ny) {
 }
 
 
+MatrixXd del2(MatrixXd phi) {
+	int c, d, i, j;
+	int pixel;
+	MatrixXd phi_out(phi.rows(), phi.cols());
+	//Laplasian kernel
+	MatrixXd kernel(3, 3);
+
+	kernel<< 0, -1, 0;
+	-1, 4, -1;
+	0, -1, 0;
+
+	int x, y;
+	x = phi.rows();
+	y = phi.cols();
+
+	phi_out= MatrixXd::Zero(x, y);
+	
+
+	for (c = 1; c < x; c++) {
+		for (d = 1; d < y; d++) {
+			pixel = 0;
+
+			for (i = 0; i <= 3; i++) {
+				for (j = 0; j <= 3; j++) {
+					pixel = kernel(i, j)*phi(c + i - 1, d + j - 1) + pixel;
+				}
+			}
+			phi_out(c, d) = pixel;
+
+		}
+	}
+
+	return phi_out;
+
+}
+
+
+
+
 MatrixXd distReg_p2(MatrixXd phi) {
 	//obliczenie R z użyciem p2
-	MatrixXd phi_x, phi_y, s, a, b, ps, ar_sin, sin1, dps1, dps2, dps;
+	MatrixXd phi_x, phi_y, s, a, b, ps, ar_sin, sin1, dps1, dps2, dps, f;
 	phi_x = phi.rightCols(phi.cols() - 1) - phi.leftCols(phi.cols() - 1);  // Matlab: dAx = diff(A,1,2)
 	phi_y= phi.bottomRows(phi.rows() - 1) - phi.topRows(phi.rows() - 1);  // Matlab: dAy = diff(A)
 	s=phi_x.array().square() + phi_x.array().square();
@@ -499,10 +535,127 @@ MatrixXd distReg_p2(MatrixXd phi) {
 	dps1 = ((ps.array() != 0)*ps.array() + (ps.array() == 0));
 	dps2=((s.array()!= 0)*s.array() + (s.array() == 0)); //wybór s do dp, obliczenie dp
 	dps = dps1.array() / dps2.array();
-		f = div(dps.array()*phi_x.array() - phi_x.array(), dps.array()*phi_y.array() - phi_y.array()) + 4 * del2(phi);
-//PISZ LAPLASJANA
+
+	MatrixXd ar_div1, ar_div2, g,h ;
+	ar_div1 = dps.array()*phi_x.array() - phi_x.array();
+	ar_div2 = dps.array()*phi_y.array() - phi_y.array();
+
+		f = div(ar_div1, ar_div2) - 4 * del2(phi);
+		return f;
 }
 
+
+MatrixXd NeumannBoundCond(MatrixXd f) {
+	// Reinicjalizacja metodą Neumanna->zapewnienie lepszej
+		//stablizacji->lepszego dopasowania
+	int ncol, nrow;
+	MatrixXd g,1;
+	nrow = f.rows();
+	ncol = f.cols();
+	g = f;
+	g(0, 0) = g(2, 2);
+	g(nrow-1, ncol-1)=g(nrow - 3, ncol - 3);
+	g.block(0, 1, 1, ncol - 2 - 2) = g.block(2, 1, 1, ncol - 2 - 2);
+	g.block(nrow-1, 1, 1, ncol - 2 - 2) = g.block(nrow-3, 1, 1, ncol - 2 - 2);
+	g.block(1, 0, nrow - 2 - 2, 1) = g.block(1, 2, nrow - 2 - 2, 1);
+	g.block(1, ncol-1, nrow - 2 - 2, 1) = g.block(1, ncol-3, nrow - 2 - 2, 1);
+	return g;
+}
+
+
+MatrixXd level_set(MatrixXd phi_0, MatrixXd g, double lambda, double mi, double alfa, double epsilon, double delta_t, int iter, int potentialFunction) {
+	MatrixXd phi, vx, vy, phi_x, phi_y, s, Nx, Ny, curvature;
+	phi = phi_0;
+	vx = g.rightCols(g.cols() - 1) - g.leftCols(g.cols() - 1);  // Matlab: dAx = diff(A,1,2)
+	vy = g.bottomRows(g.rows() - 1) - g.topRows(g.rows() - 1);  // Matlab: dAy = diff(A)
+	int k;
+	for (k = 0; k < iter; k++) {
+
+
+		phi = NeumannBoundCond(phi);
+		phi_x = phi.rightCols(phi.cols() - 1) - phi.leftCols(phi.cols() - 1);  // Matlab: dAx = diff(A,1,2)
+		phi_y = phi.bottomRows(phi.rows() - 1) - phi.topRows(phi.rows() - 1);  // Matlab: dAy = diff(A)
+		s = phi_x.array().square() + phi_y.array().square();
+		s.array() = s.array().sqrt();
+		double smallNumber = 0.000000001;
+		Nx = phi_x.array / (s.array() + smallNumber);
+		Ny = phi_y.array / (s.array() + smallNumber);
+		curvature = div(Nx, Ny);
+		//Wybór funkcji do obliczania potencjału p
+		MatrixXd distRegTerm;
+		if (potentialFunction == 1) {
+			distRegTerm = 4 * del2(phi) - curvature;;
+		} //% zmiana phi po czasie, obliczan z użycie dywergencji oraz p1
+		else {
+			distRegTerm = distReg_p2(phi);//% zmiana phi po czasie, obliczan z użycie dywergencji oraz p2
+		}
+		MatrixXd diracPhi = Dirac(phi, epsilon);
+		MatrixXd  areaTerm = diracPhi.array()*g.array(); // rozszerzenie balonu dzięki sile
+		MatrixXd edgeTerm = diracPhi.array()*(vx.array()*Nx.array() + vy.array()*Ny.array()) + diracPhi.array()*g.array()*curvature.array();
+		phi.array() = phi.array() + delta_t*(mi*distRegTerm.array() + lambda*edgeTerm.array() + alfa*areaTerm.array());
+	}
+}
+
+
+MatrixXd levelset(int el_or_sku, double alfa, MatrixXd Img, MatrixXd earlierLSF, int poz_w_a1, int poz_w_a2, int poz_k_b1, int poz_k_b2) {
+	double delta_t = 5;  // delta_t
+	double mi = 0.2 / delta_t;  // współczynnik mi*R(phi), gdzie R to regulowanie dystansu, występuję w równaniu na energię potencjalną Ep = mi*R + Ezew
+	int iter_inner = 5;
+	int iter_outer = 40;
+	double lambda = 5; // współczynnik do funkcji L(phi), L(phi) = calka z(g*delta* | phi(x) | dx)
+	double alfa = 0.5;  // można go śmiało modyfikować, współczynnik do A, gdzie A = całka z(g*H(-phi)dx)), H - funkcja Heaviside, A, oblicza wartosci dla SIGMA<0
+	double epsilon = 1.5; //do delty diraca, deltadiraca daje informacje(z całki) o energii wzdłuż konturu zerowego
+
+	double sigma = 1.5;     //do funkcji gaussa, odchylenie standardowe
+
+							//
+	MatrixXd slice_smooth;
+	///median filtration
+
+	slice_smooth = median_filter(Img);
+	MatrixXd Ix, Iy, f, g, f_help;
+	//calculate gradient
+	Ix = slice_smooth.rightCols(slice_smooth.cols() - 1) - slice_smooth.leftCols(slice_smooth.cols() - 1);  // Matlab: dAx = diff(A,1,2)
+	Iy = slice_smooth.bottomRows(slice_smooth.rows() - 1) - slice_smooth.topRows(slice_smooth.rows() - 1);  // Matlab: dAy = diff(A)
+
+	f = Ix.array().square() + Iy.array().square();
+	f_help = f.array() + 1;
+	g = f_help.array().inverse();
+	int c0 = 2;
+	MatrixXd initialLSF;
+	int w = Img.rows();
+	int k = Img.cols();
+	initialLSF = MatrixXd::Ones(w, k);
+	initialLSF.array() *= c0;
+
+	//initialLSF(i, j, p, q) = -c0;
+	//Block of size(p, q), starting at(i, j)
+	MatrixXd phi;
+	if (el_or_sku == 1) {
+	initialLSF.block(poz_w_a1, poz_k_b1, poz_w_a2 - poz_w_a1, poz_k_b2 - poz_k_b1).array() = -c0;
+	phi = initialLSF;
+	}
+	else {
+
+		initialLSF = earlierLSF;
+		phi = initialLSF;
+
+	}
+	int potentialFunction = 2;
+
+	for (int n = 1; n >= iter_outer; n++) {
+		phi = level_set(phi, g, lambda, mi, alfa, epsilon, delta_t, iter_inner, potentialFunction);
+	}
+	alfa = 0;
+	int iter_refine = 10;
+	phi = level_set(phi, g, lambda, mi, alfa, epsilon, delta_t, iter_refine, potentialFunction);
+	MatrixXd finalLSF;
+	finalLSF = phi;
+
+	return finalLSF;
+
+
+}
 
 
 
@@ -528,65 +681,19 @@ void algorithm(Data3D input) {
 	Img(2, k)= poz_w_a2;
 	Img(3, k)=poz_k_b1;
 	Img(4, k) = poz_k_b2;
-
+	//Cut data with information about elipse size
+	Img = Img.block(0, 0, Img.rows(), Img.cols() - 1);
 	//Ustawienia
-		int delta_t = 5;  // delta_t
-		double mi = 0.2 / delta_t;  // współczynnik mi*R(phi), gdzie R to regulowanie dystansu, występuję w równaniu na energię potencjalną Ep = mi*R + Ezew
-		int iter_inner = 5;
-		int iter_outer = 40;
-		double lambda = 5; // współczynnik do funkcji L(phi), L(phi) = calka z(g*delta* | phi(x) | dx)
-		double alfa = 0.5;  // można go śmiało modyfikować, współczynnik do A, gdzie A = całka z(g*H(-phi)dx)), H - funkcja Heaviside, A, oblicza wartosci dla SIGMA<0
-		double epsilon = 1.5; //do delty diraca, deltadiraca daje informacje(z całki) o energii wzdłuż konturu zerowego
-
-		double sigma = 1.5;     //do funkcji gaussa, odchylenie standardowe
-
 	//
-		MatrixXd slice_smooth, slice;
-		slice=slice_to_fit(input);/////// future 
-		///median filtration
-
-		slice_smooth = median_filter(slice);
-		MatrixXd Ix, Iy, f,g,f_help;
-		//calculate gradient
-		Ix = slice_smooth.rightCols(slice_smooth.cols() - 1) - slice_smooth.leftCols(slice_smooth.cols() - 1);  // Matlab: dAx = diff(A,1,2)
-		Iy = slice_smooth.bottomRows(slice_smooth.rows() - 1) - slice_smooth.topRows(slice_smooth.rows() - 1);  // Matlab: dAy = diff(A)
-
-		f=Ix.array().square() + Iy.array().square();
-		f_help = f.array() + 1;
-		g=f_help.array().inverse();
-		int c0 = 2;
-		MatrixXd initialLSF;
-		int w = Img.rows();
-		int k = Img.cols();
-		initialLSF=MatrixXd::Ones(w, k);
-		initialLSF.array() *= c0;
-
-		//initialLSF(i, j, p, q) = -c0;
-		//Block of size(p, q), starting at(i, j)
-		initialLSF.block(poz_w_a1, poz_w_b1, poz_w_a2- poz_w_a1, poz_w_b2-poz_w_b1)=-c0;
-		MatrixXd phi;
-		phi = initialLSF;
-
-		int potentialFunction = 2;
-
-		for (int n = 1; n >= iter_outer; n++) {
-			phi = level_set(phi, g, lambda, mi, alfa, epsilon, delta_t, iter_inner, potentialFunction);
-		}
-		alfa = 0;
-		int iter_refine = 10;
-		phi = level_set(phi, g, lambda, mi, alfa, epsilon, delta_t, iter_refine, potentialFunction);
-		MatrixXd finalLSF;
-		finalLSF = phi;
-		//////////////////////end first fitting
-
-
-
-
-
-
-
-
-
+	MatrixXd help(1, 1);
+	help.array() = 0;
+	MatrixXd first_contour_fit, second_contour_fit;
+	first_contour_fit = levelset(1, 1.5, Img, help, poz_w_a1, poz_w_a2, poz_k_b1, poz_k_b2);
+	second_contour_fit = levelset(2, 1.5, Img, first_contour_fit, 0, 0, 0, 0);
+	
+	
+	MatrixXb logic_mask = (second_contour_fit.array() < (-1));
+	//to będzie na pętli second itd
 
 
 }
