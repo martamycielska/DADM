@@ -13,11 +13,11 @@ namespace Global {
 	extern Data3D temporaryDataFrontal = Data3D(0);
 	extern Data3D temporaryDataSaggital = Data3D(0);
 	extern Data3D temporaryDataHorizontal = Data3D(0);
-	extern Data3DRaw structuralRawData = Data3DRaw(0);
+	extern Data4DRaw structuralRawData = Data4DRaw(0);
 	extern Data3DRaw structuralSensitivityMaps = Data3DRaw(0);
 	extern double L = 0;
 	extern double r = 0;
-	extern Data4DRaw diffusionRawData = Data4DRaw(0);
+	extern Data5DRaw diffusionRawData = Data5DRaw(0);
 	extern Data3DRaw diffusionSensitivityMaps = Data3DRaw(0);
 	extern Data4D diffusionData4D = Data4D(0);
 	extern Data3D diffusionData3D = Data3D(0);
