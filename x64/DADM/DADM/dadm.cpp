@@ -435,11 +435,11 @@ void Worker::run()
 	{
 		emit currentProcess("Preprocessing: Reconstruction...");
 		emit progress(0, 4);
-		//Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
-		//reconstruction->Start();
-		//images3D = reconstruction->getData3D();
+		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
+		reconstruction->Start();
+		images3D = reconstruction->getData3D();
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
-		/*
+		
 
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
@@ -474,7 +474,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
-		*/
+		
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -494,9 +494,9 @@ void Worker::run()
 	{
 		emit progress(0, 6);
 		emit currentProcess("Preprocessing: Reconstruction...");
-		//Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
-		//reconstruction->Start();
-		//images4D = reconstruction->getData4D();
+		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
+		reconstruction->Start();
+		images4D = reconstruction->getData4D();
 		emit progress(1, 6);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
@@ -687,6 +687,23 @@ void ImportWorker::diffusionDataImport()
 
 			Global::diffusionRawData = raw_data;
 
+			//----------------------
+			/*
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}*/
+			//------------------------------------
+			//Data5DRaw RawData5D(1);
+			//RawData5D[0] = RawData;
+
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
@@ -816,7 +833,8 @@ void ImportWorker::structuralDataImport()
 				}
 				raw_data.push_back(raw_data_part);
 			}
-
+			//Data4DRaw DataRaw4D(1);
+			//DataRaw4D[0] = raw_data;
 			Global::structuralRawData = raw_data;
 
 			//matvar_t *s_matVar = 0;
