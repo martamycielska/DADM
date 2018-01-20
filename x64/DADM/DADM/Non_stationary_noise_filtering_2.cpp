@@ -18,7 +18,7 @@ Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data3D images
 {
 	qDebug() << "Non stationary noise filtering 2 constructor called";
 	this->data3D_input = images;
-	estimator3D = estim;
+	//estimator3D = estim;
 	dtype = STRUCTURAL_DATA;
 	StructuralDataAlgorithm();
 }
@@ -35,7 +35,7 @@ Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data4D images
 void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 	Data3D data = data3D_input;
 	Data3D sigmaTab = estimator3D;
-	for (int iter = 0; iter < data.size(); iter++) {
+	for (int iter = 0; iter < 1; iter++) {
 		MatrixXd input = data[iter];
 		//Define constants
 		int M = input.rows();
@@ -106,7 +106,7 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 							result2 = result1.cwiseProduct(result1);
 							result3 = gauss_kernel.cwiseProduct(result2);
 							d = result3.sum();
-							h = 1.22*sigma(i, j);
+							h = 1.22*sigma(i,j);
 							w = exp(-d / (h*h));
 
 							if (w > wmax) {
@@ -120,7 +120,7 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 				Z += wmax;
 				Yq += wmax*input1(i_1, j_1);
 				if (Z > 0) {
-					output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow(sigma(i, j), 2));
+					output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow(sigma(i,j), 2));
 				}
 				else {
 					output(i, j) = input1(i, j);
@@ -130,7 +130,7 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 			}
 		}
 		data[iter] = output;
-		MatrixXd inputData = output;
+		/*MatrixXd inputData = output;
 		int xspace = inputData.rows();
 		int yspace = inputData.cols();
 
@@ -161,8 +161,9 @@ void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 		renderWindowInteractor->SetInteractorStyle(style);
 		renderWindowInteractor->SetRenderWindow(renderWindow);
 		renderWindowInteractor->Initialize();
-		renderWindowInteractor->Start();
+		renderWindowInteractor->Start();*/
 	}
+	Global::structuralData = data;
 }
 
 void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {

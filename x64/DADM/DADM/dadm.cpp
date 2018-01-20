@@ -58,6 +58,13 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.xyVtkWidget->SetRenderWindow(renderWndXY);
 	ui.yzVtkWidget->SetRenderWindow(renderWndYZ);
 	ui.xzVtkWidget->SetRenderWindow(renderWndXZ);
+
+	ui.xySlider->setMinimum(0);
+	ui.xySlider->setMaximum(0);
+	ui.xzSlider->setMinimum(0);
+	ui.xzSlider->setMaximum(0);
+	ui.yzSlider->setMinimum(0);
+	ui.yzSlider->setMaximum(0);
 }
 
 void DADM::mri_reconstruct() {
@@ -151,12 +158,20 @@ void DADM::visualization3d() {
 
 void DADM::visualization2d() {
 	if (Global::structuralData.size() != 0) {
-		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY);
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::structuralData);
 		xySliceVisualizator->visualize();
-		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ);
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::structuralData);
 		yzSliceVisualizator->visualize();
-		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ);
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::structuralData);
 		xzSliceVisualizator->visualize();
+
+		
+		ui.xySlider->setMinimum(0);
+		ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
+		ui.xzSlider->setMinimum(0);
+		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+		ui.yzSlider->setMinimum(0);
+		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
 	}
 }
 
@@ -665,7 +680,22 @@ void ImportWorker::diffusionDataImport()
 				raw_data.push_back(raw_data_part);
 			}
 
-			Global::diffusionRawData = raw_data;
+			//----------------------
+
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}
+			//------------------------------------
+
+			Global::diffusionRawData = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");

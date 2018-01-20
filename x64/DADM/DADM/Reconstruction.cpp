@@ -77,23 +77,37 @@ void Reconstruction::DiffusionDataAlgorithm()
 	Data4D slices(slices_no);
 	for (int i = 0; i < slices_no; i++)
 	{
-		Data3DRaw data;
+		Data3DRaw data(L);
 
 		Data4DRaw data4d_raw = data4DRaw_input;
 		int gradients_no = data4d_raw.size();
+		
 		Data3D reconstructed_data_3D(gradients_no);
 
 		for (int j = 0; j < gradients_no; j++)
 		{
 			Data3DRaw data_raw = data4d_raw.at(j);
 			data = FourierTransform(data_raw);
-			MatrixXd reconstructed_data;
+			MatrixXd reconstructed_data(256,256);
 			//Rekonstrukcja obrazu
 			reconstructed_data = LSreconstruction(data);
-			reconstructed_data_3D.at(j) = reconstructed_data;
+			//normalizacja wartoœci
+			
+				double min = reconstructed_data.minCoeff();
+				double max = reconstructed_data.maxCoeff();
+				for (int z = 0; z < 256; z++)
+				{
+					for (int a = 0; a < 256; a++)
+					{
+						reconstructed_data(z, a) = ((reconstructed_data(z, a) - min) * 255) / (max - min);
+					}
+				}
+				reconstructed_data_3D.at(j) = reconstructed_data;
+			
 			//tymczasowy zapis do pliku
-			if (j == 0)
-				writeToCSVfile("diffImage.csv", reconstructed_data);
+							
+				Global::structuralData = reconstructed_data_3D;
+			//qDebug() << Global::structuralData.size();
 		}
 
 		slices.at(i) = reconstructed_data_3D;

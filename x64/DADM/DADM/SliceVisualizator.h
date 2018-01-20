@@ -28,7 +28,7 @@ typedef vtkSmartPointer<vtkImageViewer2> Viewer;
 class SliceVisualizator
 {
 public:
-	SliceVisualizator(RenderWindow renderWnd, SlicePlane plane);
+	SliceVisualizator(RenderWindow renderWnd, SlicePlane plane, Data3D visData);
 	~SliceVisualizator();
 	SlicePlane plane;
 	Viewer getImageViewerXY();

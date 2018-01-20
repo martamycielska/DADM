@@ -1,5 +1,4 @@
 #include <SliceVisualizator.h>
-#include <Globals.h>
 #include <vtkImageCast.h>
 
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
@@ -64,11 +63,10 @@ protected:
 
 vtkStandardNewMacro(myVtkInteractorStyleImage);
 
-
-SliceVisualizator::SliceVisualizator(RenderWindow renderWnd, SlicePlane plane)
+SliceVisualizator::SliceVisualizator(RenderWindow renderWnd, SlicePlane plane, Data3D visData)
 {
 	this->plane = plane;
-	this->inputData = Global::structuralData;
+	this->inputData = visData;
 	this->x = inputData[0].rows();
 	this->y = inputData[0].cols();
 	this->z = inputData.size();
@@ -93,7 +91,7 @@ void SliceVisualizator::visualize()
 			for (int x = 0; x < dims[0]; x++)
 			{
 				double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, z));
-				pixel[0] = Global::structuralData[z](x, y);
+				pixel[0] = inputData[z](x, y);
 			}
 
 	if (plane == SlicePlane::XY) 
