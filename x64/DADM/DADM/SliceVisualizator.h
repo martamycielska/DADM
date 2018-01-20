@@ -18,21 +18,36 @@
 #include <sstream>
 #include <vtkImageData.h>
 #include <MRI_Module.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <MRI_Module.h>
+#include <qdebug.h>
+
+typedef vtkSmartPointer<vtkGenericOpenGLRenderWindow> RenderWindow;
+typedef vtkSmartPointer<vtkImageViewer2> Viewer;
 
 class SliceVisualizator
 {
 public:
-	SliceVisualizator();
-	vtkSmartPointer<vtkInteractorObserver> getData();
-	vtkSmartPointer<vtkImageViewer2> getImageViewer();
-	void setImageViewer(vtkSmartPointer<vtkImageViewer2>);
+	SliceVisualizator(RenderWindow renderWnd, SlicePlane plane, Data3D visData);
 	~SliceVisualizator();
+	SlicePlane plane;
+	Viewer getImageViewerXY();
+	Viewer getImageViewerYZ();
+	Viewer getImageViewerXZ();
 	void visualize();	
 
 private:
 	Data3D inputData;
-	vtkSmartPointer<vtkInteractorObserver> myInteractorStyleObserver;
-	vtkSmartPointer<vtkImageViewer2> imageViewer;
+	RenderWindow renderWndXY;
+	RenderWindow renderWndYZ;
+	RenderWindow renderWndXZ; 
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractorXY;
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractorYZ;
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractorXZ;
+	vtkSmartPointer<vtkImageViewer2> imageViewerXY;
+	vtkSmartPointer<vtkImageViewer2> imageViewerYZ;
+	vtkSmartPointer<vtkImageViewer2> imageViewerXZ;
+	vtkSmartPointer<vtkImageData> imageData;
 	int x;
 	int y; 
 	int z;

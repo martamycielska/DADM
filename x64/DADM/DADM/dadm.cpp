@@ -29,6 +29,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
+	connect(ui.actionVisualize_2D, &QAction::triggered, this, &DADM::visualization2d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
 	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
@@ -46,6 +47,24 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
+
+	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
+	connect(ui.yzSlider, SIGNAL(valueChanged(int)), this, SLOT(yzSliderValueChanged(int)));
+	connect(ui.xzSlider, SIGNAL(valueChanged(int)), this, SLOT(xzSliderValueChanged(int)));
+
+	renderWndXY = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndYZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndXZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui.xyVtkWidget->SetRenderWindow(renderWndXY);
+	ui.yzVtkWidget->SetRenderWindow(renderWndYZ);
+	ui.xzVtkWidget->SetRenderWindow(renderWndXZ);
+
+	ui.xySlider->setMinimum(0);
+	ui.xySlider->setMaximum(0);
+	ui.xzSlider->setMinimum(0);
+	ui.xzSlider->setMaximum(0);
+	ui.yzSlider->setMinimum(0);
+	ui.yzSlider->setMaximum(0);
 }
 
 void DADM::mri_reconstruct() {
@@ -137,6 +156,43 @@ void DADM::visualization3d() {
 	vis3D->show();
 }
 
+void DADM::visualization2d() {
+	if (Global::structuralData.size() != 0) {
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::structuralData);
+		xySliceVisualizator->visualize();
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::structuralData);
+		yzSliceVisualizator->visualize();
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::structuralData);
+		xzSliceVisualizator->visualize();
+
+		
+		ui.xySlider->setMinimum(0);
+		ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
+		ui.xzSlider->setMinimum(0);
+		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+		ui.yzSlider->setMinimum(0);
+		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+	}
+}
+
+void DADM::xySliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XY: " << sliderValue << " slice";
+	xySliceVisualizator->getImageViewerXY()->SetSlice(sliderValue);
+	xySliceVisualizator->getImageViewerXY()->Render();
+}
+
+void DADM::yzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam YZ: " << sliderValue << " slice";
+	yzSliceVisualizator->getImageViewerYZ()->SetSlice(sliderValue);
+	yzSliceVisualizator->getImageViewerYZ()->Render();
+}
+
+void DADM::xzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XZ: " << sliderValue << " slice";
+	xzSliceVisualizator->getImageViewerXZ()->SetSlice(sliderValue);
+	xzSliceVisualizator->getImageViewerXZ()->Render();
+}
+
 void DADM::closeEvent(QCloseEvent *)
 {
 	qApp->quit();
@@ -204,27 +260,6 @@ void DADM::structuralTestDataImport()
 		QMessageBox msgBox;
 		msgBox.setText("Finished");
 		msgBox.exec();
-
-		#pragma region SliceVisualizator
-		vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-		ui.VTK_Frontal->SetRenderWindow(renderWnd);
-
-		SliceVisualizator sliceVisualizator;
-		sliceVisualizator.visualize();
-
-		qDebug() << "TUTAJ";
-		vtkSmartPointer<vtkImageViewer2> imageViewer = sliceVisualizator.getImageViewer();
-		imageViewer->SetRenderWindow(renderWnd);
-		imageViewer->SetupInteractor(ui.VTK_Frontal->GetInteractor());
-		sliceVisualizator.setImageViewer(imageViewer);
-		ui.VTK_Frontal->GetRenderWindow()->AddRenderer(imageViewer->GetRenderer());
-		ui.VTK_Frontal->GetInteractor()->SetInteractorStyle(sliceVisualizator.getData());
-
-		//ui.VTK_Frontal->GetInteractor()->Initialize();
-		ui.VTK_Frontal->GetInteractor()->Start();
-
-		qDebug() << "TUTAJ2";
-		#pragma region SliceVisualizator
 	}
 }
 
@@ -403,6 +438,9 @@ void Worker::run()
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
+		/*
+
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
@@ -436,6 +474,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
+		*/
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -448,6 +487,7 @@ void Worker::run()
 		horizontal->Start();
 		Global::dataHorizontal = frontal->getData();
 		*/
+		
 		break;
 	}
 	case DIFFUSION_DATA:

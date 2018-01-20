@@ -24,6 +24,7 @@
 #include "visualization3d.h"
 #include "Reconstruction.h"
 #include "helpermethods.h"
+#include "SliceVisualizator.h"
 #include "Oblique_imaging.h"
 
 class Worker : public QThread
@@ -117,6 +118,12 @@ private:
 	Ui::DADMClass ui;
 	Visualization3D *vis3D;
 	Worker *worker;
+	SliceVisualizator *xySliceVisualizator;
+	SliceVisualizator *yzSliceVisualizator;
+	SliceVisualizator *xzSliceVisualizator;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXY;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndYZ;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXZ;
 
 protected:
 	void closeEvent(QCloseEvent*);
@@ -126,6 +133,7 @@ private slots:
 	void mri_reconstruct();
 	void onReconstructionFinished(Data3D);
 	void visualization3d();
+	void visualization2d();
 	void importStructuralData();
 	void importDiffusionData();
 	void onImportDone();
@@ -152,5 +160,9 @@ private slots:
 	void onObliqueImagingFrontalDone(Data3D);
 	void onObliqueImagingSaggitalDone(Data3D);
 	void onObliqueImagingHorizontalDone(Data3D);
+
+	void xySliderValueChanged(int);
+	void yzSliderValueChanged(int);
+	void xzSliderValueChanged(int);
 };
 #endif // DADM_H
