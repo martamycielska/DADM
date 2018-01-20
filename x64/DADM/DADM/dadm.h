@@ -3,6 +3,24 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_dadm.h"
+#include <vtkSmartPointer.h>
+#include <vtkObjectFactory.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkActor.h>
+#include <vtkImageViewer2.h>
+#include <vtkDICOMImageReader.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkActor2D.h>
+#include <vtkTextProperty.h>
+#include <vtkTextMapper.h>
+#include <vtkTextRenderer.h>
+#include <vtkOpenGLTextMapper.h>
+#include <vtkOpenGLTexture.h>
+#include <vtkAutoInit.h>
+#include <sstream>
+#include <vtkImageData.h>
 #include "visualization3d.h"
 #include "Reconstruction.h"
 #include "helpermethods.h"
@@ -100,7 +118,12 @@ private:
 	Ui::DADMClass ui;
 	Visualization3D *vis3D;
 	Worker *worker;
-	SliceVisualizator *sliceVisualizator;
+	SliceVisualizator *xySliceVisualizator;
+	SliceVisualizator *yzSliceVisualizator;
+	SliceVisualizator *xzSliceVisualizator;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXY;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndYZ;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXZ;
 
 protected:
 	void closeEvent(QCloseEvent*);
@@ -139,5 +162,7 @@ private slots:
 	void onObliqueImagingHorizontalDone(Data3D);
 
 	void xySliderValueChanged(int);
+	void yzSliderValueChanged(int);
+	void xzSliderValueChanged(int);
 };
 #endif // DADM_H

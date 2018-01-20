@@ -1,5 +1,4 @@
 #include <SliceVisualizator.h>
-#include <Globals.h>
 #include <vtkImageCast.h>
 
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
@@ -64,14 +63,20 @@ protected:
 
 vtkStandardNewMacro(myVtkInteractorStyleImage);
 
-
-SliceVisualizator::SliceVisualizator(RenderWindow renderWnd)
+SliceVisualizator::SliceVisualizator(RenderWindow renderWnd, SlicePlane plane, Data3D visData)
 {
-	this->renderWnd = renderWnd;
-	this->inputData = Global::structuralData;
+	this->plane = plane;
+	this->inputData = visData;
 	this->x = inputData[0].rows();
 	this->y = inputData[0].cols();
 	this->z = inputData.size();
+
+	if (plane == SlicePlane::XY)
+		this->renderWndXY = renderWnd;
+	if (plane == SlicePlane::YZ)
+		this->renderWndYZ = renderWnd;
+	if (plane == SlicePlane::XZ)
+		this->renderWndXZ = renderWnd;
 }
 
 void SliceVisualizator::visualize()
@@ -86,34 +91,76 @@ void SliceVisualizator::visualize()
 			for (int x = 0; x < dims[0]; x++)
 			{
 				double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, z));
-				pixel[0] = Global::structuralData[z](x, y);
+				pixel[0] = inputData[z](x, y);
 			}
 
-	vtkSmartPointer<vtkImageCast> imageCast = vtkSmartPointer<vtkImageCast>::New();
-	imageCast->SetInputData(imageData);
-	imageCast->SetOutputScalarTypeToUnsignedShort();
+	if (plane == SlicePlane::XY) 
+	{
+		imageViewerXY = vtkSmartPointer<vtkImageViewer2>::New();
+		renderWindowInteractorXY = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+		vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyleXY = vtkSmartPointer<myVtkInteractorStyleImage>::New();
+		myInteractorStyleXY->SetImageViewer(imageViewerXY);
+		imageViewerXY->SetupInteractor(renderWindowInteractorXY);
+		renderWindowInteractorXY->SetInteractorStyle(myInteractorStyleXY);
 
-	imageViewer = vtkSmartPointer<vtkImageViewer2>::New();
-	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-	vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyle = vtkSmartPointer<myVtkInteractorStyleImage>::New();
-	myInteractorStyle->SetImageViewer(imageViewer);
-	imageViewer->SetupInteractor(renderWindowInteractor);
-	renderWindowInteractor->SetInteractorStyle(myInteractorStyle);
-	
-	imageViewer->SetInputConnection(imageCast->GetOutputPort());
-	imageViewer->SetSliceOrientationToXY();
-	imageViewer->SetColorLevel(127);
-	imageViewer->SetColorWindow(255);
-	imageViewer->SetRenderWindow(renderWnd);
-	imageViewer->SetSliceOrientationToXY();
-	imageViewer->SetSlice(0);
-	imageViewer->Render();
-	renderWindowInteractor->Start();
+		imageViewerXY->SetInputData(imageData);
+		imageViewerXY->SetRenderWindow(renderWndXY);
+		imageViewerXY->SetSliceOrientationToXY();
+		imageViewerXY->SetSlice((int)(imageViewerXY->GetSliceMax()/2));
+		imageViewerXY->Render();
+		qDebug() << "Skonczona wizualizacja XY";
+	}
+
+	if (plane == SlicePlane::YZ)
+	{
+		imageViewerYZ= vtkSmartPointer<vtkImageViewer2>::New();
+		renderWindowInteractorYZ = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+		vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyleYZ = vtkSmartPointer<myVtkInteractorStyleImage>::New();
+		myInteractorStyleYZ->SetImageViewer(imageViewerYZ);
+		imageViewerYZ->SetupInteractor(renderWindowInteractorYZ);
+		renderWindowInteractorYZ->SetInteractorStyle(myInteractorStyleYZ);
+
+		imageViewerYZ->SetInputData(imageData);
+		imageViewerYZ->SetRenderWindow(renderWndYZ);
+		imageViewerYZ->SetSliceOrientationToYZ();
+		imageViewerYZ->SetSlice((int)(imageViewerYZ->GetSliceMax() / 2));
+		imageViewerYZ->Render();
+
+		qDebug() << "Skonczona wizualizacja YZ";
+	}
+
+	if (plane == SlicePlane::XZ)
+	{
+		imageViewerXZ = vtkSmartPointer<vtkImageViewer2>::New();
+		renderWindowInteractorXZ = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+		vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyleXZ = vtkSmartPointer<myVtkInteractorStyleImage>::New();
+		myInteractorStyleXZ->SetImageViewer(imageViewerXZ);
+		imageViewerXZ->SetupInteractor(renderWindowInteractorXZ);
+		renderWindowInteractorXZ->SetInteractorStyle(myInteractorStyleXZ);
+
+		imageViewerXZ->SetInputData(imageData);
+		imageViewerXZ->SetRenderWindow(renderWndXZ);
+		imageViewerXZ->SetSliceOrientationToXZ();
+		imageViewerXZ->SetSlice((int)(imageViewerXZ->GetSliceMax() / 2));
+		imageViewerXZ->Render();
+
+		qDebug() << "Skonczona wizualizacja XZ";
+	}
 }
 
-Viewer SliceVisualizator::getImageViewer()
+Viewer SliceVisualizator::getImageViewerXY()
 {
-	return imageViewer;
+	return imageViewerXY;
+}
+
+Viewer SliceVisualizator::getImageViewerYZ()
+{
+	return imageViewerYZ;
+}
+
+Viewer SliceVisualizator::getImageViewerXZ()
+{
+	return imageViewerXZ;
 }
 
 SliceVisualizator::~SliceVisualizator()
