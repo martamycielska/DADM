@@ -8,6 +8,13 @@
 #include <cstdlib>
 #include <cmath> 
 #include "fftw3.h"
+#include <boost/math/special_functions/bessel.hpp> 
+
+using namespace std;
+using namespace boost::math;
+using namespace Eigen;
+double e = 0.5772156649;
+double pi = 3.14159265358979323846;
 
 Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data3D data)
 {
