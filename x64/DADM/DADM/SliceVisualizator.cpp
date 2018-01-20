@@ -1,5 +1,6 @@
 #include <SliceVisualizator.h>
 #include <Globals.h>
+#include <vtkImageCast.h>
 
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
 {
