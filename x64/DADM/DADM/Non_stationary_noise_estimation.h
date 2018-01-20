@@ -14,18 +14,23 @@ public:
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
-	double Non_stationary_noise_estimation::localMeanCalculate(int startRowIndex, int startColumnIndex, MatrixXd matrix, MatrixXd meanMatrix);
+	bool Non_stationary_noise_estimation::getSum(MatrixXd matrix);
+	MatrixXd Non_stationary_noise_estimation::getFinded(MatrixXd matrix, int conditionValue);
+	MatrixXd Non_stationary_noise_estimation::setValueOnSpecifiedIndexes(MatrixXd matrixToSet, MatrixXd Indexes);
+	void Non_stationary_noise_estimation::setValueOnSpecifiedIndexes(MatrixXd& matrixToSet, MatrixXd Indexes, double value);
+	void Non_stationary_noise_estimation::setBesselValues(MatrixXd z, MatrixXd K, MatrixXd& M);
+	MatrixXd Non_stationary_noise_estimation::bessel(MatrixXd matrix);
+	MatrixXd Non_stationary_noise_estimation::getMaxValue(MatrixXd matrix, double tresh);
+	MatrixXd Non_stationary_noise_estimation::filter2(MatrixXd matrix, MatrixXd window);
+	MatrixXd Non_stationary_noise_estimation::getSNR(int window, MatrixXd matrix);
 	MatrixXd Non_stationary_noise_estimation::absoluteValue(MatrixXd matrix);
 	MatrixXd Non_stationary_noise_estimation::logCalculate(MatrixXd matrix);
 	MatrixXd Non_stationary_noise_estimation::expCalculate(MatrixXd matrix);
 	MatrixXd Non_stationary_noise_estimation::noiseEstimation(MatrixXd matrix);
-	MatrixXd Non_stationary_noise_estimation::gaussianKernel(MatrixXd K, MatrixXd image);
+	MatrixXd Non_stationary_noise_estimation::gaussianKernel(MatrixXd K, MatrixXd image, double sig);
 	MatrixXd Non_stationary_noise_estimation::dct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd coeff);
-	MatrixXd Non_stationary_noise_estimation::multiply(MatrixXd a, MatrixXd b, int power = 0, bool isDivided = false);
-	MatrixXd Non_stationary_noise_estimation::dctCorrect(MatrixXd a);
-	MatrixXd Non_stationary_noise_estimation::idctCorrect(MatrixXd a);
-	bool Non_stationary_noise_estimation::getSum(MatrixXd matrix);
+	
 };
 
