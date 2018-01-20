@@ -1,7 +1,6 @@
 #include <SliceVisualizator.h>
 #include <Globals.h>
 
-
 class myVtkInteractorStyleImage : public vtkInteractorStyleImage
 {
 public:
@@ -64,7 +63,6 @@ protected:
 
 vtkStandardNewMacro(myVtkInteractorStyleImage);
 
-
 SliceVisualizator::SliceVisualizator()
 {
 	this->inputData = Global::structuralData;
@@ -88,7 +86,7 @@ void SliceVisualizator::visualize()
 				pixel[0] = inputData[z](x, y);
 			}
 
-	vtkSmartPointer<vtkImageViewer2> imageViewer =
+	imageViewer =
 		vtkSmartPointer<vtkImageViewer2>::New();
 	imageViewer->SetInputData(imageData);
 
@@ -98,24 +96,32 @@ void SliceVisualizator::visualize()
 	sliceTextProp->SetVerticalJustificationToBottom();
 	sliceTextProp->SetJustificationToLeft();
 
-	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-		vtkSmartPointer<vtkRenderWindowInteractor>::New();
+//	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
+//		vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 	vtkSmartPointer<myVtkInteractorStyleImage> myInteractorStyle =
 		vtkSmartPointer<myVtkInteractorStyleImage>::New();
 
 	myInteractorStyle->SetImageViewer(imageViewer);
+	myInteractorStyleObserver = myInteractorStyle;
+}
 
-	imageViewer->SetupInteractor(renderWindowInteractor);
-
-	renderWindowInteractor->SetInteractorStyle(myInteractorStyle);
-
+void SliceVisualizator::setImageViewer(vtkSmartPointer<vtkImageViewer2> imViewer) {
+	imageViewer = imViewer;
 	imageViewer->GetRenderWindow()->SetSize(700, 600);
 	imageViewer->Render();
 	imageViewer->GetRenderWindow()->SetWindowName("Visualization 2D");
 	imageViewer->GetRenderer()->ResetCamera();
 	imageViewer->Render();
-	renderWindowInteractor->Start();
+}
+
+vtkSmartPointer<vtkImageViewer2> SliceVisualizator::getImageViewer() {
+	return imageViewer;
+}
+
+vtkSmartPointer<vtkInteractorObserver> SliceVisualizator::getData()
+{
+	return myInteractorStyleObserver;
 }
 
 SliceVisualizator::~SliceVisualizator()

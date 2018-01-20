@@ -212,7 +212,18 @@ void DADM::structuralTestDataImport()
 		SliceVisualizator sliceVisualizator;
 		sliceVisualizator.visualize();
 
-		//ui.VTK_Frontal->GetRenderWindow()->AddRenderer(sliceVisualizator->getData());
+		qDebug() << "TUTAJ";
+		vtkSmartPointer<vtkImageViewer2> imageViewer = sliceVisualizator.getImageViewer();
+		imageViewer->SetRenderWindow(renderWnd);
+		imageViewer->SetupInteractor(ui.VTK_Frontal->GetInteractor());
+		sliceVisualizator.setImageViewer(imageViewer);
+		ui.VTK_Frontal->GetRenderWindow()->AddRenderer(imageViewer->GetRenderer());
+		ui.VTK_Frontal->GetInteractor()->SetInteractorStyle(sliceVisualizator.getData());
+
+		//ui.VTK_Frontal->GetInteractor()->Initialize();
+		ui.VTK_Frontal->GetInteractor()->Start();
+
+		qDebug() << "TUTAJ2";
 		#pragma region SliceVisualizator
 	}
 }

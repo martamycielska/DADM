@@ -19,16 +19,20 @@
 #include <vtkImageData.h>
 #include <MRI_Module.h>
 
-
 class SliceVisualizator
 {
 public:
 	SliceVisualizator();
+	vtkSmartPointer<vtkInteractorObserver> getData();
+	vtkSmartPointer<vtkImageViewer2> getImageViewer();
+	void setImageViewer(vtkSmartPointer<vtkImageViewer2>);
 	~SliceVisualizator();
 	void visualize();	
 
 private:
 	Data3D inputData;
+	vtkSmartPointer<vtkInteractorObserver> myInteractorStyleObserver;
+	vtkSmartPointer<vtkImageViewer2> imageViewer;
 	int x;
 	int y; 
 	int z;
