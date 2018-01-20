@@ -19,6 +19,7 @@
 #include "matio.h"
 #include "qaction.h"
 #include "qfiledialog.h"
+#include <SliceVisualizator.h>
 //#include "mat.h"
 
 //using MatFileHandler;
@@ -28,6 +29,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
+	connect(ui.actionVisualize_2D, &QAction::triggered, this, &DADM::visualization2d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
 	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
@@ -45,6 +47,24 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
+
+	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
+	connect(ui.yzSlider, SIGNAL(valueChanged(int)), this, SLOT(yzSliderValueChanged(int)));
+	connect(ui.xzSlider, SIGNAL(valueChanged(int)), this, SLOT(xzSliderValueChanged(int)));
+
+	renderWndXY = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndYZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndXZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui.xyVtkWidget->SetRenderWindow(renderWndXY);
+	ui.yzVtkWidget->SetRenderWindow(renderWndYZ);
+	ui.xzVtkWidget->SetRenderWindow(renderWndXZ);
+
+	ui.xySlider->setMinimum(0);
+	ui.xySlider->setMaximum(0);
+	ui.xzSlider->setMinimum(0);
+	ui.xzSlider->setMaximum(0);
+	ui.yzSlider->setMinimum(0);
+	ui.yzSlider->setMaximum(0);
 }
 
 void DADM::mri_reconstruct() {
@@ -134,6 +154,48 @@ void DADM::visualization3d() {
 	vis3D = new Visualization3D();
 	HelperMethods::SetCenterPosition(vis3D);
 	vis3D->show();
+}
+
+void DADM::visualization2d() {
+	if (Global::structuralData.size() != 0) {
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::structuralData);
+		xySliceVisualizator->visualize();
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::structuralData);
+		yzSliceVisualizator->visualize();
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::structuralData);
+		xzSliceVisualizator->visualize();
+
+		
+		ui.xySlider->setMinimum(0);
+		ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
+		ui.xzSlider->setMinimum(0);
+		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+		ui.yzSlider->setMinimum(0);
+		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+	}
+}
+
+void DADM::xySliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XY: " << sliderValue << " slice";
+	xySliceVisualizator->getImageViewerXY()->SetSlice(sliderValue);
+	xySliceVisualizator->getImageViewerXY()->Render();
+}
+
+void DADM::yzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam YZ: " << sliderValue << " slice";
+	yzSliceVisualizator->getImageViewerYZ()->SetSlice(sliderValue);
+	yzSliceVisualizator->getImageViewerYZ()->Render();
+}
+
+void DADM::xzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XZ: " << sliderValue << " slice";
+	xzSliceVisualizator->getImageViewerXZ()->SetSlice(sliderValue);
+	xzSliceVisualizator->getImageViewerXZ()->Render();
+}
+
+void DADM::closeEvent(QCloseEvent *)
+{
+	qApp->quit();
 }
 
 void DADM::onReconstructionFinished(Data3D data)
@@ -376,6 +438,9 @@ void Worker::run()
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
+		/*
+
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
@@ -409,6 +474,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
+		*/
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -421,6 +487,7 @@ void Worker::run()
 		horizontal->Start();
 		Global::dataHorizontal = frontal->getData();
 		*/
+		
 		break;
 	}
 	case DIFFUSION_DATA:
@@ -567,8 +634,8 @@ void ImportWorker::diffusionDataImport()
 					if (val_num >= g_matVar->dims[0] * g_matVar->dims[1]) break;
 					//qDebug() << xData[val_num];
 				}
-				emit importProgress(status, max);
 			}
+			emit importProgress(status, max);
 
 			Global::gradients = m;
 		}
@@ -606,14 +673,29 @@ void ImportWorker::diffusionDataImport()
 							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
-						emit importProgress(status, max);
 					}
 					raw_data_part.push_back(m);
+					emit importProgress(status, max);
 				}
 				raw_data.push_back(raw_data_part);
 			}
 
-			Global::diffusionRawData = raw_data;
+			//----------------------
+
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}
+			//------------------------------------
+
+			Global::diffusionRawData = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -643,9 +725,9 @@ void ImportWorker::diffusionDataImport()
 							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
-						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
+					emit importProgress(status, max);
 				}
 
 				Global::diffusionSensitivityMaps = sensitivity_maps;
@@ -736,9 +818,9 @@ void ImportWorker::structuralDataImport()
 						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
 						//qDebug() << xRe[val_num] << xIm[val_num];
 					}
-					emit importProgress(status, max);
 				}
 				raw_data.push_back(m);
+				emit importProgress(status, max);
 			}
 
 			Global::structuralRawData = raw_data;
@@ -771,9 +853,9 @@ void ImportWorker::structuralDataImport()
 							if (val_num >= s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2]) break;
 							//qDebug() << xRe[val_num] << xIm[val_num];
 						}
-						emit importProgress(status, max);
 					}
 					sensitivity_maps.push_back(m);
+					emit importProgress(status, max);
 				}
 
 				Global::structuralSensitivityMaps = sensitivity_maps;
@@ -804,6 +886,7 @@ void ImportWorker::structuralDataImport()
 	emit importDone();
 }
 
+
 ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
 	qRegisterMetaType<Data3D>("Data3D");
 	this->profile = profile;
@@ -813,7 +896,18 @@ ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Prof
 }
 
 void ObliqueImagingWorker::run() {
-	Oblique_imaging *imaging = new Oblique_imaging(data, a, b);
+	Oblique_imaging *imaging;
+	switch (profile) {
+	case FRONTAL:
+		imaging = new Oblique_imaging(data, a, b, FRONTAL);
+		break;
+	case SAGGITAL:
+		imaging = new Oblique_imaging(data, a, b, SAGGITAL);
+		break;
+	case HORIZONTAL:
+		imaging = new Oblique_imaging(data, a, b, HORIZONTAL);
+		break;
+	}
 	imaging->Start();
 	Data3D d = imaging->getData();
 	switch (profile) {
@@ -825,6 +919,7 @@ void ObliqueImagingWorker::run() {
 		break;
 	case HORIZONTAL:
 		emit resultReadyHorizontal(d);
+		break;
 	}
 }
 
@@ -849,5 +944,7 @@ void UpsamplingWorker::run() {
 		break;
 	case HORIZONTAL:
 		emit resultReadyHorizontal(d);
+		break;
 	}
 }
+
