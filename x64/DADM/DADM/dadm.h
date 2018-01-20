@@ -100,7 +100,12 @@ private:
 	Ui::DADMClass ui;
 	Visualization3D *vis3D;
 	Worker *worker;
-	SliceVisualizator *sliceVisualizator;
+	SliceVisualizator *xySliceVisualizator;
+	SliceVisualizator *yzSliceVisualizator;
+	SliceVisualizator *xzSliceVisualizator;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXY;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndYZ;
+	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXZ;
 
 protected:
 	void closeEvent(QCloseEvent*);
@@ -139,5 +144,7 @@ private slots:
 	void onObliqueImagingHorizontalDone(Data3D);
 
 	void xySliderValueChanged(int);
+	void yzSliderValueChanged(int);
+	void xzSliderValueChanged(int);
 };
 #endif // DADM_H

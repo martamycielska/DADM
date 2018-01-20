@@ -49,6 +49,15 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.progressBar->hide();
 
 	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
+	connect(ui.yzSlider, SIGNAL(valueChanged(int)), this, SLOT(yzSliderValueChanged(int)));
+	connect(ui.xzSlider, SIGNAL(valueChanged(int)), this, SLOT(xzSliderValueChanged(int)));
+
+	renderWndXY = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndYZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndXZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui.xyVtkWidget->SetRenderWindow(renderWndXY);
+	ui.yzVtkWidget->SetRenderWindow(renderWndYZ);
+	ui.xzVtkWidget->SetRenderWindow(renderWndXZ);
 }
 
 void DADM::mri_reconstruct() {
@@ -141,21 +150,32 @@ void DADM::visualization3d() {
 }
 
 void DADM::visualization2d() {
-	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWnd = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
-	ui.VTK_Frontal->SetRenderWindow(renderWnd);
-
 	if (Global::structuralData.size() != 0) {
-		sliceVisualizator = new SliceVisualizator(renderWnd);
-		sliceVisualizator->visualize();
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY);
+		xySliceVisualizator->visualize();
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ);
+		yzSliceVisualizator->visualize();
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ);
+		xzSliceVisualizator->visualize();
 	}
 }
 
 void DADM::xySliderValueChanged(int sliderValue) {
-	if (sliceVisualizator != NULL) {
-		qDebug() << sliceVisualizator;
-		sliceVisualizator->getImageViewer()->SetSlice(sliderValue);
-		sliceVisualizator->getImageViewer()->Render();
-	}
+	qDebug() << "Zmieniam XY: " << sliderValue << " slice";
+	xySliceVisualizator->getImageViewerXY()->SetSlice(sliderValue);
+	xySliceVisualizator->getImageViewerXY()->Render();
+}
+
+void DADM::yzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam YZ: " << sliderValue << " slice";
+	yzSliceVisualizator->getImageViewerYZ()->SetSlice(sliderValue);
+	yzSliceVisualizator->getImageViewerYZ()->Render();
+}
+
+void DADM::xzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XZ: " << sliderValue << " slice";
+	xzSliceVisualizator->getImageViewerXZ()->SetSlice(sliderValue);
+	xzSliceVisualizator->getImageViewerXZ()->Render();
 }
 
 void DADM::closeEvent(QCloseEvent *)
