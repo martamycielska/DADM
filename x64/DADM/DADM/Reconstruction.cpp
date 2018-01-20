@@ -66,6 +66,7 @@ void Reconstruction::StructuralDataAlgorithm() {
 	}
 	//zwracana wartoœæ
 	//data3D_output = slices;
+	//tymczasowo
 	Global::structuralData = slices;
 	qDebug() << Global::structuralData.size();
 } 
