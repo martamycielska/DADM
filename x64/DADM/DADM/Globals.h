@@ -19,11 +19,11 @@ namespace Global {
 	extern Data3D temporaryDataSaggital;
 	extern Data3D temporaryDataHorizontal;
 	extern Data3D structuralData;
-	extern Data3DRaw structuralRawData;
+	extern Data4DRaw structuralRawData;
 	extern Data3DRaw structuralSensitivityMaps;
 	extern double L;
 	extern double r;
-	extern Data4DRaw diffusionRawData;
+	extern Data5DRaw diffusionRawData;
 	extern Data3DRaw diffusionSensitivityMaps;
 	extern Data4D diffusionData4D;
 	extern Data3D diffusionData3D;

@@ -439,7 +439,7 @@ void Worker::run()
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
-		/*
+		
 
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
@@ -474,7 +474,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
-		*/
+		
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -694,8 +694,9 @@ void ImportWorker::diffusionDataImport()
 				RawData.at(d) = data;
 			}
 			//------------------------------------
-
-			Global::diffusionRawData = RawData;
+			Data5DRaw RawData5D(1);
+			RawData5D[0] = RawData;
+			Global::diffusionRawData = RawData5D;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -822,8 +823,9 @@ void ImportWorker::structuralDataImport()
 				raw_data.push_back(m);
 				emit importProgress(status, max);
 			}
-
-			Global::structuralRawData = raw_data;
+			Data4DRaw DataRaw4D(1);
+			DataRaw4D[0] = raw_data;
+			Global::structuralRawData = DataRaw4D;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");

@@ -9,20 +9,20 @@
 
 
 
-Reconstruction::Reconstruction(Data3DRaw raw_data, Data3DRaw sensitivity_maps, int L, int r)
+Reconstruction::Reconstruction(Data4DRaw raw_data, Data3DRaw sensitivity_maps, int L, int r)
 {
 	qDebug() << "Reconstruction constructor called";
-	data3DRaw_input = raw_data;
+	data4DRaw_input = raw_data;
 	sensitivityMaps3D = sensitivity_maps;
 	this->L = L;
 	this->r = r;
 	dtype = STRUCTURAL_DATA;
 }
 
-Reconstruction::Reconstruction(Data4DRaw data, Data3DRaw sensitivity_maps, int L, int r)
+Reconstruction::Reconstruction(Data5DRaw data, Data3DRaw sensitivity_maps, int L, int r)
 {
 	qDebug() << "Reconstruction constructor called";
-	data4DRaw_input = data;
+	data5DRaw_input = data;
 	sensitivityMaps3D = sensitivity_maps;
 	this->L = L;
 	this->r = r;
@@ -32,22 +32,23 @@ Reconstruction::Reconstruction(Data4DRaw data, Data3DRaw sensitivity_maps, int L
 
 void Reconstruction::StructuralDataAlgorithm() {
 
-	int slices_no = 1;
+	int slices_no = data4DRaw_input.size();//liczba przekrojów
+	Data3DRaw data_raw;
+	MatrixXd reconstructed_data;
 	Data3D slices(slices_no);
+
 	for (int i = 0; i < slices_no; i++)
 	{
-		Data3D data;
 		//przeprowadzenie Odwrotnej Transformaty Fouriera
-		Data3DRaw data_raw = data3DRaw_input;
+		data_raw = data4DRaw_input[i];
 		data_raw = FourierTransform(data_raw);
-		MatrixXd reconstructed_data;
+		
 		//Rekonstrukcja obrazu
 		reconstructed_data = LSreconstruction(data_raw);
 		qDebug() << "LS reconstruction done";
 
 		reconstructed_data = TikhonovRegularization(data_raw, reconstructed_data);
 		qDebug() << "Tikhonov regularization done";
-		writeToCSVfile("myImageS.csv", reconstructed_data);
 
 		//------------------
 		//normalizacja wartoœci
@@ -62,53 +63,51 @@ void Reconstruction::StructuralDataAlgorithm() {
 		}
 		slices.at(i) = reconstructed_data;
 		
-
 	}
 	//zwracana wartoœæ
 	//data3D_output = slices;
 	//tymczasowo
 	Global::structuralData = slices;
-	qDebug() << Global::structuralData.size();
+	
 } 
 
 void Reconstruction::DiffusionDataAlgorithm()
 {
-	int slices_no = 1;
+	int slices_no = data5DRaw_input.size();
 	Data4D slices(slices_no);
+	Data3DRaw data_raw;
+
 	for (int i = 0; i < slices_no; i++)
 	{
 		Data3DRaw data(L);
 
-		Data4DRaw data4d_raw = data4DRaw_input;
+		Data4DRaw data4d_raw = data5DRaw_input[i];
 		int gradients_no = data4d_raw.size();
 		
 		Data3D reconstructed_data_3D(gradients_no);
 
 		for (int j = 0; j < gradients_no; j++)
 		{
-			Data3DRaw data_raw = data4d_raw.at(j);
+			data_raw = data4d_raw.at(j);
 			data = FourierTransform(data_raw);
 			MatrixXd reconstructed_data(256,256);
 			//Rekonstrukcja obrazu
 			reconstructed_data = LSreconstruction(data);
 			//normalizacja wartoœci
 			
-				double min = reconstructed_data.minCoeff();
-				double max = reconstructed_data.maxCoeff();
-				for (int z = 0; z < 256; z++)
+			double min = reconstructed_data.minCoeff();
+			double max = reconstructed_data.maxCoeff();
+			for (int z = 0; z < 256; z++)
 				{
 					for (int a = 0; a < 256; a++)
-					{
-						reconstructed_data(z, a) = ((reconstructed_data(z, a) - min) * 255) / (max - min);
-					}
+						{
+							reconstructed_data(z, a) = ((reconstructed_data(z, a) - min) * 255) / (max - min);
+						}
 				}
-				reconstructed_data_3D.at(j) = reconstructed_data;
-			
-			//tymczasowy zapis do pliku
+			reconstructed_data_3D.at(j) = reconstructed_data;
 							
-				Global::structuralData = reconstructed_data_3D;
-			//qDebug() << Global::structuralData.size();
-		}
+			Global::structuralData = reconstructed_data_3D;
+			}
 
 		slices.at(i) = reconstructed_data_3D;
 
@@ -148,13 +147,12 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 			{
 				a[i*sizex + j] = log(i, j);
 				count++;
-
 			}
 		}
 
 		std::vector<std::complex<double>> b(sizex*sizey);//zdefiniowanie wektora wyjœciowego
 
-														 //zdefiniowanie IDFT plan
+		//zdefiniowanie IDFT plan
 		fftw_plan plan = fftw_plan_dft_2d(sizey, sizex, reinterpret_cast<fftw_complex*>(&a[0]), reinterpret_cast<fftw_complex*>(&b[0]), FFTW_BACKWARD, FFTW_ESTIMATE);
 		fftw_execute(plan);
 		fftw_destroy_plan(plan);
@@ -189,28 +187,10 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 	//std::vector<MatrixXcd> S = sensitivityMaps3D;
 	//std::vector<MatrixXcd> Sd(L);
 	MatrixXcd temp(256, 256);
-	/*
-	for (int k = 0; k < L; k++)
-	{
-	//#pragma omp parallel for shared(S, k, temp) private(i, j)
-	for (int i = 0; i < 256; i++)
-	{
-	for (int j = 0; j < 256; j++)
-	{
-	temp(i, j) = abs(sensitivityMaps3D.at(k)(i, j));
-
-	}
-	}
-
-	Sd.at(k) = temp; //zamiana wartoœci na double
-	}
-	*/
-	//Reconstruction::SensMaps = Sd;
 	MatrixXcd log = I_raw.at(1);
 
 	int sizex = log.rows(); // liczba wierszy
 	int sizey = log.cols(); //liczba kolumn
-
 
 	for (int y = 0; y <sizey; y++)
 	{
@@ -219,8 +199,10 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 
 			for (int j = 0; j<L; j++)
 			{
-				Sx(j, 0) = sensitivityMaps3D.at(j)(x, y);
-				Sx(j, 1) = sensitivityMaps3D.at(j)(x + rec_step, y);
+				for (int p=0; p<r; p++)
+				{ 
+				Sx(j, p) = sensitivityMaps3D.at(j)(x + p*rec_step, y);
+				}
 			}
 
 			for (int k = 0; k<L; k++)
@@ -232,8 +214,10 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 			MatrixXcd temp2 = temp.inverse()*Sx.transpose();
 			Dr = temp2*Ds;
 
-			Image(x, y) = abs(Dr(0));
-			Image(x + rec_step, y) = abs(Dr(1));
+			for (int q = 0; q < r; q++)
+			{
+				Image(x+q*rec_step, y) = abs(Dr(q));
+			}
 
 		}
 
@@ -258,11 +242,10 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 	A(1, 1) = 1;
 	Data3DRaw I_raw = data;
 	MatrixXd LastImage = medianFilter(image, 3);
-	MatrixXd ImagePoint(2, 1);
-	MatrixXcd log = I_raw.at(1);
+	MatrixXd ImagePoint(r, 1);
 
-	int sizex = log.rows(); // liczba wierszy
-	int sizey = log.cols(); //liczba kolumn
+	int sizex = I_raw.at(1).rows(); // liczba wierszy
+	int sizey = I_raw.at(1).cols(); //liczba kolumn
 
 
 	for (int y = 0; y <sizey; y++)
@@ -272,8 +255,10 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 
 			for (int j = 0; j<L; j++)
 			{
-				Sx(j, 0) = sensitivityMaps3D.at(j)(x, y);
-				Sx(j, 1) = sensitivityMaps3D.at(j)(x + rec_step, y);
+				for (int p = 0; p<r; p++)
+				{
+					Sx(j, p) = sensitivityMaps3D.at(j)(x + p*rec_step, y);
+				}
 			}
 
 			for (int k = 0; k<L; k++)
@@ -281,14 +266,17 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 				Ds(k) = I_raw.at(k)(x, y);
 			}
 			//wyliczenie zgodnie ze wzorem
-			ImagePoint(0, 0) = LastImage(x, y);
-			ImagePoint(1, 0) = LastImage(x + rec_step, y);
-			//temp = (Sx.transpose()*Sx+((lambda*lambda)*A.transpose()*A));
+			for (int w = 0; w < r; w++) 
+			{
+				ImagePoint(w, 0) = LastImage(x + w*rec_step, y);
+			}
+			
 			Dr = ImagePoint + ((Sx.transpose()*Sx + ((lambda*lambda)*A.transpose()*A)).inverse()*Sx.transpose())*(Ds - (Sx*ImagePoint));
-
-
-			Image(x, y) = abs(Dr(0));
-			Image(x + rec_step, y) = abs(Dr(1));
+			
+			for (int q = 0; q < r; q++)
+			{
+				Image(x + q*rec_step, y) = abs(Dr(q));
+			}
 
 		}
 
