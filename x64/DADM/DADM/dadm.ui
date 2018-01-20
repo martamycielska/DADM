@@ -472,7 +472,7 @@
   </action>
   <action name="actionVisualization_3D">
    <property name="text">
-    <string>Visualization 3D...</string>
+    <string>Visualize 3D</string>
    </property>
   </action>
   <action name="actionInformation">
