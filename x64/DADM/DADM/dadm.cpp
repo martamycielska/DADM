@@ -645,7 +645,22 @@ void ImportWorker::diffusionDataImport()
 				raw_data.push_back(raw_data_part);
 			}
 
-			Global::diffusionRawData = raw_data;
+			//----------------------
+
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}
+			//------------------------------------
+
+			Global::diffusionRawData = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
