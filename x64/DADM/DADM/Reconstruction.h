@@ -13,6 +13,7 @@
 
 typedef std::vector<MatrixXcd> Data3DRaw;
 typedef std::vector<std::vector<MatrixXcd>> Data4DRaw;
+typedef std::vector<std::vector<std::vector<MatrixXcd>>> Data5DRaw;
 
 class Reconstruction :
 	public Diffusion_Structural_Module
