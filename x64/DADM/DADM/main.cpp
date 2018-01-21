@@ -7,4 +7,6 @@ int main(int argc, char *argv[])
 	DADM w;
 	w.show();
 	return a.exec();
+
+	
 }

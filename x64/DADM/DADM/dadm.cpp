@@ -65,6 +65,9 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.xzSlider->setMaximum(0);
 	ui.yzSlider->setMinimum(0);
 	ui.yzSlider->setMaximum(0);
+
+
+
 }
 
 void DADM::mri_reconstruct() {
@@ -259,8 +262,11 @@ void DADM::structuralTestDataImport()
 		Mat_Close(mat);
 		QMessageBox msgBox;
 		msgBox.setText("Finished");
+
 		msgBox.exec();
 	}
+
+
 }
 
 void DADM::onPreprocessingDone()
@@ -306,7 +312,7 @@ void DADM::resolutionValuesChanged()
 
 void DADM::planeValuesChanged()
 {
-	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
+	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::structuralData, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
 	connect(worker_frontal, &UpsamplingWorker::resultReadyFrontal, this, &DADM::onUpsamplingFrontalDone);
 	connect(worker_frontal, &UpsamplingWorker::finished, worker_frontal, &QObject::deleteLater);
 	worker_frontal->start();
@@ -438,6 +444,10 @@ void Worker::run()
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+
+
+	
+
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
 		/*
 
@@ -468,7 +478,7 @@ void Worker::run()
 			break;
 		}
 		}
-		emit progress(3, 4);
+		emit progress(3,4);
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images3D);
 		correction->Start();
@@ -492,7 +502,7 @@ void Worker::run()
 	}
 	case DIFFUSION_DATA:
 	{
-		emit progress(0, 6);
+		/*emit progress(0, 6);
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
@@ -546,6 +556,7 @@ void Worker::run()
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
 		emit progress(6, 6);
+		
 		//TODO k¹ty do ustalenia
 		/* 
 		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
@@ -884,7 +895,10 @@ void ImportWorker::structuralDataImport()
 	qDebug() << Global::r;
 	Mat_Close(mat);
 	emit importDone();
+
+	
 }
+
 
 
 ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
@@ -929,22 +943,26 @@ UpsamplingWorker::UpsamplingWorker(Data3D data, int width, int height, Profile p
 	this->data = data;
 	this->width = width;
 	this->height = height;
+	
 }
 
 void UpsamplingWorker::run() {
-	Upsampling *upsampling = new Upsampling(data, width, height);
+	
+
+	Upsampling *upsampling = new Upsampling(data.at(0), width, height);
 	upsampling->Start();
-	Data3D d = upsampling->getData();
-	switch (profile) {
-	case FRONTAL:
-		emit resultReadyFrontal(d);
-		break;
-	case SAGGITAL:
-		emit resultReadySggital(d);
-		break;
-	case HORIZONTAL:
-		emit resultReadyHorizontal(d);
-		break;
-	}
+	MatrixXd d = upsampling->getData();
+	//switch (profile) {
+	//case FRONTAL:
+		//emit resultReadyFrontal(d);
+		//break;
+	//case SAGGITAL:
+		//emit resultReadySggital(d);
+		//break;
+	//case HORIZONTAL:
+		//emit resultReadyHorizontal(d);
+		//break;
+	//}
 }
+
 
