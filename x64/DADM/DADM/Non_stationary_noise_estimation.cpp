@@ -13,8 +13,6 @@
 using namespace std;
 using namespace boost::math;
 using namespace Eigen;
-double e = 0.5772156649;
-double pi = 3.14159265358979323846;
 
 Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data3D data)
 {
@@ -304,7 +302,10 @@ MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log) {
 	return K;
 }
 
-MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd coeff) {
+MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR) {
+
+	RowVectorXd coeff(9);
+	coeff << -0.2895, -0.0388, 0.4099, -0.3552, 0.1493, -0.0358, 0.0050, 0.0003745, 0.0000118;
 
 	MatrixXd F = coeff(0)*pow(SNR.array(), 0) + coeff(1)*pow(SNR.array(), 1) + coeff(2)*pow(SNR.array(), 2)
 		+ coeff(3)*pow(SNR.array(), 3) + coeff(4)*pow(SNR.array(), 4) + coeff(5)*pow(SNR.array(), 5)
@@ -316,7 +317,7 @@ MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd 
 }
 
 
-void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j = 0, bool isDiffusion = false)
+void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j, bool isDiffusion)
 {
 	MatrixXd mean = filter2(reconstructedImage, MatrixXd::Ones(5, 5)) / (5 * 5);
 	MatrixXd reconstructedWithoutMean = reconstructedImage - mean;
@@ -331,7 +332,7 @@ void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage,
 
 	MatrixXd estimator = noiseEstimation(expCalculate(lpf));
 	MatrixXd SNR = getSNR(3, reconstructedImage);
-	MatrixXd correctSNR = riceCorrection(SNR, coeff);
+	MatrixXd correctSNR = riceCorrection(SNR);
 	MatrixXd LPF1 = lpf - correctSNR;
 
 	MatrixXd filtered2 = gaussianKernel(kernel, log, 3.4 + 2);

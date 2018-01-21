@@ -7,6 +7,7 @@ class Non_stationary_noise_estimation:
 public:
 	double e = 0.5772156649;
 	double pi = 3.14159265358979323846;
+	
 	Non_stationary_noise_estimation(Data3D);
 	Non_stationary_noise_estimation(Data4D);
 	~Non_stationary_noise_estimation() {};
@@ -30,7 +31,7 @@ private:
 	MatrixXd Non_stationary_noise_estimation::gaussianKernel(MatrixXd K, MatrixXd image, double sig);
 	MatrixXd Non_stationary_noise_estimation::dct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log);
-	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd coeff);
+	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR);
 	void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j = 0, bool isDiffusion = false);
 };
 
