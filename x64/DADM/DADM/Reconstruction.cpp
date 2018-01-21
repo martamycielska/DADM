@@ -33,12 +33,14 @@ Reconstruction::Reconstruction(Data5DRaw data, Data3DRaw sensitivity_maps, int L
 void Reconstruction::StructuralDataAlgorithm() {
 
 	int slices_no = data4DRaw_input.size();//liczba przekrojów
+	qDebug() << "Size: " << slices_no;
 	Data3DRaw data_raw;
 	MatrixXd reconstructed_data;
 	Data3D slices(slices_no);
 
 	for (int i = 0; i < slices_no; i++)
 	{
+		qDebug() << "Iteration: " << i;
 		//przeprowadzenie Odwrotnej Transformaty Fouriera
 		data_raw = data4DRaw_input[i];
 		data_raw = FourierTransform(data_raw);
@@ -65,9 +67,9 @@ void Reconstruction::StructuralDataAlgorithm() {
 		
 	}
 	//zwracana wartoœæ
-	//data3D_output = slices;
+	data3D_output = slices;
 	//tymczasowo
-	Global::structuralData = slices;
+	//Global::structuralData = slices;
 	
 } 
 
@@ -114,7 +116,7 @@ void Reconstruction::DiffusionDataAlgorithm()
 	}
 
 	//zwracana wartoœæ
-	//data4D_output = slices;
+	data4D_output = slices;
 }
 
 Data3DRaw Reconstruction::FourierTransform(Data3DRaw raw_data)
