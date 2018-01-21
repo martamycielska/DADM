@@ -70,8 +70,7 @@ void Upsampling::Inicjalizacja(MatrixXd inputData) {
                         {
                                 Image1(i, j) = 0;
 
-                                //qDebug() << "Dla i" << i << "DLa j" << j;
-                                //qDebug() << "INTERPOLACJA PO WIERSZACH" << Image1(i, j);
+                            
                         }
 
                 }
@@ -80,7 +79,7 @@ void Upsampling::Inicjalizacja(MatrixXd inputData) {
         for (int i = 0; i < Image1.rows(); i++) {
                 for (int j = 0; j < Image.cols(); j++) {
 
-                        //qDebug() << "Po rozszerzeniu " << Image1(i, j);
+                      
                 }
         }
 
@@ -208,6 +207,8 @@ void Upsampling::Inicjalizacja(MatrixXd inputData) {
         }
 
         int punkt = 1;
+
+
         //// FILTR BILATERALNY ///
 
 
