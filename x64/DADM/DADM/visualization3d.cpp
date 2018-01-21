@@ -15,7 +15,7 @@ Visualization3D::Visualization3D(QWidget *parent) :
 #pragma region controls event
 void Visualization3D::Brain3D() {
 
-#pragma region to delete
+	#pragma region to delete
 	// do usuniêcia, jeœli bêdzie gotowy ca³y strumieñ danych
 	// nale¿y wtedy odpowiedni¹ strukturê przypisaæ do zmiennej "inputData"
 	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Mat file (*.mat) (*mat)");
@@ -24,10 +24,20 @@ void Visualization3D::Brain3D() {
 		return;
 
 	ReadMatFile(url.path());
-	inputData = Global::structuralData;
-#pragma endregion to delete
+	//inputData = Global::structuralData;
+	#pragma endregion to delete
+
+	if (inputData.size() == 0) {
+		QMessageBox msgBox;
+		msgBox.setText("Brak danych lub niepoprawny plik");
+		msgBox.exec();
+		return;
+	}
 
 	SetDataSize();
+	visualizationDone = false;
+	setCutOptionEnable = ui->cutEnableRadioBtn->isChecked();
+
 	UpdateProcessStateText("The model 3D initializing ....\nPlease wait");
 	brain_3D = new Brain_3D(inputData, xspace, yspace, zspace, threshold, shrinkingFactor);
 
@@ -106,10 +116,10 @@ void Visualization3D::AcceptThreshold() {
 #pragma region private methods
 void Visualization3D::InitValue() {
 	ui->setupUi(this);
-	threshold =3;
-	shrinkingFactor = 2;
+	threshold = 3;
+	shrinkingFactor = 1;
 	visualizationDone = false;
-	setCutOptionEnable = true;
+	setCutOptionEnable = false;
 }
 
 void Visualization3D::SetDataSize() {
@@ -130,6 +140,7 @@ void Visualization3D::InitUI() {
 	ui->horizontalSlider->setValue(threshold);
 	ui->shrinkSlider->setValue(shrinkingFactor);
 	ui->thresholdTextEdit->setText(QString::number(ui->horizontalSlider->value()));
+	ui->cutEnableRadioBtn->setChecked(false);
 }
 
 void Visualization3D::AddRendererAndPlaneWidget() {
@@ -170,7 +181,11 @@ void Visualization3D::AddRendererAndPlaneWidget() {
 
 	//Set data to clip
 	clipper->SetInputConnection(brain_3D->getDecimate()->GetOutputPort());
-	brain_3D->getMapper()->SetInputConnection(clipper->GetOutputPort());
+
+	if (setCutOptionEnable)
+		brain_3D->getMapper()->SetInputConnection(clipper->GetOutputPort());
+	else
+		brain_3D->getMapper()->SetInputConnection(brain_3D->getDecimate()->GetOutputPort());
 
 	plane->SetOrigin(xspace / 2., yspace / 2., zspace / 2.);
 	plane->SetNormal(0, -1, 0);
@@ -204,6 +219,7 @@ void Visualization3D::UpdateProcessStateText(QString text) {
 
 void Visualization3D::ReadMatFile(QString path) {
 
+	inputData = Data3D(0);
 	QByteArray ba = path.remove(0, 1).toLatin1();
 	const char *fileName = ba.data();
 	mat_t *mat = Mat_Open(fileName, MAT_ACC_RDONLY);
@@ -211,6 +227,13 @@ void Visualization3D::ReadMatFile(QString path) {
 	if (mat) {
 		matvar_t *matVar = 0;
 		matVar = Mat_VarRead(mat, (char*)"imageMaskFull");
+		//matVar = Mat_VarRead(mat, (char*)"dataset_T2");         //T21
+		//matVar = Mat_VarRead(mat, (char*)"dataset_T1_INU_20");  //T12
+		//matVar = Mat_VarRead(mat, (char*)"dataset_T2_INU_20");  //T12
+		//matVar = Mat_VarRead(mat, (char*)"dataset_T1");         //T11
+		//matVar = Mat_VarRead(mat, (char*)"dataset_PD_INU_20");  //PD1
+		//matVar = Mat_VarRead(mat, (char*)"dataset_PD");         //PD2
+		
 
 		if (matVar) {
 			const double *xData = static_cast<const double*>(matVar->data);
@@ -233,7 +256,7 @@ void Visualization3D::ReadMatFile(QString path) {
 				data.push_back(m);
 			}
 
-			Global::structuralData = data;
+			inputData = data;
 		}
 
 		Mat_Close(mat);

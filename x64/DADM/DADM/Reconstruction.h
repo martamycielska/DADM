@@ -11,26 +11,27 @@
 //typedef Tensor<std::complex<double>, 3> Data3DRaw;
 //typedef Tensor<std::complex<double>, 4> Data4DRaw;
 
-typedef std::vector<MatrixXcd> Data3DRaw;
+typedef std::vector<std::vector<std::vector<MatrixXcd>>> Data5DRaw;
 typedef std::vector<std::vector<MatrixXcd>> Data4DRaw;
+typedef std::vector<MatrixXcd> Data3DRaw;
 
 class Reconstruction :
 	public Diffusion_Structural_Module
 {
 public:
-	Reconstruction(Data3DRaw, Data3DRaw, int, int);
 	Reconstruction(Data4DRaw, Data3DRaw, int, int);
+	Reconstruction(Data5DRaw, Data3DRaw, int, int);
 	~Reconstruction() {};
 
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
-	Data3D FourierTransform(Data3DRaw raw_data);
-	Data3D ifft(Data3DRaw raw_data);
-	MatrixXd LSreconstruction(Data3D data);
-	MatrixXd TikhonovRegularization(Data3D data, MatrixXd image);
-	Data3DRaw data3DRaw_input;
+	Data3DRaw FourierTransform(Data3DRaw raw_data);
+	Data3DRaw ifft(Data3DRaw raw_data);
+	MatrixXd LSreconstruction(Data3DRaw data);
+	MatrixXd TikhonovRegularization(Data3DRaw data, MatrixXd image);
 	Data4DRaw data4DRaw_input;
+	Data5DRaw data5DRaw_input;
 	Data3DRaw sensitivityMaps3D;
 	Data3D SensMaps;
 	MatrixXd medianFilter(MatrixXd image, int windowSize);
