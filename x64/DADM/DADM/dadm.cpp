@@ -141,7 +141,7 @@ void DADM::onImportDone()
 	msgBox.setText("Data imported");
 	msgBox.exec();
 	ui.statusBar->showMessage("Ready");
-
+	ui.progressBar->hide();
 	Worker* worker = new Worker(Global::dtype, Global::ftype);
 	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
 	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
@@ -272,7 +272,6 @@ void DADM::onPreprocessingDone()
 	QMessageBox msgBox;
 	msgBox.setText("Preprocessing Done");
 	msgBox.exec();
-	ui.progressBar->hide();
 }
 
 void DADM::onProgress(int progress, int max)
@@ -437,9 +436,9 @@ void Worker::run()
 		emit progress(0, 4);
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
-		images3D = reconstruction->getData3D();
+		Global::structuralData = reconstruction->getData3D();
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
-		
+		/*
 
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
@@ -474,7 +473,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
-		
+		*/
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -496,7 +495,8 @@ void Worker::run()
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
-		images4D = reconstruction->getData4D();
+		Global::structuralData = reconstruction->getData4D().at(3);
+		/*
 		emit progress(1, 6);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
@@ -546,6 +546,7 @@ void Worker::run()
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
 		emit progress(6, 6);
+		*/
 		//TODO k¹ty do ustalenia
 		/* 
 		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
@@ -604,7 +605,7 @@ void ImportWorker::diffusionDataImport()
 
 		int max = 0;
 		if (matVar) {
-			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3];
+			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3] * matVar->dims[4];
 		}
 
 		if (s_matVar) {
@@ -656,47 +657,57 @@ void ImportWorker::diffusionDataImport()
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
 			qDebug() << matVar->dims[3];
+			qDebug() << matVar->dims[4];
 
 			//std::vector<MatrixXcd> raw_data;
 			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			std::vector<std::vector<MatrixXcd>> raw_data;
-			for (int l = 0; l < matVar->dims[3]; l++) {
-				std::vector<MatrixXcd> raw_data_part;
-				for (int i = 0; i < matVar->dims[2]; i++) {
-					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-					for (int j = 0; j < matVar->dims[1]; j++) {
-						for (int k = 0; k < matVar->dims[0]; k++) {
-							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-							status++;
-							val_num++;
-							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
-							//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<std::vector<MatrixXcd>>> raw_data;
+			for (int m = 0; m < matVar->dims[4]; m++) {
+				std::vector<std::vector<MatrixXcd>> raw_data_part_one;
+				for (int l = 0; l < matVar->dims[3]; l++) {
+					std::vector<MatrixXcd> raw_data_part_two;
+					for (int i = 0; i < matVar->dims[2]; i++) {
+						MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+						for (int j = 0; j < matVar->dims[1]; j++) {
+							for (int k = 0; k < matVar->dims[0]; k++) {
+								m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+								status++;
+								val_num++;
+								if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3] * matVar->dims[4]) break;
+								//qDebug() << xRe[val_num] << xIm[val_num];
+							}
 						}
+						raw_data_part_two.push_back(m);
+						emit importProgress(status, max);
 					}
-					raw_data_part.push_back(m);
-					emit importProgress(status, max);
+					raw_data_part_one.push_back(raw_data_part_two);
 				}
-				raw_data.push_back(raw_data_part);
+				raw_data.push_back(raw_data_part_one);
 			}
 
 			//----------------------
-
-			Data4DRaw RawData(matVar->dims[2]);
-			Data3DRaw data(matVar->dims[3]);
-			for (int d = 0; d<matVar->dims[2]; d++)
-			{
-				for (int f = 0; f < matVar->dims[3]; f++)
+			
+			Data5DRaw RawData5D(matVar->dims[2]);
+			Data4DRaw RawData(matVar->dims[3]);
+			Data3DRaw data(matVar->dims[4]);
+			for (int b = 0; b < matVar->dims[2]; b++) {
+				for (int d = 0; d < matVar->dims[3]; d++)
 				{
-					data.at(f) = raw_data.at(f).at(d);
+					for (int f = 0; f < matVar->dims[4]; f++)
+					{
+						data.at(f) = raw_data.at(f).at(d).at(b);
 
+					}
+					RawData.at(d) = data;
 				}
-				RawData.at(d) = data;
+				RawData5D.at(b) = RawData;
 			}
-			//------------------------------------
-			Data5DRaw RawData5D(1);
-			RawData5D[0] = RawData;
+
 			Global::diffusionRawData = RawData5D;
+			//------------------------------------
+			//Data5DRaw RawData5D(1);
+			//RawData5D[0] = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -785,7 +796,7 @@ void ImportWorker::structuralDataImport()
 
 		int max = 0;
 		if (matVar) {
-			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2];
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
 		}
 
 		if (s_matVar) {
@@ -805,27 +816,43 @@ void ImportWorker::structuralDataImport()
 			qDebug() << matVar->dims[0];
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
+			qDebug() << matVar->dims[3];
 
-			std::vector<MatrixXcd> raw_data;
-			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			for (int i = 0; i < matVar->dims[2]; i++) {
-				MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-				for (int j = 0; j < matVar->dims[1]; j++) {
-					for (int k = 0; k < matVar->dims[0]; k++) {
-						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-						status++;
-						val_num++;
-						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
-						//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<MatrixXcd>> raw_data;
+			for (int l = 0; l < matVar->dims[3]; l++) {
+				std::vector<MatrixXcd> raw_data_part;
+				for (int i = 0; i < matVar->dims[2]; i++) {
+					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+					for (int j = 0; j < matVar->dims[1]; j++) {
+						for (int k = 0; k < matVar->dims[0]; k++) {
+							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
+							val_num++;
+							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
+							//qDebug() << xRe[val_num] << xIm[val_num];
+						}
 					}
+					raw_data_part.push_back(m);
+					emit importProgress(status, max);
 				}
-				raw_data.push_back(m);
-				emit importProgress(status, max);
+				raw_data.push_back(raw_data_part);
 			}
-			Data4DRaw DataRaw4D(1);
-			DataRaw4D[0] = raw_data;
-			Global::structuralRawData = DataRaw4D;
+			//Data4DRaw DataRaw4D(1);
+			//DataRaw4D[0] = raw_data;
+
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}
+			Global::structuralRawData = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
