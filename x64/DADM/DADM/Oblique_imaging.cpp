@@ -1,6 +1,18 @@
 #include "Oblique_imaging.h"
 #include "qdebug.h"
 
+#include <vtkImageActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkSmartPointer.h>
+#include <vtkCamera.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkNamedColors.h>
+#include <vtkImageData.h>
+#include <vtkAutoInit.h>
+
 Oblique_imaging::Oblique_imaging(Data3D data, double a, double b, Profile profile, int profile_nr)
 {
 	qDebug() << "Oblique imaging constructor called";
@@ -25,7 +37,6 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 	int size_y = 0;
 	int size_z = 0;
 	int border = 100;
-
 	/*
 	std::vector<MatrixXd> test_data;
 	test_data = Global::structuralData;
@@ -34,10 +45,10 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 		qDebug() << "Oblique Imaging modue have no data in";
 		return;
 	}
-	
+
 	Eigen::MatrixXd slice;
 	slice = inputData.at(90);
-	
+
 	size_z = inputData.size();
 	size_x = slice.rows();
 	size_y = slice.cols();
@@ -61,17 +72,17 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 	//define vectors and point for a base plane
 	Eigen::RowVector3f v1, v2, point, p;
 
-	switch (profile){
+	switch (profile) {
 	case HORIZONTAL:
 		v1 << 1, 0, 0;
 		v2 << 0, 1, 0;
 		break;
 	case SAGGITAL:
-		v1 << 0, 1, 0;
+		v1 << 1, 0, 0;
 		v2 << 0, 0, 1;
 		break;
 	case FRONTAL:
-		v1 << 1, 0, 0;
+		v1 << 0, 1, 0;
 		v2 << 0, 0, 1;
 		break;
 
@@ -108,6 +119,8 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 
 	v1 = v1*rot_matrix;
 	v2 = v2 * rot_matrix;
+	qDebug() << v1(0) << v1(1) << v1(2);
+	qDebug() << v2(0) << v2(1) << v2(2);
 
 	//get new plane's points and interpolate values
 	Eigen::MatrixXd image_out = Eigen::MatrixXd::Zero(size_x, size_y);
@@ -115,17 +128,17 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 	for (int s = -127; s <= 127; ++s) {
 		for (int t = -127; t <= 127; ++t) {
 			p = t*v1 + s*v2 + point;
-			
+
 			p(0) = std::round(p(0));
 			p(1) = std::round(p(1));
 			p(2) = std::round(p(2));
 
 			image_out(t + 127, s + 127) = (data[p(2)](p(0), p(1)) +
 				data[p(2) - 1](p(0), p(1)) + data[p(2) + 1](p(0), p(1)) +
-					data[p(2)](p(0) + 1, p(1)) + data[p(2) - 1](p(0) - 1, p(1)) +
-						data[p(2)](p(0), p(1) - 1) + data[p(2)](p(0), p(1) + 1))/7;		
-						
+				data[p(2)](p(0) + 1, p(1)) + data[p(2) - 1](p(0) - 1, p(1)) +
+				data[p(2)](p(0), p(1) - 1) + data[p(2)](p(0), p(1) + 1)) / 7;
 		}
 	}
-
 }
+
+

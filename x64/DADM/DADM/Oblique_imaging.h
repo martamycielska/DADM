@@ -2,8 +2,6 @@
 #include "MRI_Module.h"
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
-//#include "dadm.h"
-#include "Globals.h"
 
 typedef enum Profile { FRONTAL, SAGGITAL, HORIZONTAL } Profile;
 
