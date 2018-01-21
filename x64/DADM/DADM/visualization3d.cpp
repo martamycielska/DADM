@@ -226,7 +226,7 @@ void Visualization3D::ReadMatFile(QString path) {
 
 	if (mat) {
 		matvar_t *matVar = 0;
-		matVar = Mat_VarRead(mat, (char*)"d");                    //afterSkullStripping
+		matVar = Mat_VarRead(mat, (char*)"d_out");                //afterSkullStripping
 		//matVar = Mat_VarRead(mat, (char*)"imageMaskFull");      //segmentaction mask
 		//matVar = Mat_VarRead(mat, (char*)"dataset_T2");         //T21
 		//matVar = Mat_VarRead(mat, (char*)"dataset_T1_INU_20");  //T12
