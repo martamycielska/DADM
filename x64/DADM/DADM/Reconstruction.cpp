@@ -127,8 +127,8 @@ Data3DRaw Reconstruction::FourierTransform(Data3DRaw raw_data)
 
 Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 {
-	int sizey = raw_data.at(0).rows(); // liczba wierszy
-	int sizex = raw_data.at(0).cols();// liczba kolumn
+	int sizey = raw_data.at(0).rows(); // rows number
+	int sizex = raw_data.at(0).cols();// columns number
 	MatrixXcd afteridftmatrix(sizey, sizex);
 	Data3DRaw afteridftvector(L);
 
@@ -138,7 +138,7 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 
 		//-----------------------
 
-		std::vector<std::complex<double>> a(sizex*sizey);//zdefiniowanie wektora wejœciowego
+		std::vector<std::complex<double>> a(sizex*sizey);//input vector definition
 		int count = 1;
 		#pragma omp parallel for shared(log, a, count, sizey, sizex) private(i, j)
 		for (int i = 0; i < sizey; i++)
@@ -150,15 +150,15 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 			}
 		}
 
-		std::vector<std::complex<double>> b(sizex*sizey);//zdefiniowanie wektora wyjœciowego
+		std::vector<std::complex<double>> b(sizex*sizey);//output vector definition
 
-		//zdefiniowanie IDFT plan
+		//IDFT plan definition
 		fftw_plan plan = fftw_plan_dft_2d(sizey, sizex, reinterpret_cast<fftw_complex*>(&a[0]), reinterpret_cast<fftw_complex*>(&b[0]), FFTW_BACKWARD, FFTW_ESTIMATE);
 		fftw_execute(plan);
 		fftw_destroy_plan(plan);
 		fftw_cleanup();
 		std::complex<double> tmp;
-		//powrót do macierzy
+		//return to matrix
 		#pragma omp parallel for shared(b, tmp, afteridftmatrix, sizey, sizex) private(i, j)
 		for (int i = 0; i < sizey; i++)
 		{
@@ -235,11 +235,7 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 	VectorXcd Dr(r, 1);
 	MatrixXd Image(256, 256);
 	MatrixXcd Ds(L, 1);
-	Matrix2d A;
-	A(0, 0) = 1;
-	A(1, 0) = 0;
-	A(0, 1) = 0;
-	A(1, 1) = 1;
+	MatrixXd A=MatrixXd::Identity(r,r);
 	Data3DRaw I_raw = data;
 	MatrixXd LastImage = medianFilter(image, 3);
 	MatrixXd ImagePoint(r, 1);
@@ -318,7 +314,7 @@ MatrixXd Reconstruction::medianFilter(MatrixXd image, int windowSize)
 		for (int y = 0; y < image.cols(); ++y)
 		{
 			//loopy odpowiedzialne za operowanie na oknie filtrujacym
-			// #pragma omp parallel for shared(b, a, x, y, color, pixels) private(i, j)
+			#pragma omp parallel for shared(b, a, x, y, color, pixels) private(i, j)
 			for (int j = -(windowSize / 2); j < windowSize - 1; ++j)
 			{
 				for (int i = -(windowSize / 2); i < windowSize - 1; ++i)
