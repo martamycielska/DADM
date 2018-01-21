@@ -1,7 +1,6 @@
-#include "Segmentation.h"
+﻿#include "Segmentation.h"
 #include "qdebug.h"
 #include <Globals.h>
-
 #include <vtkImageActor.h>
 #include <vtkRenderWindow.h>
 #include <vtkInteractorStyleImage.h>
@@ -16,15 +15,13 @@
 VTK_MODULE_INIT(vtkRenderingOpenGL2);
 VTK_MODULE_INIT(vtkInteractionStyle);
 
-
 Segmentation::Segmentation(itk::IndexValueType seed_X, itk::IndexValueType seed_Y, int lowThreshold, int uppThreshold)
 {
-	qDebug() << "Segmentation constructor called";
+	//qDebug() << "Segmentation constructor called";
 	this->inputData = Global::structuralData;
 	this->x = inputData[0].rows();
 	this->y = inputData[0].cols();
 	this->z = inputData.size();
-	this->outImage;
 }
 
 void Segmentation::Start() {
@@ -45,7 +42,7 @@ void Segmentation::Start() {
 
 	//konwersja do obiektu ITK
 	const unsigned int Dimension = 3;
-	typedef float InternalPixelType;
+	typedef double InternalPixelType;
 	typedef itk::Image<InternalPixelType, Dimension> ImageType;
 	typedef itk::VTKImageToImageFilter< ImageType > FilterType;
 	FilterType::Pointer filter = FilterType::New();
@@ -62,53 +59,42 @@ void Segmentation::Start() {
 	}
 
 	ImageType::ConstPointer myitkImage = filter->GetOutput();
-	myitkImage->Print(std::cout);
-
-	//return EXIT_SUCCESS;
 
 
 	//Connected Threshold Image Filter Segmentation
-
-	typedef float InternalPixelType;
-	//const unsigned int Dimension = 2;
+	typedef double InternalPixelType;
 	typedef itk::Image<InternalPixelType, Dimension> InternalImageType;
 
-	typedef unsigned char  OutputPixelType;
+	typedef unsigned char OutputPixelType;
 	typedef itk::Image<OutputPixelType, Dimension> OutputImageType;
 	typedef itk::CastImageFilter<InternalImageType, OutputImageType> CastingFilterType;
 	CastingFilterType::Pointer caster = CastingFilterType::New();
 
 	InternalImageType::Pointer image = InternalImageType::New();
-	const ImageType::SizeType  size = { { x, y, z } };
-	const ImageType::IndexType start = { { 0, 0, 0 } };
-	ImageType::RegionType region;
+	const InternalImageType::SizeType  size = { { x, y, z } };
+	const InternalImageType::IndexType start = { { 0, 0, 0 } };
+	InternalImageType::RegionType region;
 	region.SetSize(size);
 	region.SetIndex(start);
 	image->SetRegions(region);
 	image->Allocate(true);
 
-	/*
-	typedef  itk::ImageFileReader<InternalImageType> ReaderType;
 	typedef  itk::ImageFileWriter<OutputImageType> WriterType;
-
-	ReaderType::Pointer reader = ReaderType::New();
 	WriterType::Pointer writer = WriterType::New();
+	writer->SetFileName("test.png");
 
-	reader->SetFileName("C:\itk-debug\itk\Examples\Data\BrainProtonDensitySlice256x256.png");
-	writer->SetFileName("C:\itk-debug\itk\Examples\Data\new.png");
-	*/
 	typedef itk::CurvatureFlowImageFilter<InternalImageType, InternalImageType>	CurvatureFlowImageFilterType;
 
 	CurvatureFlowImageFilterType::Pointer smoothing = CurvatureFlowImageFilterType::New();
 
-	typedef itk::ConnectedThresholdImageFilter<InternalImageType,InternalImageType> ConnectedFilterType;
+	typedef itk::ConnectedThresholdImageFilter<InternalImageType, InternalImageType> ConnectedFilterType;
 
 	ConnectedFilterType::Pointer connectedThreshold = ConnectedFilterType::New();
 
-	smoothing->SetInput(image);
+	smoothing->SetInput(myitkImage);
 	connectedThreshold->SetInput(smoothing->GetOutput());
 	caster->SetInput(connectedThreshold->GetOutput());
-	//outImage->SetInput(caster->GetOutput());
+	writer->SetInput(caster->GetOutput());
 
 	smoothing->SetNumberOfIterations(5);
 	smoothing->SetTimeStep(0.125);
@@ -130,7 +116,7 @@ void Segmentation::Start() {
 
 	try
 	{
-		outImage->Update();
+		writer->Update();
 	}
 	catch (itk::ExceptionObject & excep)
 	{
@@ -140,26 +126,36 @@ void Segmentation::Start() {
 
 	//return EXIT_SUCCESS;
 
-	//wy�wietlenie-test
-	vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
-	actor->SetInputData(imageData);
+	//konwersja z itk do vtk i testowe wyświetlenie
+	typedef itk::ImageToVTKImageFilter<ImageType> ConnectorType;
 
-	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+	ConnectorType::Pointer connector = ConnectorType::New();
+
+	connector->SetInput(myitkImage);
+
+	vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
+#if VTK_MAJOR_VERSION <= 5
+	actor->SetInput(connector->GetOutput());
+#else
+	connector->Update();
+	actor->SetInputData(connector->GetOutput());
+#endif
+	vtkSmartPointer<vtkRenderer> renderer =	vtkSmartPointer<vtkRenderer>::New();
 	renderer->AddActor(actor);
 	renderer->ResetCamera();
 
 	vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
 	renderWindow->AddRenderer(renderer);
-	renderWindow->SetWindowName("Segmentation");
 
 	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 	vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
+
 	renderWindowInteractor->SetInteractorStyle(style);
 	renderWindowInteractor->SetRenderWindow(renderWindow);
 	renderWindowInteractor->Initialize();
 	renderWindowInteractor->Start();
 
-
+	//return EXIT_SUCCESS;
 }
 
 Segmentation::~Segmentation()
