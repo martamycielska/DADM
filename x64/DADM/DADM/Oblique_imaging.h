@@ -11,7 +11,7 @@ class Oblique_imaging:
 	public MRI_Module<Data3D, Data3D>
 {
 public:
-	Oblique_imaging(Data3D, double, double, Profile);
+	Oblique_imaging(Data3D, double, double, Profile, int);
 	virtual void Start();
 	~Oblique_imaging();
 	void getObliqueImage(Data3D inputData);
@@ -20,5 +20,6 @@ private:
 	double a;
 	double b;
 	Profile profile;
+	int profile_nr;
 };
 
