@@ -116,7 +116,7 @@ void Visualization3D::AcceptThreshold() {
 #pragma region private methods
 void Visualization3D::InitValue() {
 	ui->setupUi(this);
-	threshold = 3;
+	threshold = 134;
 	shrinkingFactor = 1;
 	visualizationDone = false;
 	setCutOptionEnable = false;
@@ -226,7 +226,9 @@ void Visualization3D::ReadMatFile(QString path) {
 
 	if (mat) {
 		matvar_t *matVar = 0;
-		matVar = Mat_VarRead(mat, (char*)"imageMaskFull");
+		//matVar = Mat_VarRead(mat, (char*)"imageMaskFull");      // po segmentacji
+		matVar = Mat_VarRead(mat, (char*)"d_out");                //afterSkullStripping
+		//matVar = Mat_VarRead(mat, (char*)"imageMaskFull");      //segmentaction mask
 		//matVar = Mat_VarRead(mat, (char*)"dataset_T2");         //T21
 		//matVar = Mat_VarRead(mat, (char*)"dataset_T1_INU_20");  //T12
 		//matVar = Mat_VarRead(mat, (char*)"dataset_T2_INU_20");  //T12

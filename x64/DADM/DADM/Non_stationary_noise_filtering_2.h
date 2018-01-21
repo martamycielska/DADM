@@ -12,6 +12,8 @@ public:
 	Non_stationary_noise_filtering_2(Data4D, Data4D);
 	~Non_stationary_noise_filtering_2() {};
 
+	MatrixXd unlm(MatrixXd input, MatrixXd sigma);
+
 private:
 	virtual void StructuralDataAlgorithm();
 	virtual void DiffusionDataAlgorithm();
