@@ -7,5 +7,7 @@ public:
 	Diffusion_tensor_imaging(Data4D);
 	virtual void Start();
 	~Diffusion_tensor_imaging();
+	void estimate_tensor();
+	void b_matrix();
 };
 
