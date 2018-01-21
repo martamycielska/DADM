@@ -32,7 +32,8 @@ Reconstruction::Reconstruction(Data5DRaw data, Data3DRaw sensitivity_maps, int L
 
 void Reconstruction::StructuralDataAlgorithm() {
 
-	int slices_no = data4DRaw_input.size();//liczba przekrojów
+	int slices_no = data4DRaw_input.size();//slices number
+	size = sensitivityMaps3D[0].rows();
 	qDebug() << "Size: " << slices_no;
 	Data3DRaw data_raw;
 	MatrixXd reconstructed_data;
@@ -41,24 +42,24 @@ void Reconstruction::StructuralDataAlgorithm() {
 	for (int i = 0; i < slices_no; i++)
 	{
 		qDebug() << "Iteration: " << i;
-		//przeprowadzenie Odwrotnej Transformaty Fouriera
+		//Inverse Discrete Fourier Transform
 		data_raw = data4DRaw_input[i];
 		data_raw = FourierTransform(data_raw);
 		
-		//Rekonstrukcja obrazu
+		//Image Reconstruction
 		reconstructed_data = LSreconstruction(data_raw);
 		qDebug() << "LS reconstruction done";
 
 		reconstructed_data = TikhonovRegularization(data_raw, reconstructed_data);
 		qDebug() << "Tikhonov regularization done";
 
-		//------------------
-		//normalizacja wartoœci
+		//Value normalization to 0-255
 		double min = reconstructed_data.minCoeff();
 		double max = reconstructed_data.maxCoeff();
-		for (int z = 0; z < 256; z++)
+#pragma omp parallel for shared(reconstructed_data, min, max) private(z, a)
+		for (int z = 0; z < size; z++)
 		{
-			for (int a = 0; a < 256; a++)
+			for (int a = 0; a < size; a++)
 			{
 				reconstructed_data(z,a)=((reconstructed_data(z, a)-min)*255)/(max-min);
 			}
@@ -66,16 +67,15 @@ void Reconstruction::StructuralDataAlgorithm() {
 		slices.at(i) = reconstructed_data;
 		
 	}
-	//zwracana wartoœæ
+	//output slices
 	data3D_output = slices;
-	//tymczasowo
-	//Global::structuralData = slices;
 	
 } 
 
 void Reconstruction::DiffusionDataAlgorithm()
 {
 	int slices_no = data5DRaw_input.size();
+	size = sensitivityMaps3D[0].rows();
 	Data4D slices(slices_no);
 	Data3DRaw data_raw;
 
@@ -92,30 +92,31 @@ void Reconstruction::DiffusionDataAlgorithm()
 		{
 			data_raw = data4d_raw.at(j);
 			data = FourierTransform(data_raw);
-			MatrixXd reconstructed_data(256,256);
-			//Rekonstrukcja obrazu
+			MatrixXd reconstructed_data(size,size);
+			//image reconstruction
 			reconstructed_data = LSreconstruction(data);
-			//normalizacja wartoœci
+			reconstructed_data = TikhonovRegularization(data, reconstructed_data);
 			
+			//Value normalization to 0-255
 			double min = reconstructed_data.minCoeff();
 			double max = reconstructed_data.maxCoeff();
-			for (int z = 0; z < 256; z++)
+#pragma omp parallel for shared(reconstructed_data, min, max) private(z, a)
+			for (int z = 0; z < size; z++)
 				{
-					for (int a = 0; a < 256; a++)
+					for (int a = 0; a < size; a++)
 						{
 							reconstructed_data(z, a) = ((reconstructed_data(z, a) - min) * 255) / (max - min);
 						}
 				}
 			reconstructed_data_3D.at(j) = reconstructed_data;
-							
-			Global::structuralData = reconstructed_data_3D;
+			
 			}
 
 		slices.at(i) = reconstructed_data_3D;
 
 	}
 
-	//zwracana wartoœæ
+	//output slices
 	data4D_output = slices;
 }
 
@@ -123,7 +124,7 @@ Data3DRaw Reconstruction::FourierTransform(Data3DRaw raw_data)
 {
 
 	Data3DRaw data;
-	data = ifft(raw_data); //wywo³anie funkcji do odwrotnej transformaty Fouriera
+	data = ifft(raw_data); //call iffft function
 	return data;
 }
 
@@ -138,8 +139,7 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 	{
 		MatrixXcd log = raw_data.at(k);
 
-		//-----------------------
-
+		
 		std::vector<std::complex<double>> a(sizex*sizey);//input vector definition
 		int count = 1;
 		#pragma omp parallel for shared(log, a, count, sizey, sizex) private(i, j)
@@ -179,26 +179,24 @@ Data3DRaw Reconstruction::ifft(Data3DRaw raw_data)
 
 MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 {
-	//rekonstrukcja SENSE
-	int rec_step = 256 / r;
+	//SENSE RECONSTRUCTION
+	int rec_step = size/ r;
 	MatrixXcd Sx(L, r);
 	VectorXcd Dr(r, 1);
-	MatrixXd Image(256, 256);
+	MatrixXd Image(size, size);
 	MatrixXcd Ds(L, 1);
 	Data3DRaw I_raw = data;
-	//std::vector<MatrixXcd> S = sensitivityMaps3D;
-	//std::vector<MatrixXcd> Sd(L);
-	MatrixXcd temp(256, 256);
+	MatrixXcd temp(size, size);
 	MatrixXcd log = I_raw.at(1);
 
-	int sizex = log.rows(); // liczba wierszy
-	int sizey = log.cols(); //liczba kolumn
+	int sizex = log.rows(); // rows number
+	int sizey = log.cols(); //columns number
 
 	for (int y = 0; y <sizey; y++)
 	{
 		for (int x = 0; x<sizex; x++)
 		{
-
+#pragma omp parallel for shared(sensitivityMaps3D, x, y, rec_step) private(j, p)
 			for (int j = 0; j<L; j++)
 			{
 				for (int p=0; p<r; p++)
@@ -211,7 +209,7 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 			{
 				Ds(k) = I_raw.at(k)(x, y);
 			}
-			//wyliczenie zgodnie ze wzorem
+			//evaluation according to the formula of LS reconstruction
 			MatrixXcd temp = (Sx.transpose()*Sx);
 			MatrixXcd temp2 = temp.inverse()*Sx.transpose();
 			Dr = temp2*Ds;
@@ -225,32 +223,32 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 
 	}
 
-	return Image; //zrekonstruowany obraz
+	return Image; //reconstructed image
 }
 
 MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 {
-	//regularyzacja Tichonova
-	int rec_step = 256 / r;
+	//Tikhonov regularization
+	int rec_step = size / r;
 	double lambda = 0.02;
 	MatrixXcd Sx(L, r);
 	VectorXcd Dr(r, 1);
-	MatrixXd Image(256, 256);
+	MatrixXd Image(size, size);
 	MatrixXcd Ds(L, 1);
 	MatrixXd A=MatrixXd::Identity(r,r);
 	Data3DRaw I_raw = data;
 	MatrixXd LastImage = medianFilter(image, 3);
 	MatrixXd ImagePoint(r, 1);
 
-	int sizex = I_raw.at(1).rows(); // liczba wierszy
-	int sizey = I_raw.at(1).cols(); //liczba kolumn
+	int sizex = I_raw.at(1).rows(); // rows number
+	int sizey = I_raw.at(1).cols(); //columns number
 
 
 	for (int y = 0; y <sizey; y++)
 	{
 		for (int x = 0; x<sizex; x++)
 		{
-
+#pragma omp parallel for shared(sensitivityMaps3D, x, y, rec_step) private(j, p)
 			for (int j = 0; j<L; j++)
 			{
 				for (int p = 0; p<r; p++)
@@ -263,7 +261,7 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 			{
 				Ds(k) = I_raw.at(k)(x, y);
 			}
-			//wyliczenie zgodnie ze wzorem
+			//evaluation according to the formula of Tikhonov Regularization
 			for (int w = 0; w < r; w++) 
 			{
 				ImagePoint(w, 0) = LastImage(x + w*rec_step, y);
@@ -279,7 +277,7 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 		}
 
 	}
-	return Image; //zrekonstruowany obraz
+	return Image; //regularized image
 }
 
 void Reconstruction::writeToCSVfile(std::string name, MatrixXd matrix)
@@ -310,12 +308,12 @@ MatrixXd Reconstruction::medianFilter(MatrixXd image, int windowSize)
 	int b;
 
 	MatrixXd newimage(image.rows(), image.cols());
-	//glowny loop dla siatki pixeli wyznaczajacy tzw pixel wyrozniony
+	//main loop for a pixel grid, called pixel highlighted
 	for (int x = 0; x < image.rows(); ++x)
 	{
 		for (int y = 0; y < image.cols(); ++y)
 		{
-			//loopy odpowiedzialne za operowanie na oknie filtrujacym
+			//loops responsible for operating on the filter window
 			#pragma omp parallel for shared(b, a, x, y, color, pixels) private(i, j)
 			for (int j = -(windowSize / 2); j < windowSize - 1; ++j)
 			{
@@ -325,12 +323,12 @@ MatrixXd Reconstruction::medianFilter(MatrixXd image, int windowSize)
 					b = y + j;
 					if (a<0)
 						a = 0;
-					if (a > 255)
-						a = 255;
+					if (a > image.rows() -1)
+						a = x;
 					if (b<0)
 						b = 0;
-					if (b > 255)
-						b = 255;
+					if (b > image.cols())
+						b = y;
 					color = image(a, b);
 					pixels.push_back(color);
 				}
