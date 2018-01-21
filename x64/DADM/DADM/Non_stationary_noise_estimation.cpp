@@ -31,26 +31,24 @@ Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data4D data)
 }
 
 void Non_stationary_noise_estimation::StructuralDataAlgorithm() {
-	//data3D_input
+	
+		for (int i = 0; i < data3D_input.size(); i++) {
+			setEstimators(data3D_input[i], i);
+		}
 }
 
 void Non_stationary_noise_estimation::DiffusionDataAlgorithm() {
-	//data4D_input
+	
+	for (int i = 0; i < data4D_input.size(); i++) {
+		for (int j = 0; j < data4D_input[i].size(); j++) {
+			setEstimators(data4D_input[i][j], i, j, true);
+		}
+	}
 }
 
 bool Non_stationary_noise_estimation::getSum(MatrixXd matrix)
 {
-	for (int j = 0; j < matrix.cols(); j++) {
-		double sumInColumn = 0;
-		for (int i = 0; i < matrix.rows(); i++) {
-			sumInColumn += matrix(i, j);
-		}
-		if (sumInColumn <= 1)
-		{
-			return false;
-		}
-	}
-	return true;
+	return !((matrix.colwise().sum().array() <= 1).any());
 }
 
 MatrixXd Non_stationary_noise_estimation::getFinded(MatrixXd matrix, int conditionValue)
@@ -110,45 +108,20 @@ void Non_stationary_noise_estimation::setBesselValues(MatrixXd z, MatrixXd K, Ma
 
 MatrixXd Non_stationary_noise_estimation::bessel(MatrixXd matrix)
 {
-	MatrixXd cont = MatrixXd::Zero(256, 256);
-	for (int i = 0; i < matrix.rows(); i++) {
-		for (int j = 0; j < matrix.cols(); j++) {
-			if (matrix(i, j) < 1.5) {
-				cont(i, j) = 1;
-			}
-			else {
-				cont(i, j) = 0;
-			}
-		}
-	}
-
+	MatrixXd cont = (matrix.array() < 1.5).cast<double>().array();
 	MatrixXd z8 = 8 * matrix;
 	MatrixXd z8Power2 = pow(z8.array(), 2);
 	MatrixXd z8Power3 = pow(z8.array(), 3);
-	MatrixXd Md1 = MatrixXd::Constant(256, 256, 1).array() / z8.array();
-	MatrixXd Md2 = MatrixXd::Constant(256, 256, 4.5).array() / z8Power2.array();
-	MatrixXd Md3 = MatrixXd::Constant(256, 256, (25 * 9) / 6).array() / z8Power3.array();
-	MatrixXd Md = (MatrixXd::Constant(256, 256, 1) + Md1) + Md2 + Md3;
 
-	MatrixXd Mn1 = MatrixXd::Constant(256, 256, 3).array() / z8.array();
-	MatrixXd Mn2 = MatrixXd::Constant(256, 256, 15 / 2).array() / z8Power2.array();
-	MatrixXd Mn3 = MatrixXd::Constant(256, 256, (3 * 5 * 21) / 6).array() / z8Power3.array();
-	MatrixXd Mn = MatrixXd::Constant(256, 256, 1) - Mn1 - Mn2 - Mn3;
-
-	MatrixXd M = Mn.array() / Md.array();
-	for (int i = 0; i < M.rows();i++) {
-		for (int j = 0; j < M.cols(); j++) {
-			if (M(i, j) != M(i, j))
-			{
-				M(i, j) = 0;
-			}
-		}
-	}
+	MatrixXd Md = (1 + (1 / z8.array())) + (4.5 / z8Power2.array()) + (37.5 / z8Power3.array());
+	MatrixXd Mn = (1 - (3 / z8.array())) - (7.5 / z8Power2.array()) - (52.5 / z8Power3.array());
+	MatrixXd M = (Mn.array() / Md.array()).unaryExpr([](double v) { return std::isnan(v) ? 0.0 : v; });
 
 	if (getSum(cont)) {
 		MatrixXd K = getFinded(cont, 1);
 		setBesselValues(matrix, K, M);
 	}
+
 	MatrixXd K = getFinded(matrix, 0);
 	setValueOnSpecifiedIndexes(M, K, 0);
 
@@ -156,15 +129,14 @@ MatrixXd Non_stationary_noise_estimation::bessel(MatrixXd matrix)
 }
 
 MatrixXd Non_stationary_noise_estimation::getMaxValue(MatrixXd matrix, double tresh) {
-
-	for (int i = 0; i <= 255;i++) {
-		for (int j = 0; j <= 255; j++) {
-			if (matrix(i, j) < tresh) {
-				matrix(i, j) = tresh;
-			}
-		}
+	if (tresh == 0)
+	{
+		return matrix.unaryExpr([](double v) { return v < 0 ? 0 : v; });
 	}
-	return matrix;
+	else
+	{
+		return matrix.unaryExpr([](double v) { return v < 0.01 ? 0.01 : v; });
+	}
 }
 
 MatrixXd Non_stationary_noise_estimation::filter2(MatrixXd matrix, MatrixXd window)
@@ -341,4 +313,42 @@ MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd 
 	F = F.array() * (SNR.array() <= 7).cast<double>().array();
 
 	return F;
+}
+
+
+void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j = 0, bool isDiffusion = false)
+{
+	MatrixXd mean = filter2(reconstructedImage, MatrixXd::Ones(5, 5)) / (5 * 5);
+	MatrixXd reconstructedWithoutMean = reconstructedImage - mean;
+	MatrixXd log = logCalculate(absoluteValue(reconstructedWithoutMean));
+
+	MatrixXd kernel = MatrixXd::Zero(2*reconstructedImage.rows(), 2 * reconstructedImage.cols());
+	MatrixXd filtered = gaussianKernel(kernel, log, 3.4);
+
+	MatrixXd dctt = dct(log);
+	MatrixXd lpfF2 = dctt.array()*filtered.array();
+	MatrixXd lpf = idct(lpfF2);
+
+	MatrixXd estimator = noiseEstimation(expCalculate(lpf));
+	MatrixXd SNR = getSNR(3, reconstructedImage);
+	MatrixXd correctSNR = riceCorrection(SNR, coeff);
+	MatrixXd LPF1 = lpf - correctSNR;
+
+	MatrixXd filtered2 = gaussianKernel(kernel, log, 3.4 + 2);
+	MatrixXd dctt2 = dct(LPF1);
+	MatrixXd lpfF22 = dctt2.array()*filtered2.array();
+	MatrixXd lpf2 = idct(lpfF22);
+
+	MatrixXd estimator2 = noiseEstimation(expCalculate(lpf2));
+
+	if (isDiffusion)
+	{
+		GaussEstimator4D[i][j] = estimator;
+		RiceEstimator4D[i][j] = estimator2;
+	}
+	else
+	{
+		GaussEstimator3D[i] = estimator;
+		RiceEstimator3D[i] = estimator2;
+	}
 }

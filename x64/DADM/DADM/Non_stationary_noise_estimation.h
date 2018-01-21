@@ -31,6 +31,6 @@ private:
 	MatrixXd Non_stationary_noise_estimation::dct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR, MatrixXd coeff);
-	
+	void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j = 0, bool isDiffusion = false);
 };
 
