@@ -88,6 +88,11 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
+	Global::structuralData.clear();
+	Global::dataXY.clear();
+	Global::dataXZ.clear();
+	Global::dataYZ.clear();
+
 	ui.DiffusionPage->hide();
 	Global::dtype = STRUCTURAL_DATA;
 	ui.statusBar->showMessage("Busy");
@@ -108,8 +113,12 @@ void DADM::importDiffusionData()
 	if (url.isEmpty())
 		return;
 
+	Global::structuralData.clear();
+	Global::dataXY.clear();
+	Global::dataXZ.clear();
+	Global::dataYZ.clear();
+
 	ui.DiffusionPage->show();
-	
 	disconnect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
 	disconnect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
 	disconnect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
@@ -155,12 +164,12 @@ void DADM::visualization3d() {
 }
 
 void DADM::visualization2d() {
-	if (Global::structuralData.size() != 0) {
-		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::temporaryDataXY);
+	if (Global::dataXY.size() != 0) {
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::dataXY);
 		xySliceVisualizator->visualize();
-		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::temporaryDataYZ);
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::dataYZ);
 		yzSliceVisualizator->visualize();
-		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::temporaryDataXZ);
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::dataXZ);
 		xzSliceVisualizator->visualize();
 
 		
@@ -265,9 +274,6 @@ void DADM::structuralTestDataImport()
 
 void DADM::onPreprocessingDone()
 {
-	Global::temporaryDataXY = Global::dataXY;
-	Global::temporaryDataXZ = Global::dataXZ;
-	Global::temporaryDataYZ = Global::dataYZ;
 	ui.statusBar->showMessage("Ready");
 	visualization2d();
 }
@@ -307,20 +313,7 @@ void DADM::planeValuesChanged()
 	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
 	worker_frontal->start();
 
-	/*
-	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::dataXY, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
-	connect(worker_saggital, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
-	connect(worker_saggital, &ObliqueImagingWorker::finished, worker_saggital, &QObject::deleteLater);
-	worker_saggital->start();
-	
-	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::dataYZ, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
-	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
-	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
-	worker_horizontal->start();
-	*/
 }
-
-
 
 void DADM::diffusionFASet()
 {
@@ -366,10 +359,6 @@ void DADM::UNLMFiltrationSet()
 
 void DADM::restoreDefault()
 {
-	Global::temporaryDataXY = Global::dataXY;
-	Global::temporaryDataXZ = Global::dataXZ;
-	Global::temporaryDataYZ = Global::dataYZ;
-
 	ui.alphaPlaneSpinBox->setValue(0);
 	ui.betaPlaneSpinBox->setValue(0);
 	ui.resolutionWidthSpinBox->setValue(0);
@@ -383,19 +372,19 @@ void DADM::showProgramInformation()
 
 void DADM::onObliqueImagingFrontalDone(Data3D data)
 {
-	Global::temporaryDataXZ = data;
+	//Global::temporaryDataXZ = data;
 	qDebug() << "Done XZ";
 }
 
 void DADM::onObliqueImagingSaggitalDone(Data3D data)
 {
-	Global::temporaryDataXY = data;
+	//Global::temporaryDataXY = data;
 	qDebug() << "Done XY";
 }
 
 void DADM::onObliqueImagingHorizontalDone(Data3D data)
 {
-	Global::temporaryDataYZ = data;
+	//Global::temporaryDataYZ = data;
 	qDebug() << "Done YZ";
 }
 
@@ -422,46 +411,44 @@ void Worker::run()
 	case STRUCTURAL_DATA:
 	{
 		emit currentProcess("Preprocessing: Reconstruction...");
-		emit progress(0, 4);
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		Global::structuralData = reconstruction->getData3D();
+		Global::structuralRawData.clear();
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
-		/*
+		if (ftype != NONE) {
 
-		emit progress(1, 4);
-		emit currentProcess("Preprocessing: Non stationary noise estimation...");
-		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
-		estimation->Start();
-		rice3D = estimation->getData3D(RICE);
-		emit progress(2, 4);
-		switch (ftype)
-		{
-		case LMMSE:
-		{
-			emit currentProcess("Preprocessing: Non stationary noise filtering...");
-			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images3D, rice3D);
-			lmmse->Start();
-			images3D.clear();
-			images3D = lmmse->getData3D();
-			break;
+			emit currentProcess("Preprocessing: Non stationary noise estimation...");
+			Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
+			estimation->Start();
+			rice3D = estimation->getData3D(RICE);
+			switch (ftype)
+			{
+			case LMMSE:
+			{
+				emit currentProcess("Preprocessing: Non stationary noise filtering...");
+				Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images3D, rice3D);
+				lmmse->Start();
+				images3D.clear();
+				images3D = lmmse->getData3D();
+				break;
+			}
+			case UNLM:
+			{
+				emit currentProcess("Preprocessing: Non stationary noise filtering...");
+				Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
+				unlm->Start();
+				images3D.clear();
+				images3D = unlm->getData3D();
+				break;
+			}
+			}
 		}
-		case UNLM:
-		{
-			emit currentProcess("Preprocessing: Non stationary noise filtering...");
-			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
-			unlm->Start();
-			images3D.clear();
-			images3D = unlm->getData3D();
-			break;
-		}
-		}
-		emit progress(3, 4);
+		/*
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images3D);
 		correction->Start();
 		Global::structuralData = correction->getData3D();
-		emit progress(4, 4);
 		*/
 		//------------------------------------------------------------YZ
 		Eigen::MatrixXd slice;
@@ -503,6 +490,7 @@ void Worker::run()
 		}
 
 		Global::dataXY = Global::structuralData;
+		Global::structuralData.clear();
 		Global::dataYZ = YZ_data_out;
 		Global::dataXZ = XZ_data_out;
 
@@ -530,48 +518,47 @@ void Worker::run()
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
+		Global::diffusionRawData.clear();
 		Global::structuralData = reconstruction->getData4D().at(3);
+		if (ftype != NONE) {
+			emit currentProcess("Preprocessing: Non stationary noise estimation...");
+			Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
+			estimation->Start();
+			rice4D = estimation->getData4D(RICE);
+			emit progress(2, 6);
+			switch (ftype)
+			{
+			case LMMSE:
+			{
+				emit currentProcess("Preprocessing: Non stationary noise filtering...");
+				Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images4D, rice4D);
+				lmmse->Start();
+				images4D.clear();
+				images4D = lmmse->getData4D();
+				break;
+			}
+			case UNLM:
+			{
+				emit currentProcess("Preprocessing: Non stationary noise filtering...");
+				Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images4D, rice4D);
+				unlm->Start();
+				images4D.clear();
+				images4D = unlm->getData4D();
+				break;
+			}
+			}
+		}
 		/*
-		emit progress(1, 6);
-		emit currentProcess("Preprocessing: Non stationary noise estimation...");
-		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
-		estimation->Start();
-		rice4D = estimation->getData4D(RICE);
-		emit progress(2, 6);
-		switch (ftype)
-		{
-		case LMMSE:
-		{
-			emit currentProcess("Preprocessing: Non stationary noise filtering...");
-			Non_stationary_noise_filtering_1 *lmmse = new Non_stationary_noise_filtering_1(images4D, rice4D);
-			lmmse->Start();
-			images4D.clear();
-			images4D = lmmse->getData4D();
-			break;
-		}
-		case UNLM:
-		{
-			emit currentProcess("Preprocessing: Non stationary noise filtering...");
-			Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images4D, rice4D);
-			unlm->Start();
-			images4D.clear();
-			images4D = unlm->getData4D();
-			break;
-		}
-		}
-		emit progress(3, 6);
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
 		correction->Start();
 		images4D.clear();
 		images4D = correction->getData4D();
-		emit progress(4, 6);
 		emit currentProcess("Preprocessing: Skull stripping...");
 		Skull_stripping *skull_stripping = new Skull_stripping(images4D);
 		skull_stripping->Start();
 		images4D.clear();
 		images4D = skull_stripping->getData4D();
-		emit progress(5,6);
 		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
 		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
 		diff->Start();
@@ -580,7 +567,6 @@ void Worker::run()
 		Global::RA = diff->getRA();
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
-		emit progress(6, 6);
 		*/
 		//TODO k¹ty do ustalenia
 		/* 
@@ -807,6 +793,12 @@ void ImportWorker::diffusionDataImport()
 			Global::b_value = xData[0];
 		}
 
+		Mat_VarFree(matVar);
+		Mat_VarFree(s_matVar);
+		Mat_VarFree(r_matVar);
+		Mat_VarFree(l_matVar);
+		Mat_VarFree(b_matVar);
+		Mat_VarFree(g_matVar);
 	}
 	qDebug() << Global::L;
 	qDebug() << Global::r;
@@ -943,6 +935,11 @@ void ImportWorker::structuralDataImport()
 			Global::r = xData[0];
 		}
 
+		Mat_VarFree(matVar);
+		Mat_VarFree(s_matVar);
+		Mat_VarFree(r_matVar);
+		Mat_VarFree(l_matVar);
+
 	}
 	qDebug() << Global::L;
 	qDebug() << Global::r;
@@ -963,13 +960,13 @@ void ObliqueImagingWorker::run() {
 	Oblique_imaging *imaging;
 	switch (profile) {
 	case FRONTAL:
-		imaging = new Oblique_imaging(data, a, b, FRONTAL);
+		imaging = new Oblique_imaging(data, a, b, FRONTAL, 30);
 		break;
 	case SAGGITAL:
-		imaging = new Oblique_imaging(data, a, b, SAGGITAL);
+		imaging = new Oblique_imaging(data, a, b, SAGGITAL, 30);
 		break;
 	case HORIZONTAL:
-		imaging = new Oblique_imaging(data, a, b, HORIZONTAL);
+		imaging = new Oblique_imaging(data, a, b, HORIZONTAL, 30);
 		break;
 	}
 	imaging->Start();

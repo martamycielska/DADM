@@ -28,7 +28,7 @@ UpsamplingImage::UpsamplingImage(SlicePlane plane, int width, int height, int sl
 	switch (plane) {
 	case SlicePlane::XY:
 	{
-		UpsamplingWorker *worker = new UpsamplingWorker(Global::temporaryDataXY.at(slice), width, height);
+		UpsamplingWorker *worker = new UpsamplingWorker(Global::dataXY.at(slice), width, height);
 		connect(worker, &UpsamplingWorker::finished, worker, &QObject::deleteLater);
 		connect(worker, &UpsamplingWorker::processingDone, this, &UpsamplingImage::onProessingDone);
 		worker->start();
@@ -36,7 +36,7 @@ UpsamplingImage::UpsamplingImage(SlicePlane plane, int width, int height, int sl
 	}
 	case SlicePlane::XZ:
 	{
-		UpsamplingWorker *worker = new UpsamplingWorker(Global::temporaryDataXZ.at(slice), width, height);
+		UpsamplingWorker *worker = new UpsamplingWorker(Global::dataXZ.at(slice), width, height);
 		connect(worker, &UpsamplingWorker::finished, worker, &QObject::deleteLater);
 		connect(worker, &UpsamplingWorker::processingDone, this, &UpsamplingImage::onProessingDone);
 		worker->start();
@@ -44,7 +44,7 @@ UpsamplingImage::UpsamplingImage(SlicePlane plane, int width, int height, int sl
 	}
 	case SlicePlane::YZ:
 	{
-		UpsamplingWorker *worker = new UpsamplingWorker(Global::temporaryDataYZ.at(slice), width, height);
+		UpsamplingWorker *worker = new UpsamplingWorker(Global::dataYZ.at(slice), width, height);
 		connect(worker, &UpsamplingWorker::finished, worker, &QObject::deleteLater);
 		connect(worker, &UpsamplingWorker::processingDone, this, &UpsamplingImage::onProessingDone);
 		worker->start();

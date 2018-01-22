@@ -15,9 +15,6 @@ namespace Global {
 	extern Data3D dataXY;
 	extern Data3D dataYZ;
 	extern Data3D dataXZ;
-	extern Data3D temporaryDataXY;
-	extern Data3D temporaryDataYZ;
-	extern Data3D temporaryDataXZ;
 	extern Data3D structuralData;
 	extern Data4DRaw structuralRawData;
 	extern Data3DRaw structuralSensitivityMaps;

@@ -53,7 +53,7 @@
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="FiltrationPage">
             <property name="geometry">
@@ -74,7 +74,7 @@
                 <string>LMMSE</string>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -82,6 +82,16 @@
               <widget class="QRadioButton" name="UNLMRadioButton">
                <property name="text">
                 <string>UNLM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="NoneFiltrationRadioButton">
+               <property name="text">
+                <string>None</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -105,8 +115,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>98</width>
+              <height>103</height>
              </rect>
             </property>
             <attribute name="label">
@@ -184,8 +194,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>112</width>
+              <height>172</height>
              </rect>
             </property>
             <attribute name="label">
@@ -279,8 +289,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>98</width>
+              <height>110</height>
              </rect>
             </property>
             <attribute name="label">
@@ -515,7 +525,7 @@
   </action>
   <action name="actionVisualize_2D">
    <property name="text">
-    <string>Visualize 2D</string>
+    <string>Refresh view</string>
    </property>
   </action>
   <action name="actionRead_Global_Data">

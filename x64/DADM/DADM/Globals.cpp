@@ -10,9 +10,6 @@ namespace Global {
 	extern Data3D dataXY = Data3D(0);
 	extern Data3D dataYZ = Data3D(0);
 	extern Data3D dataXZ = Data3D(0);
-	extern Data3D temporaryDataXY = Data3D(0);
-	extern Data3D temporaryDataYZ = Data3D(0);
-	extern Data3D temporaryDataXZ = Data3D(0);
 	extern Data4DRaw structuralRawData = Data4DRaw(0);
 	extern Data3DRaw structuralSensitivityMaps = Data3DRaw(0);
 	extern double L = 0;
