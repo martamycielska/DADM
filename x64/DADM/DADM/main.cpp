@@ -3,8 +3,12 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	DADM w;
-	w.show();
-	return a.exec();
+	MatrixXd m;
+
+	return 1;
+
+	//QApplication a(argc, argv);
+	//DADM w;
+	//w.show();
+	//return a.exec();
 }

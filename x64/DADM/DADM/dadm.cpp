@@ -19,6 +19,7 @@
 #include "matio.h"
 #include "qaction.h"
 #include "qfiledialog.h"
+#include <SliceVisualizator.h>
 //#include "mat.h"
 
 //using MatFileHandler;
@@ -28,6 +29,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
+	connect(ui.actionVisualize_2D, &QAction::triggered, this, &DADM::visualization2d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
 	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
@@ -45,6 +47,24 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
+
+	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
+	connect(ui.yzSlider, SIGNAL(valueChanged(int)), this, SLOT(yzSliderValueChanged(int)));
+	connect(ui.xzSlider, SIGNAL(valueChanged(int)), this, SLOT(xzSliderValueChanged(int)));
+
+	renderWndXY = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndYZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndXZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui.xyVtkWidget->SetRenderWindow(renderWndXY);
+	ui.yzVtkWidget->SetRenderWindow(renderWndYZ);
+	ui.xzVtkWidget->SetRenderWindow(renderWndXZ);
+
+	ui.xySlider->setMinimum(0);
+	ui.xySlider->setMaximum(0);
+	ui.xzSlider->setMinimum(0);
+	ui.xzSlider->setMaximum(0);
+	ui.yzSlider->setMinimum(0);
+	ui.yzSlider->setMaximum(0);
 }
 
 void DADM::mri_reconstruct() {
@@ -61,22 +81,22 @@ void DADM::mri_reconstruct() {
 
 void DADM::importStructuralData()
 {
-
-	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Mat file (*.mat) (*mat)");
-
-	if (url.isEmpty())
-		return;
-
-	ui.DiffusionPage->hide();
-	Global::dtype = STRUCTURAL_DATA;
-	ui.statusBar->showMessage("Busy");
-	ui.progressBar->show();
-	QString path = url.path().remove(0, 1);
-	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
-	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
-	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
-	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
-	iw->start();
+//
+//	QUrl url = QFileDialog::getOpenFileUrl(this, "Open file", QUrl(""), "Mat file (*.mat) (*mat)");
+//
+//	if (url.isEmpty())
+//		return;
+//
+//	ui.DiffusionPage->hide();
+//	Global::dtype = STRUCTURAL_DATA;
+//	ui.statusBar->showMessage("Busy");
+//	ui.progressBar->show();
+//	QString path = url.path().remove(0, 1);
+//	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
+//	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
+//	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
+//	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
+//	iw->start();
 }
 
 void DADM::importDiffusionData()
@@ -134,6 +154,43 @@ void DADM::visualization3d() {
 	vis3D = new Visualization3D();
 	HelperMethods::SetCenterPosition(vis3D);
 	vis3D->show();
+}
+
+void DADM::visualization2d() {
+	if (Global::structuralData.size() != 0) {
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::structuralData);
+		xySliceVisualizator->visualize();
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::structuralData);
+		yzSliceVisualizator->visualize();
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::structuralData);
+		xzSliceVisualizator->visualize();
+
+		
+		ui.xySlider->setMinimum(0);
+		ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
+		ui.xzSlider->setMinimum(0);
+		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+		ui.yzSlider->setMinimum(0);
+		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+	}
+}
+
+void DADM::xySliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XY: " << sliderValue << " slice";
+	xySliceVisualizator->getImageViewerXY()->SetSlice(sliderValue);
+	xySliceVisualizator->getImageViewerXY()->Render();
+}
+
+void DADM::yzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam YZ: " << sliderValue << " slice";
+	yzSliceVisualizator->getImageViewerYZ()->SetSlice(sliderValue);
+	yzSliceVisualizator->getImageViewerYZ()->Render();
+}
+
+void DADM::xzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XZ: " << sliderValue << " slice";
+	xzSliceVisualizator->getImageViewerXZ()->SetSlice(sliderValue);
+	xzSliceVisualizator->getImageViewerXZ()->Render();
 }
 
 void DADM::closeEvent(QCloseEvent *)
@@ -381,6 +438,9 @@ void Worker::run()
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		images3D = reconstruction->getData3D();
+		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
+		
+
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
@@ -414,6 +474,7 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
+		
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -426,6 +487,7 @@ void Worker::run()
 		horizontal->Start();
 		Global::dataHorizontal = frontal->getData();
 		*/
+		
 		break;
 	}
 	case DIFFUSION_DATA:
@@ -476,7 +538,7 @@ void Worker::run()
 		images4D = skull_stripping->getData4D();
 		emit progress(5,6);
 		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
-		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
+		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D, Global::b_value, Global::gradients);
 		diff->Start();
 		Global::diffusionData4D = diff->getData();
 		Global::FA = diff->getFA();
@@ -542,7 +604,7 @@ void ImportWorker::diffusionDataImport()
 
 		int max = 0;
 		if (matVar) {
-			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3];
+			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3] * matVar->dims[4];
 		}
 
 		if (s_matVar) {
@@ -594,31 +656,53 @@ void ImportWorker::diffusionDataImport()
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
 			qDebug() << matVar->dims[3];
+			qDebug() << matVar->dims[4];
 
 			//std::vector<MatrixXcd> raw_data;
 			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			std::vector<std::vector<MatrixXcd>> raw_data;
-			for (int l = 0; l < matVar->dims[3]; l++) {
-				std::vector<MatrixXcd> raw_data_part;
-				for (int i = 0; i < matVar->dims[2]; i++) {
-					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-					for (int j = 0; j < matVar->dims[1]; j++) {
-						for (int k = 0; k < matVar->dims[0]; k++) {
-							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-							status++;
-							val_num++;
-							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
-							//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<std::vector<MatrixXcd>>> raw_data;
+			for (int m = 0; m < matVar->dims[4]; m++) {
+				std::vector<std::vector<MatrixXcd>> raw_data_part_one;
+				for (int l = 0; l < matVar->dims[3]; l++) {
+					std::vector<MatrixXcd> raw_data_part_two;
+					for (int i = 0; i < matVar->dims[2]; i++) {
+						MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+						for (int j = 0; j < matVar->dims[1]; j++) {
+							for (int k = 0; k < matVar->dims[0]; k++) {
+								m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+								status++;
+								val_num++;
+								if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
+								//qDebug() << xRe[val_num] << xIm[val_num];
+							}
 						}
+						raw_data_part_two.push_back(m);
+						emit importProgress(status, max);
 					}
-					raw_data_part.push_back(m);
-					emit importProgress(status, max);
+					raw_data_part_one.push_back(raw_data_part_two);
 				}
-				raw_data.push_back(raw_data_part);
+				raw_data.push_back(raw_data_part_one);
 			}
 
 			Global::diffusionRawData = raw_data;
+
+			//----------------------
+			/*
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}*/
+			//------------------------------------
+			//Data5DRaw RawData5D(1);
+			//RawData5D[0] = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -707,7 +791,7 @@ void ImportWorker::structuralDataImport()
 
 		int max = 0;
 		if (matVar) {
-			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2];
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
 		}
 
 		if (s_matVar) {
@@ -727,25 +811,30 @@ void ImportWorker::structuralDataImport()
 			qDebug() << matVar->dims[0];
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
+			qDebug() << matVar->dims[3];
 
-			std::vector<MatrixXcd> raw_data;
-			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			for (int i = 0; i < matVar->dims[2]; i++) {
-				MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-				for (int j = 0; j < matVar->dims[1]; j++) {
-					for (int k = 0; k < matVar->dims[0]; k++) {
-						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-						status++;
-						val_num++;
-						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
-						//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<MatrixXcd>> raw_data;
+			for (int l = 0; l < matVar->dims[3]; l++) {
+				std::vector<MatrixXcd> raw_data_part;
+				for (int i = 0; i < matVar->dims[2]; i++) {
+					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+					for (int j = 0; j < matVar->dims[1]; j++) {
+						for (int k = 0; k < matVar->dims[0]; k++) {
+							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
+							val_num++;
+							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
+							//qDebug() << xRe[val_num] << xIm[val_num];
+						}
 					}
+					raw_data_part.push_back(m);
+					emit importProgress(status, max);
 				}
-				raw_data.push_back(m);
-				emit importProgress(status, max);
+				raw_data.push_back(raw_data_part);
 			}
-
+			//Data4DRaw DataRaw4D(1);
+			//DataRaw4D[0] = raw_data;
 			Global::structuralRawData = raw_data;
 
 			//matvar_t *s_matVar = 0;

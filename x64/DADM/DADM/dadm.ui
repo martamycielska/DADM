@@ -6,17 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1088</width>
-    <height>689</height>
+    <width>960</width>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>DADM</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_13">
+   <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="maximumSize">
@@ -60,8 +60,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>80</width>
+              <height>90</height>
              </rect>
             </property>
             <attribute name="label">
@@ -105,8 +105,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>93</width>
+              <height>103</height>
              </rect>
             </property>
             <attribute name="label">
@@ -184,8 +184,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>94</width>
+              <height>103</height>
              </rect>
             </property>
             <attribute name="label">
@@ -304,14 +304,14 @@
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer_10">
+          <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>148</height>
+             <height>40</height>
             </size>
            </property>
           </spacer>
@@ -320,24 +320,76 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_12">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QOpenGLWidget" name="VTK_Frontal"/>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QVTKOpenGLWidget" name="xyVtkWidget" native="true"/>
+            </item>
+            <item>
+             <widget class="QSlider" name="xySlider">
+              <property name="maximum">
+               <number>180</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QOpenGLWidget" name="VTK_Saggital"/>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QVTKOpenGLWidget" name="yzVtkWidget" native="true"/>
+            </item>
+            <item>
+             <widget class="QSlider" name="yzSlider">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_16">
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QOpenGLWidget" name="VTK_Horizontal"/>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QVTKOpenGLWidget" name="xzVtkWidget" native="true"/>
+            </item>
+            <item>
+             <widget class="QSlider" name="xzSlider">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QWidget" name="Unused_Widget" native="true"/>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -362,7 +414,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1088</width>
+     <width>960</width>
      <height>21</height>
     </rect>
    </property>
@@ -386,6 +438,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionVisualization_3D"/>
+    <addaction name="actionVisualize_2D"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -420,7 +473,7 @@
   </action>
   <action name="actionVisualization_3D">
    <property name="text">
-    <string>Visualization 3D...</string>
+    <string>Visualize 3D</string>
    </property>
   </action>
   <action name="actionInformation">
@@ -428,8 +481,26 @@
     <string>Information...</string>
    </property>
   </action>
+  <action name="actionVisualize_2D">
+   <property name="text">
+    <string>Visualize 2D</string>
+   </property>
+  </action>
+  <action name="actionRead_Global_Data">
+   <property name="text">
+    <string>Read Global Data</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QVTKOpenGLWidget</class>
+   <extends>QWidget</extends>
+   <header>QVTKOpenGLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="dadm.qrc"/>
  </resources>
