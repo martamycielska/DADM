@@ -199,6 +199,8 @@ void DADM::structuralTestDataImport()
 			Global::structuralData = data;
 		}
 
+
+
 		Mat_Close(mat);
 		QMessageBox msgBox;
 		msgBox.setText("Finished");
