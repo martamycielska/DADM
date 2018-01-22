@@ -13,10 +13,10 @@ Brain_3D::Brain_3D(Data3D data, int xspace, int yspace, int zspace, int threshol
 }
 
 void Brain_3D::Start() {
-	initialize(inputData);
+	createModel3D(inputData);
 }
 
-void Brain_3D::initialize(Data3D inputData) {
+void Brain_3D::createModel3D(Data3D inputData) {
 
 	// Create a MRI image data
 	imageData = vtkSmartPointer<vtkImageData>::New();
@@ -44,13 +44,13 @@ void Brain_3D::initialize(Data3D inputData) {
 	mc->ComputeGradientsOn();
 	mc->SetValue(0, threshold);
 
+	// Reduce the number of triangles (in percentage)
 	decimater = vtkSmartPointer<vtkDecimatePro>::New();
 	decimater->SetInputConnection(mc->GetOutputPort());
 	//decimate->SetTargetReduction(.99); //99% reduction (if there was 100 triangles, now there will be 1)
 	decimater->SetTargetReduction(.0); //0% reduction (if there was 100 triangles, now there will be 90)
 
-
-	// Create a mapper
+	// Create a mapper (mapping isosurface to graphic primitives)
 	mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	mapper->SetInputConnection(decimater->GetOutputPort());
 	//mapper->SetInputConnection(mc->GetOutputPort());

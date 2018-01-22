@@ -1,5 +1,6 @@
 #pragma once
 #include "qthread.h"
+#include "qdebug.h"
 #include <Eigen\Dense>
 #include <unsupported\Eigen\CXX11\Tensor>
 
@@ -7,6 +8,8 @@ using namespace Eigen;
 
 //typedef Tensor<double, 3> Data3D;
 //typedef Tensor<double, 4> Data4D;
+
+enum class SlicePlane { XY, YZ, XZ };
 
 typedef std::vector<MatrixXd> Data3D;
 typedef std::vector<std::vector<MatrixXd>> Data4D;

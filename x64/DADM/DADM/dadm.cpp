@@ -19,6 +19,8 @@
 #include "matio.h"
 #include "qaction.h"
 #include "qfiledialog.h"
+#include <SliceVisualizator.h>
+#include "upsamplingimage.h"
 //#include "mat.h"
 
 //using MatFileHandler;
@@ -28,6 +30,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
+	connect(ui.actionVisualize_2D, &QAction::triggered, this, &DADM::visualization2d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
 	connect(ui.actionDiffusion_data, &QAction::triggered, this, &DADM::importDiffusionData);
 	connect(ui.actionRestore_default, &QAction::triggered, this, &DADM::restoreDefault);
@@ -45,6 +48,24 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 	ui.progressBar->hide();
+
+	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
+	connect(ui.yzSlider, SIGNAL(valueChanged(int)), this, SLOT(yzSliderValueChanged(int)));
+	connect(ui.xzSlider, SIGNAL(valueChanged(int)), this, SLOT(xzSliderValueChanged(int)));
+
+	renderWndXY = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndYZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	renderWndXZ = vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+	ui.xyVtkWidget->SetRenderWindow(renderWndXY);
+	ui.yzVtkWidget->SetRenderWindow(renderWndYZ);
+	ui.xzVtkWidget->SetRenderWindow(renderWndXZ);
+
+	ui.xySlider->setMinimum(0);
+	ui.xySlider->setMaximum(0);
+	ui.xzSlider->setMinimum(0);
+	ui.xzSlider->setMaximum(0);
+	ui.yzSlider->setMinimum(0);
+	ui.yzSlider->setMaximum(0);
 }
 
 void DADM::mri_reconstruct() {
@@ -117,11 +138,8 @@ void DADM::importDiffusionData()
 
 void DADM::onImportDone()
 {
-	QMessageBox msgBox;
-	msgBox.setText("Data imported");
-	msgBox.exec();
 	ui.statusBar->showMessage("Ready");
-
+	ui.progressBar->hide();
 	Worker* worker = new Worker(Global::dtype, Global::ftype);
 	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
 	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
@@ -134,6 +152,43 @@ void DADM::visualization3d() {
 	vis3D = new Visualization3D();
 	HelperMethods::SetCenterPosition(vis3D);
 	vis3D->show();
+}
+
+void DADM::visualization2d() {
+	if (Global::structuralData.size() != 0) {
+		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::temporaryDataXY);
+		xySliceVisualizator->visualize();
+		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::temporaryDataYZ);
+		yzSliceVisualizator->visualize();
+		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::temporaryDataXZ);
+		xzSliceVisualizator->visualize();
+
+		
+		ui.xySlider->setMinimum(0);
+		ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
+		ui.xzSlider->setMinimum(0);
+		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+		ui.yzSlider->setMinimum(0);
+		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+	}
+}
+
+void DADM::xySliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XY: " << sliderValue << " slice";
+	xySliceVisualizator->getImageViewerXY()->SetSlice(sliderValue);
+	xySliceVisualizator->getImageViewerXY()->Render();
+}
+
+void DADM::yzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam YZ: " << sliderValue << " slice";
+	yzSliceVisualizator->getImageViewerYZ()->SetSlice(sliderValue);
+	yzSliceVisualizator->getImageViewerYZ()->Render();
+}
+
+void DADM::xzSliderValueChanged(int sliderValue) {
+	qDebug() << "Zmieniam XZ: " << sliderValue << " slice";
+	xzSliceVisualizator->getImageViewerXZ()->SetSlice(sliderValue);
+	xzSliceVisualizator->getImageViewerXZ()->Render();
 }
 
 void DADM::closeEvent(QCloseEvent *)
@@ -210,14 +265,11 @@ void DADM::structuralTestDataImport()
 
 void DADM::onPreprocessingDone()
 {
-	Global::temporaryDataFrontal = Global::dataFrontal;
-	Global::temporaryDataHorizontal = Global::dataHorizontal;
-	Global::temporaryDataSaggital = Global::dataSaggital;
+	Global::temporaryDataXY = Global::dataXY;
+	Global::temporaryDataXZ = Global::dataXZ;
+	Global::temporaryDataYZ = Global::dataYZ;
 	ui.statusBar->showMessage("Ready");
-	QMessageBox msgBox;
-	msgBox.setText("Preprocessing Done");
-	msgBox.exec();
-	ui.progressBar->hide();
+	visualization2d();
 }
 
 void DADM::onProgress(int progress, int max)
@@ -233,38 +285,23 @@ void DADM::onProccesing(QString msg)
 
 void DADM::resolutionValuesChanged()
 {
-	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
-	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
-	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
-	worker_frontal->start();
-
-	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::dataSaggital, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
-	connect(worker_saggital, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
-	connect(worker_saggital, &ObliqueImagingWorker::finished, worker_saggital, &QObject::deleteLater);
-	worker_saggital->start();
-
-	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::dataFrontal, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
-	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
-	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
-	worker_horizontal->start();
+	if (ui.FrontalPlaneRadioButton->isChecked()) {
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xzSlider->value());
+		upsamlingImageWindow->show();
+	}
+	if (ui.SaggitalPlaneRadioButton->isChecked()) {
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XY, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xySlider->value());
+		upsamlingImageWindow->show();
+	}
+	if (ui.HorizontalPlaneRadioButton->isChecked()) {
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::YZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.yzSlider->value());
+		upsamlingImageWindow->show();
+	}
 }
 
 void DADM::planeValuesChanged()
 {
-	UpsamplingWorker *worker_frontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), FRONTAL);
-	connect(worker_frontal, &UpsamplingWorker::resultReadyFrontal, this, &DADM::onUpsamplingFrontalDone);
-	connect(worker_frontal, &UpsamplingWorker::finished, worker_frontal, &QObject::deleteLater);
-	worker_frontal->start();
 
-	UpsamplingWorker *worker_saggital = new UpsamplingWorker(Global::dataSaggital, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), SAGGITAL);
-	connect(worker_saggital, &UpsamplingWorker::resultReadySggital, this, &DADM::onUpsamplingSaggitalDone);
-	connect(worker_saggital, &UpsamplingWorker::finished, worker_saggital, &QObject::deleteLater);
-	worker_saggital->start();
-
-	UpsamplingWorker *worker_horizontal = new UpsamplingWorker(Global::dataFrontal, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), HORIZONTAL);
-	connect(worker_horizontal, &UpsamplingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingFrontalDone);
-	connect(worker_horizontal, &UpsamplingWorker::finished, worker_horizontal, &QObject::deleteLater);
-	worker_horizontal->start();
 }
 
 
@@ -312,9 +349,9 @@ void DADM::UNLMFiltrationSet()
 
 void DADM::restoreDefault()
 {
-	Global::temporaryDataFrontal = Global::dataFrontal;
-	Global::temporaryDataHorizontal = Global::dataHorizontal;
-	Global::temporaryDataSaggital = Global::dataSaggital;
+	Global::temporaryDataXY = Global::dataXY;
+	Global::temporaryDataXZ = Global::dataXZ;
+	Global::temporaryDataYZ = Global::dataYZ;
 
 	ui.alphaPlaneSpinBox->setValue(0);
 	ui.betaPlaneSpinBox->setValue(0);
@@ -328,32 +365,32 @@ void DADM::showProgramInformation()
 
 void DADM::onUpsamplingFrontalDone(Data3D data)
 {
-	Global::temporaryDataFrontal = data;
+	//Global::temporaryDataFrontal = data;
 }
 
 void DADM::onUpsamplingSaggitalDone(Data3D data)
 {
-	Global::temporaryDataSaggital = data;
+	//Global::temporaryDataSaggital = data;
 }
 
 void DADM::onUpsamplingHorizontalDone(Data3D data)
 {
-	Global::temporaryDataHorizontal = data;
+	//Global::temporaryDataHorizontal = data;
 }
 
 void DADM::onObliqueImagingFrontalDone(Data3D data)
 {
-	Global::temporaryDataFrontal = data;
+	//Global::temporaryDataFrontal = data;
 }
 
 void DADM::onObliqueImagingSaggitalDone(Data3D data)
 {
-	Global::temporaryDataSaggital = data;
+	//Global::temporaryDataSaggital = data;
 }
 
 void DADM::onObliqueImagingHorizontalDone(Data3D data)
 {
-	Global::temporaryDataHorizontal = data;
+	//Global::temporaryDataHorizontal = data;
 }
 
 DADM::~DADM()
@@ -382,7 +419,10 @@ void Worker::run()
 		emit progress(0, 4);
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
-		images3D = reconstruction->getData3D();
+		Global::structuralData = reconstruction->getData3D();
+		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
+		/*
+
 		emit progress(1, 4);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
@@ -416,6 +456,53 @@ void Worker::run()
 		correction->Start();
 		Global::structuralData = correction->getData3D();
 		emit progress(4, 4);
+		*/
+		//------------------------------------------------------------YZ
+		Eigen::MatrixXd slice;
+		slice = Global::structuralData.at(90);
+
+		int size_z = Global::structuralData.size();
+		int size_x = slice.rows();
+		int size_y = slice.cols();
+
+		std::vector<MatrixXd> YZ_data_out;
+		Eigen::MatrixXd image_out = Eigen::MatrixXd::Zero(size_y, size_z);
+
+		for (int YZ_slice_nr = 0; YZ_slice_nr < size_x; ++YZ_slice_nr) {
+			for (int i = 0; i < size_y; ++i) {
+				for (int j = 0; j < size_z; ++j) {
+					image_out(i, j) = Global::structuralData[j](YZ_slice_nr, i);
+				}
+			}
+			YZ_data_out.push_back(image_out);
+		}
+
+		//------------------------------------------------------------ XZ
+		slice = Global::structuralData.at(90);
+
+		size_z = Global::structuralData.size();
+		size_x = slice.rows();
+		size_y = slice.cols();
+
+		std::vector<MatrixXd> XZ_data_out;
+		image_out = Eigen::MatrixXd::Zero(size_x, size_z);
+
+		for (int XZ_slice_nr = 0; XZ_slice_nr < size_x; ++XZ_slice_nr) {
+			for (int i = 0; i < size_x; ++i) {
+				for (int j = 0; j < size_z; ++j) {
+					image_out(i, j) = Global::structuralData[j](i, XZ_slice_nr);
+				}
+			}
+			XZ_data_out.push_back(image_out);
+		}
+
+		Global::dataXY = Global::structuralData;
+		Global::dataYZ = YZ_data_out;
+		Global::dataXZ = XZ_data_out;
+
+		qDebug() << Global::dataXY.size();
+		qDebug() << Global::dataYZ.size();
+		qDebug() << Global::dataXZ.size();
 		//TODO k¹ty do ustalenia
 		/*
 		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
@@ -428,6 +515,7 @@ void Worker::run()
 		horizontal->Start();
 		Global::dataHorizontal = frontal->getData();
 		*/
+		
 		break;
 	}
 	case DIFFUSION_DATA:
@@ -436,7 +524,8 @@ void Worker::run()
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
-		images4D = reconstruction->getData4D();
+		Global::structuralData = reconstruction->getData4D().at(3);
+		/*
 		emit progress(1, 6);
 		emit currentProcess("Preprocessing: Non stationary noise estimation...");
 		Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
@@ -486,6 +575,7 @@ void Worker::run()
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
 		emit progress(6, 6);
+		*/
 		//TODO k¹ty do ustalenia
 		/* 
 		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
@@ -544,7 +634,7 @@ void ImportWorker::diffusionDataImport()
 
 		int max = 0;
 		if (matVar) {
-			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3];
+			max += matVar->dims[0]*matVar->dims[1]*matVar->dims[2]*matVar->dims[3] * matVar->dims[4];
 		}
 
 		if (s_matVar) {
@@ -596,31 +686,57 @@ void ImportWorker::diffusionDataImport()
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
 			qDebug() << matVar->dims[3];
+			qDebug() << matVar->dims[4];
 
 			//std::vector<MatrixXcd> raw_data;
 			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			std::vector<std::vector<MatrixXcd>> raw_data;
-			for (int l = 0; l < matVar->dims[3]; l++) {
-				std::vector<MatrixXcd> raw_data_part;
-				for (int i = 0; i < matVar->dims[2]; i++) {
-					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-					for (int j = 0; j < matVar->dims[1]; j++) {
-						for (int k = 0; k < matVar->dims[0]; k++) {
-							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-							status++;
-							val_num++;
-							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
-							//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<std::vector<MatrixXcd>>> raw_data;
+			for (int m = 0; m < matVar->dims[4]; m++) {
+				std::vector<std::vector<MatrixXcd>> raw_data_part_one;
+				for (int l = 0; l < matVar->dims[3]; l++) {
+					std::vector<MatrixXcd> raw_data_part_two;
+					for (int i = 0; i < matVar->dims[2]; i++) {
+						MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+						for (int j = 0; j < matVar->dims[1]; j++) {
+							for (int k = 0; k < matVar->dims[0]; k++) {
+								m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+								status++;
+								val_num++;
+								if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3] * matVar->dims[4]) break;
+								//qDebug() << xRe[val_num] << xIm[val_num];
+							}
 						}
+						raw_data_part_two.push_back(m);
+						emit importProgress(status, max);
 					}
-					raw_data_part.push_back(m);
-					emit importProgress(status, max);
+					raw_data_part_one.push_back(raw_data_part_two);
 				}
-				raw_data.push_back(raw_data_part);
+				raw_data.push_back(raw_data_part_one);
 			}
 
-			Global::diffusionRawData = raw_data;
+			//----------------------
+			
+			Data5DRaw RawData5D(matVar->dims[2]);
+			Data4DRaw RawData(matVar->dims[3]);
+			Data3DRaw data(matVar->dims[4]);
+			for (int b = 0; b < matVar->dims[2]; b++) {
+				for (int d = 0; d < matVar->dims[3]; d++)
+				{
+					for (int f = 0; f < matVar->dims[4]; f++)
+					{
+						data.at(f) = raw_data.at(f).at(d).at(b);
+
+					}
+					RawData.at(d) = data;
+				}
+				RawData5D.at(b) = RawData;
+			}
+
+			Global::diffusionRawData = RawData5D;
+			//------------------------------------
+			//Data5DRaw RawData5D(1);
+			//RawData5D[0] = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -709,7 +825,7 @@ void ImportWorker::structuralDataImport()
 
 		int max = 0;
 		if (matVar) {
-			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2];
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
 		}
 
 		if (s_matVar) {
@@ -729,26 +845,43 @@ void ImportWorker::structuralDataImport()
 			qDebug() << matVar->dims[0];
 			qDebug() << matVar->dims[1];
 			qDebug() << matVar->dims[2];
+			qDebug() << matVar->dims[3];
 
-			std::vector<MatrixXcd> raw_data;
-			//MatrixXcd m(matVar->dims[0], matVar->dims[1]);
 			int val_num = 0;
-			for (int i = 0; i < matVar->dims[2]; i++) {
-				MatrixXcd m(matVar->dims[0], matVar->dims[1]);
-				for (int j = 0; j < matVar->dims[1]; j++) {
-					for (int k = 0; k < matVar->dims[0]; k++) {
-						m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
-						status++;
-						val_num++;
-						if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2]) break;
-						//qDebug() << xRe[val_num] << xIm[val_num];
+			std::vector<std::vector<MatrixXcd>> raw_data;
+			for (int l = 0; l < matVar->dims[3]; l++) {
+				std::vector<MatrixXcd> raw_data_part;
+				for (int i = 0; i < matVar->dims[2]; i++) {
+					MatrixXcd m(matVar->dims[0], matVar->dims[1]);
+					for (int j = 0; j < matVar->dims[1]; j++) {
+						for (int k = 0; k < matVar->dims[0]; k++) {
+							m(k, j) = std::complex<double>(xRe[val_num], xIm[val_num]);
+							status++;
+							val_num++;
+							if (val_num >= matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3]) break;
+							//qDebug() << xRe[val_num] << xIm[val_num];
+						}
 					}
+					raw_data_part.push_back(m);
+					emit importProgress(status, max);
 				}
-				raw_data.push_back(m);
-				emit importProgress(status, max);
+				raw_data.push_back(raw_data_part);
 			}
+			//Data4DRaw DataRaw4D(1);
+			//DataRaw4D[0] = raw_data;
 
-			Global::structuralRawData = raw_data;
+			Data4DRaw RawData(matVar->dims[2]);
+			Data3DRaw data(matVar->dims[3]);
+			for (int d = 0; d<matVar->dims[2]; d++)
+			{
+				for (int f = 0; f < matVar->dims[3]; f++)
+				{
+					data.at(f) = raw_data.at(f).at(d);
+
+				}
+				RawData.at(d) = data;
+			}
+			Global::structuralRawData = RawData;
 
 			//matvar_t *s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
@@ -811,6 +944,7 @@ void ImportWorker::structuralDataImport()
 	emit importDone();
 }
 
+
 ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
 	qRegisterMetaType<Data3D>("Data3D");
 	this->profile = profile;
@@ -847,27 +981,4 @@ void ObliqueImagingWorker::run() {
 	}
 }
 
-UpsamplingWorker::UpsamplingWorker(Data3D data, int width, int height, Profile profile) {
-	qRegisterMetaType<Data3D>("Data3D");
-	this->profile = profile;
-	this->data = data;
-	this->width = width;
-	this->height = height;
-}
 
-void UpsamplingWorker::run() {
-	Upsampling *upsampling = new Upsampling(data, width, height);
-	upsampling->Start();
-	Data3D d = upsampling->getData();
-	switch (profile) {
-	case FRONTAL:
-		emit resultReadyFrontal(d);
-		break;
-	case SAGGITAL:
-		emit resultReadySggital(d);
-		break;
-	case HORIZONTAL:
-		emit resultReadyHorizontal(d);
-		break;
-	}
-}
