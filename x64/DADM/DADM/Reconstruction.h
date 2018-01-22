@@ -37,6 +37,7 @@ private:
 	MatrixXd medianFilter(MatrixXd image, int windowSize);
 	int L;
 	int r;
+	int size;
 	Data3D xspacedata;
 	void writeToCSVfile(std::string name, MatrixXd matrix);
 };

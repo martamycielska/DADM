@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
-    <height>639</height>
+    <width>1087</width>
+    <height>742</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
            <property name="maximumSize">
             <size>
              <width>159</width>
-             <height>230</height>
+             <height>290</height>
             </size>
            </property>
            <property name="acceptDrops">
@@ -53,15 +53,15 @@
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="FiltrationPage">
             <property name="geometry">
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>80</width>
-              <height>90</height>
+              <width>135</width>
+              <height>178</height>
              </rect>
             </property>
             <attribute name="label">
@@ -74,7 +74,7 @@
                 <string>LMMSE</string>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -82,6 +82,16 @@
               <widget class="QRadioButton" name="UNLMRadioButton">
                <property name="text">
                 <string>UNLM</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="NoneFiltrationRadioButton">
+               <property name="text">
+                <string>None</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -105,7 +115,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>93</width>
+              <width>98</width>
               <height>103</height>
              </rect>
             </property>
@@ -184,14 +194,38 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>94</width>
-              <height>103</height>
+              <width>112</width>
+              <height>172</height>
              </rect>
             </property>
             <attribute name="label">
              <string>Resolution</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <widget class="QRadioButton" name="FrontalPlaneRadioButton">
+               <property name="text">
+                <string>Frontal (XZ)</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="SaggitalPlaneRadioButton">
+               <property name="text">
+                <string>Sagittal (XY)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="HorizontalPlaneRadioButton">
+               <property name="text">
+                <string>Horizontal (YZ)</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_13">
                <item>
@@ -202,7 +236,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="resolutionWidthSpinBox"/>
+                <widget class="QSpinBox" name="resolutionWidthSpinBox">
+                 <property name="maximum">
+                  <number>1024</number>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -216,7 +254,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QSpinBox" name="resolutionHeightSpinBox"/>
+                <widget class="QSpinBox" name="resolutionHeightSpinBox">
+                 <property name="maximum">
+                  <number>1024</number>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -247,8 +289,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>118</height>
+              <width>98</width>
+              <height>110</height>
              </rect>
             </property>
             <attribute name="label">
@@ -414,7 +456,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>960</width>
+     <width>1087</width>
      <height>21</height>
     </rect>
    </property>
@@ -483,7 +525,7 @@
   </action>
   <action name="actionVisualize_2D">
    <property name="text">
-    <string>Visualize 2D</string>
+    <string>Refresh view</string>
    </property>
   </action>
   <action name="actionRead_Global_Data">

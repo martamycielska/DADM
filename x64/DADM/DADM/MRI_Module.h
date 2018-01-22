@@ -1,5 +1,6 @@
 #pragma once
 #include "qthread.h"
+#include "qdebug.h"
 #include <Eigen\Dense>
 #include <unsupported\Eigen\CXX11\Tensor>
 
