@@ -7,12 +7,9 @@ namespace Global {
 	extern double b_value = 0;
 	extern MatrixXd gradients = MatrixXd(0,0);
 	extern Data3D structuralData = Data3D(0);
-	extern Data3D dataFrontal = Data3D(0);
-	extern Data3D dataSaggital = Data3D(0);
-	extern Data3D dataHorizontal = Data3D(0);
-	extern Data3D temporaryDataFrontal = Data3D(0);
-	extern Data3D temporaryDataSaggital = Data3D(0);
-	extern Data3D temporaryDataHorizontal = Data3D(0);
+	extern Data3D dataXY = Data3D(0);
+	extern Data3D dataYZ = Data3D(0);
+	extern Data3D dataXZ = Data3D(0);
 	extern Data4DRaw structuralRawData = Data4DRaw(0);
 	extern Data3DRaw structuralSensitivityMaps = Data3DRaw(0);
 	extern double L = 0;

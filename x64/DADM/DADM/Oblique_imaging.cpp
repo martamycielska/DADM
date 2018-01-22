@@ -116,17 +116,18 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 	for (int s = -127; s <= 127; ++s) {
 		for (int t = -127; t <= 127; ++t) {
 			p = t*v1 + s*v2 + point;
-
 			p(0) = std::round(p(0));
 			p(1) = std::round(p(1));
 			p(2) = std::round(p(2));
-
 			image_out(t + 127, s + 127) = (data[p(2)](p(0), p(1)) +
 				data[p(2) - 1](p(0), p(1)) + data[p(2) + 1](p(0), p(1)) +
 				data[p(2)](p(0) + 1, p(1)) + data[p(2) - 1](p(0) - 1, p(1)) +
 				data[p(2)](p(0), p(1) - 1) + data[p(2)](p(0), p(1) + 1)) / 7;
 		}
 	}
+
+	outputData.push_back(image_out);
+	qDebug() << "DONE";
 }
 
 

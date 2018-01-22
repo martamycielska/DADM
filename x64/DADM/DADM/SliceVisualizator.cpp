@@ -122,7 +122,7 @@ void SliceVisualizator::visualize()
 
 		imageViewerYZ->SetInputData(imageData);
 		imageViewerYZ->SetRenderWindow(renderWndYZ);
-		imageViewerYZ->SetSliceOrientationToYZ();
+		//imageViewerYZ->SetSliceOrientationToYZ();
 		imageViewerYZ->SetSlice((int)(imageViewerYZ->GetSliceMax() / 2));
 		imageViewerYZ->Render();
 
@@ -140,7 +140,7 @@ void SliceVisualizator::visualize()
 
 		imageViewerXZ->SetInputData(imageData);
 		imageViewerXZ->SetRenderWindow(renderWndXZ);
-		imageViewerXZ->SetSliceOrientationToXZ();
+		//imageViewerXZ->SetSliceOrientationToXZ();
 		imageViewerXZ->SetSlice((int)(imageViewerXZ->GetSliceMax() / 2));
 		imageViewerXZ->Render();
 

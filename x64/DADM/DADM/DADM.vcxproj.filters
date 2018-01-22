@@ -113,6 +113,15 @@
     <ClCompile Include="SliceVisualizator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="upsamplingimage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_upsamplingimage.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_upsamplingimage.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dadm.h">
@@ -128,6 +137,12 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="visualization3d.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="upsamplingimage.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="upsamplingimage.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -191,6 +206,9 @@
     </ClInclude>
     <ClInclude Include="SliceVisualizator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_upsamplingimage.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
