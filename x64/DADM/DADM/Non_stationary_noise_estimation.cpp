@@ -1,18 +1,6 @@
 #include "Non_stationary_noise_estimation.h"
 #include "qdebug.h"
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <Eigen/Dense>
-#include <vector>
-#include <cstdlib>
-#include <cmath> 
-#include "fftw3.h"
-#include <boost/math/special_functions/bessel.hpp> 
 
-using namespace std;
-using namespace boost::math;
-using namespace Eigen;
 
 Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data3D data)
 {
@@ -304,43 +292,58 @@ MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log) {
 
 MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR) {
 
-	RowVectorXd coeff(9);
-	coeff << -0.2895, -0.0388, 0.4099, -0.3552, 0.1493, -0.0358, 0.0050, 0.0003745, 0.0000118;
-
-	MatrixXd F = coeff(0)*pow(SNR.array(), 0) + coeff(1)*pow(SNR.array(), 1) + coeff(2)*pow(SNR.array(), 2)
-		+ coeff(3)*pow(SNR.array(), 3) + coeff(4)*pow(SNR.array(), 4) + coeff(5)*pow(SNR.array(), 5)
-		+ coeff(6)* pow(SNR.array(), 6) + coeff(7)*pow(SNR.array(), 7) + coeff(8)*pow(SNR.array(), 8);
-
+	MatrixXd F = (-0.289549906258443)*pow(SNR.array(), 0) + (-0.038892257560633)*pow(SNR.array(), 1) + (0.409867108141953)*pow(SNR.array(), 2)
+		+ (-0.355237628488567)*pow(SNR.array(), 3) + (0.149328280945610)*pow(SNR.array(), 4) + (-0.035786111794209)*pow(SNR.array(), 5)
+		+ (0.004979528938591)* pow(SNR.array(), 6) + (-0.0003747563744775917)*pow(SNR.array(), 7) + (0.00001180202291400923)*pow(SNR.array(), 8);
+	
 	F = F.array() * (SNR.array() <= 7).cast<double>().array();
 
 	return F;
 }
 
+void Non_stationary_noise_estimation::writeToCSVfile(string name, MatrixXd matrix) {
+	ofstream file(name.c_str());
+
+	for (int i = 0; i < matrix.rows(); i++) {
+		for (int j = 0; j < matrix.cols(); j++) {
+
+			if (j + 1 == matrix.cols()) {
+				file << (matrix(i, j));
+			}
+			else {
+				file << (matrix(i, j)) << ',';
+			}
+		}
+		file << '\n';
+	}
+	file.close();
+}
 
 void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j, bool isDiffusion)
 {
 	MatrixXd mean = filter2(reconstructedImage, MatrixXd::Ones(5, 5)) / (5 * 5);
 	MatrixXd reconstructedWithoutMean = reconstructedImage - mean;
-	MatrixXd log = logCalculate(absoluteValue(reconstructedWithoutMean));
+	MatrixXd abs = absoluteValue(reconstructedWithoutMean);
+	MatrixXd log = logCalculate(abs);
 
 	MatrixXd kernel = MatrixXd::Zero(2*reconstructedImage.rows(), 2 * reconstructedImage.cols());
 	MatrixXd filtered = gaussianKernel(kernel, log, 3.4);
 
-	MatrixXd dctt = dct(log);
-	MatrixXd lpfF2 = dctt.array()*filtered.array();
-	MatrixXd lpf = idct(lpfF2);
-
-	MatrixXd estimator = noiseEstimation(expCalculate(lpf));
+	MatrixXd dctValue = dct(log);
+	MatrixXd lpfF = dctValue.array()*filtered.array();
+	MatrixXd lpf = idct(lpfF);
+	MatrixXd exp =expCalculate(lpf);
+	MatrixXd estimator = noiseEstimation(exp);
 	MatrixXd SNR = getSNR(3, reconstructedImage);
 	MatrixXd correctSNR = riceCorrection(SNR);
 	MatrixXd LPF1 = lpf - correctSNR;
 
 	MatrixXd filtered2 = gaussianKernel(kernel, log, 3.4 + 2);
-	MatrixXd dctt2 = dct(LPF1);
-	MatrixXd lpfF22 = dctt2.array()*filtered2.array();
-	MatrixXd lpf2 = idct(lpfF22);
-
-	MatrixXd estimator2 = noiseEstimation(expCalculate(lpf2));
+	MatrixXd dctValue2 = dct(LPF1);
+	MatrixXd lpfF2 = dctValue2.array()*filtered2.array();
+	MatrixXd lpf2 = idct(lpfF2);
+	MatrixXd exp2=expCalculate(lpf2);
+	MatrixXd estimator2 = noiseEstimation(exp2);
 
 	if (isDiffusion)
 	{

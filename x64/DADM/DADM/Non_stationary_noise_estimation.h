@@ -1,5 +1,17 @@
 #pragma once
 #include "Estimation_Module.h"
+#include <iostream>
+#include <fstream>
+#include <Eigen/Dense>
+#include <vector>
+#include <cstdlib>
+#include <cmath> 
+#include "fftw3.h"
+#include <boost/math/special_functions/bessel.hpp> 
+
+using namespace std;
+using namespace boost::math;
+using namespace Eigen;
 
 class Non_stationary_noise_estimation:
 	public Estimation_Module
@@ -32,6 +44,7 @@ private:
 	MatrixXd Non_stationary_noise_estimation::dct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::idct(MatrixXd log);
 	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR);
+	void Non_stationary_noise_estimation::writeToCSVfile(string name, MatrixXd matrix);
 	void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j = 0, bool isDiffusion = false);
 };
 
