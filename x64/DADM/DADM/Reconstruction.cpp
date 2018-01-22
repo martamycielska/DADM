@@ -327,7 +327,7 @@ MatrixXd Reconstruction::medianFilter(MatrixXd image, int windowSize)
 						a = x;
 					if (b<0)
 						b = 0;
-					if (b > image.cols())
+					if (b > image.cols()-1)
 						b = y;
 					color = image(a, b);
 					pixels.push_back(color);
