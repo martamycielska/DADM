@@ -134,9 +134,6 @@ private slots:
 	void restoreDefault();
 	void showProgramInformation();
 
-	void onUpsamplingFrontalDone(Data3D);
-	void onUpsamplingSaggitalDone(Data3D);
-	void onUpsamplingHorizontalDone(Data3D);
 	void onObliqueImagingFrontalDone(Data3D);
 	void onObliqueImagingSaggitalDone(Data3D);
 	void onObliqueImagingHorizontalDone(Data3D);

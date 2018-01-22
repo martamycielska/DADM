@@ -301,8 +301,25 @@ void DADM::resolutionValuesChanged()
 
 void DADM::planeValuesChanged()
 {
+	ui.statusBar->showMessage("Busy");
+	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataXZ, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
+	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
+	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
+	worker_frontal->start();
 
+	/*
+	ObliqueImagingWorker *worker_saggital = new ObliqueImagingWorker(Global::dataXY, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL);
+	connect(worker_saggital, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
+	connect(worker_saggital, &ObliqueImagingWorker::finished, worker_saggital, &QObject::deleteLater);
+	worker_saggital->start();
+	
+	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::dataYZ, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL);
+	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
+	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
+	worker_horizontal->start();
+	*/
 }
+
 
 
 void DADM::diffusionFASet()
@@ -363,34 +380,23 @@ void DADM::showProgramInformation()
 {
 }
 
-void DADM::onUpsamplingFrontalDone(Data3D data)
-{
-	//Global::temporaryDataFrontal = data;
-}
-
-void DADM::onUpsamplingSaggitalDone(Data3D data)
-{
-	//Global::temporaryDataSaggital = data;
-}
-
-void DADM::onUpsamplingHorizontalDone(Data3D data)
-{
-	//Global::temporaryDataHorizontal = data;
-}
 
 void DADM::onObliqueImagingFrontalDone(Data3D data)
 {
-	//Global::temporaryDataFrontal = data;
+	Global::temporaryDataXZ = data;
+	qDebug() << "Done XZ";
 }
 
 void DADM::onObliqueImagingSaggitalDone(Data3D data)
 {
-	//Global::temporaryDataSaggital = data;
+	Global::temporaryDataXY = data;
+	qDebug() << "Done XY";
 }
 
 void DADM::onObliqueImagingHorizontalDone(Data3D data)
 {
-	//Global::temporaryDataHorizontal = data;
+	Global::temporaryDataYZ = data;
+	qDebug() << "Done YZ";
 }
 
 DADM::~DADM()
