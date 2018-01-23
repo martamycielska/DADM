@@ -41,18 +41,13 @@ TensorData Diffusion_tensor_imaging::EstimateTensor() {
 				
 				MatrixXd X = ((B.transpose() * covar * B).inverse()).array() * (B.transpose() * covar).array() * this->inputData[k][i].row(j).array().log();
 
-				for (int l = 0; l < this->inputData[k][i].cols(); l++) {
-
-					T[k][i][j][l].setZero(3, 3);
-					T[k][i][j][l].row(0)(0) = X(1,0);
-					T[k][i][j][l].row(0)(1) = X(2, 0);
-					T[k][i][j][l].row(0)(2) = X(3, 0);
-					T[k][i][j][l].row(1)(1) = X(4, 0);
-					T[k][i][j][l].row(1)(2) = X(5, 0);
-					T[k][i][j][l].row(2)(2) = X(6, 0);
-					
-					 
-				}
+					T[k][i][j].setZero(3, 3);
+					T[k][i][j].row(0)(0) = X(1,0);
+					T[k][i][j].row(0)(1) = X(2, 0);
+					T[k][i][j].row(0)(2) = X(3, 0);
+					T[k][i][j].row(1)(1) = X(4, 0);
+					T[k][i][j].row(1)(2) = X(5, 0);
+					T[k][i][j].row(2)(2) = X(6, 0);
 				
 			}
 		}
@@ -83,16 +78,123 @@ MatrixXd Diffusion_tensor_imaging::BMatrix() {
 	return b_matrix;
 }
 
-Data3D Diffusion_tensor_imaging::FractionalAnisotropy() {
-	
-	return FA; };
+//VectorXd Diffusion_tensor_imaging::EigenVector() {
+//
+//	double v1, v2, v3;
+//	VectorXd v(v1, v2, v3);
+//	TensorData T = EstimateTensor();
+//
+//	for (int k = 0; k < this->inputData.size(); k++)
+//	{
+//		for (int i = 0; i < this->inputData[k].size(); i++)
+//		{
+//			for (int j = 0; j < this->inputData[k][i].size(); j++)
+//			{
+//				for (int l = 0; l < this->inputData[k][i].cols(); l++) {
+//
+//					v1 = T[k][i][j][l].row(0)(0);
+//					v2 = T[k][i][j][l].row(1)(1);
+//					v3 = T[k][i][j][l].row(2)(2);
+//					return v;
+//				}
+//			}
+//		}
+//	}
+//	
+//}
+
 Data3D Diffusion_tensor_imaging::MeanDiffusivity() {
 
-	return MD; };
+	TensorData T = EstimateTensor();
+	double v1, v2, v3;
+	Data3D MD;
+	for (int k = 0; k < this->inputData.size(); k++)
+	{
+		for (int i = 0; i < this->inputData[k].size(); i++)
+		{
+			for (int j = 0; j < this->inputData[k][i].size(); j++)
+			{
+					v1 = T[k][i][j].row(0)(0);
+					v2 = T[k][i][j].row(1)(1);
+					v3 = T[k][i][j].row(2)(2);
+					MD[k].row(i)(j) = (v1 + v2 + v3) / 3;
+			}
+		}
+		
+	}
+	return MD;
+}
+
+//Data4D Diffusion_tensor_imaging::FractionalAnisotropy() {
+//	
+//	TensorData T = EstimateTensor();
+//	double v1, v2, v3, v;
+//	MD = MeanDiffusivity();
+//
+//	for (int k = 0; k < this->inputData.size(); k++)
+//	{
+//		for (int i = 0; i < this->inputData[k].size(); i++)
+//		{
+//			for (int j = 0; j < this->inputData[k][i].size(); j++)
+//			{
+//				
+//				v = MD[k].row(i)(j);
+//				v1 = T[k][i][j].row(0)(0);
+//				v2 = T[k][i][j].row(1)(1);
+//				v3 = T[k][i][j].row(2)(2);
+//				FA[k].row(i)(j) = sqrt(3 * ((pow((v1 - v),2) + (pow((v2 - v),2)) + (pow((v3 - v),2)))) / sqrt(2 * ((pow(v1, 2) + (pow(v2,2)) + (pow(v3,2))))));
+//				/*r = (int)cimg::min(30 + 1.5f*cimg::abs(255 * fa * v1), 255.0f),
+//				g = (int)cimg::min(30 + 1.5f*cimg::abs(255 * fa * v2), 255.0f),
+//				b = (int)cimg::min(30 + 1.5f*cimg::abs(255 * fa * v3), 255.0f);*/
+//
+//			}
+//		}
+//	}
+//
+//	return FA; };
+
 Data3D Diffusion_tensor_imaging::RelativeAnisotropy() {
 
+	TensorData T = EstimateTensor();
+	double v1, v2, v3, v;
+	MD = MeanDiffusivity();
+
+	for (int k = 0; k < this->inputData.size(); k++)
+	{
+		for (int i = 0; i < this->inputData[k].size(); i++)
+		{
+			for (int j = 0; j < this->inputData[k][i].size(); j++)
+			{
+
+				v = MD[k].row(i)(j);
+				v1 = T[k][i][j].row(0)(0);
+				v2 = T[k][i][j].row(1)(1);
+				v3 = T[k][i][j].row(2)(2);
+				RA[k].row(i)(j) = sqrt(pow((v1 - v), 2) + (pow((v2 - v), 2)) + (pow((v3 - v),2)))/ sqrt(3 * v);
+			}
+		}
+	}
+	
 	return RA; };
 Data3D Diffusion_tensor_imaging::VolumeRatio() {
+
+	TensorData T = EstimateTensor();
+	double v1, v2, v3, v;	
+	for (int k = 0; k < this->inputData.size(); k++)
+	{
+		for (int i = 0; i < this->inputData[k].size(); i++)
+		{
+			for (int j = 0; j < this->inputData[k][i].size(); j++)
+			{
+
+				v = MD[k].row(i)(j);
+				v1 = T[k][i][j].row(0)(0);
+				v2 = T[k][i][j].row(1)(1);
+				v3 = T[k][i][j].row(2)(2);
+				VR[k].row(i)(j) = (v1*v2*v3) / (pow(v,3));
+			}
+		}
+	}
 
 	return VR; };
 

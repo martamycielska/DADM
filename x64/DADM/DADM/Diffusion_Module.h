@@ -5,14 +5,14 @@ class Diffusion_Module :
 {
 public:
 	Diffusion_Module() {};
-	virtual Data3D getFA() { return FA; };
+	virtual Data4D getFA() { return FA; };
 	virtual Data3D getMD() { return MD; };
 	virtual Data3D getRA() { return RA; };
 	virtual Data3D getVR() { return VR; };
 	virtual ~Diffusion_Module() {};
 
 protected:
-	Data3D FA;
+	Data4D FA;
 	Data3D MD;
 	Data3D RA;
 	Data3D VR;
