@@ -21,7 +21,6 @@ Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data3D images
 	estimator3D = estim;
 	dtype = STRUCTURAL_DATA;
 	StructuralDataAlgorithm();
-	qDebug() << "test";
 }
 
 Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data4D images, Data4D estim)
@@ -134,13 +133,7 @@ MatrixXd Non_stationary_noise_filtering_2::unlm(MatrixXd input, MatrixXd sigma) 
 			Z += wmax;
 			Yq += wmax*input1(i_1, j_1);
 			if (Z > 0) {
-				if ((pow((Yq / Z), 2) - 2 * pow(sigma(i, j), 2)) > 0) {
-					output(i, j) = sqrt(pow((Yq / Z), 2) - 2 * pow(sigma(i, j), 2));
-				}
-				else {
-					output(i, j) = input1(i, j) - sigma(i, j);
-				}
-
+				output(i, j) = sqrt(abs(pow((Yq / Z), 2) - 2 * pow(sigma(i, j), 2)));
 			}
 			else {
 				output(i, j) = input1(i, j);
