@@ -47,7 +47,6 @@ void Brain_3D::createModel3D(Data3D inputData) {
 	// Reduce the number of triangles (in percentage)
 	decimater = vtkSmartPointer<vtkDecimatePro>::New();
 	decimater->SetInputConnection(mc->GetOutputPort());
-	//decimate->SetTargetReduction(.99); //99% reduction (if there was 100 triangles, now there will be 1)
 	decimater->SetTargetReduction(.6); //60% reduction (if there was 100 triangles, now there will be 40)
 
 	// Create a mapper (mapping isosurface to graphic primitives)
