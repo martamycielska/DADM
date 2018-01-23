@@ -110,9 +110,6 @@
     <ClCompile Include="helpermethods.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SliceVisualizator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dadm.h">
@@ -187,9 +184,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="helpermethods.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SliceVisualizator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
