@@ -78,7 +78,7 @@ private:
 	void Brain3D();
 	void AcceptThreshold();
 	void SliderValueChanged(int);
-	void ShrinkSliderValueChanged(int);
+	//void ShrinkSliderValueChanged(int);
 	void CutEnableChanged(bool);
 	void AddRendererAndPlaneWidget();
 };
