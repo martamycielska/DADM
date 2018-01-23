@@ -185,12 +185,10 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 	VectorXcd Dr(r, 1);
 	MatrixXd Image(size, size);
 	MatrixXcd Ds(L, 1);
-	Data3DRaw I_raw = data;
 	MatrixXcd temp(size, size);
-	MatrixXcd log = I_raw.at(1);
-
-	int sizex = log.rows(); // rows number
-	int sizey = log.cols(); //columns number
+	
+	int sizex = data.at(1).rows(); // rows number
+	int sizey = data.at(1).cols(); //columns number
 
 	for (int y = 0; y <sizey; y++)
 	{
@@ -207,7 +205,7 @@ MatrixXd Reconstruction::LSreconstruction(Data3DRaw data)
 
 			for (int k = 0; k<L; k++)
 			{
-				Ds(k) = I_raw.at(k)(x, y);
+				Ds(k) = data.at(k)(x, y);
 			}
 			//evaluation according to the formula of LS reconstruction
 			MatrixXcd temp = (Sx.transpose()*Sx);
@@ -236,12 +234,11 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 	MatrixXd Image(size, size);
 	MatrixXcd Ds(L, 1);
 	MatrixXd A=MatrixXd::Identity(r,r);
-	Data3DRaw I_raw = data;
 	MatrixXd LastImage = medianFilter(image, 3);
 	MatrixXd ImagePoint(r, 1);
 
-	int sizex = I_raw.at(1).rows(); // rows number
-	int sizey = I_raw.at(1).cols(); //columns number
+	int sizex = data.at(1).rows(); // rows number
+	int sizey = data.at(1).cols(); //columns number
 
 
 	for (int y = 0; y <sizey; y++)
@@ -259,7 +256,7 @@ MatrixXd Reconstruction::TikhonovRegularization(Data3DRaw data, MatrixXd image)
 
 			for (int k = 0; k<L; k++)
 			{
-				Ds(k) = I_raw.at(k)(x, y);
+				Ds(k) = data.at(k)(x, y);
 			}
 			//evaluation according to the formula of Tikhonov Regularization
 			for (int w = 0; w < r; w++) 
