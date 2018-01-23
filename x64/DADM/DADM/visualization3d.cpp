@@ -51,21 +51,6 @@ void Visualization3D::SliderValueChanged(int sliderValue) {
 	ui->thresholdTextEdit->setText(QString::number(sliderValue));
 }
 
-void Visualization3D::ShrinkSliderValueChanged(int sliderValue) {
-	shrinkingFactor = sliderValue;
-
-	if (visualizationDone) {
-		UpdateProcessStateText("The mri data shrinking...\nPlease wait");
-		QEventLoop loop;
-		QTimer::singleShot(1000, &loop, SLOT(quit()));
-		loop.exec();
-
-		brain_3D->setShrinkFactor(shrinkingFactor);
-		ui->qvtkWidget->GetRenderWindow()->Render();
-		UpdateProcessStateText("Shrinking done");
-	}
-}
-
 void Visualization3D::CutEnableChanged(bool cutEnable) {
 	if (visualizationDone) {
 		if (cutEnable) {
@@ -133,12 +118,11 @@ void Visualization3D::SetConnections() {
 	connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(SliderValueChanged(int)));
 	connect(ui->acceptBtn, SIGNAL(clicked(bool)), this, SLOT(AcceptThreshold()));
 	connect(ui->cutEnableRadioBtn, SIGNAL(toggled(bool)), this, SLOT(CutEnableChanged(bool)));
-	connect(ui->shrinkSlider, SIGNAL(valueChanged(int)), this, SLOT(ShrinkSliderValueChanged(int)));
 }
 
 void Visualization3D::InitUI() {
 	ui->horizontalSlider->setValue(threshold);
-	ui->shrinkSlider->setValue(shrinkingFactor);
+	/*ui->shrinkSlider->setValue(shrinkingFactor);*/
 	ui->thresholdTextEdit->setText(QString::number(ui->horizontalSlider->value()));
 	ui->cutEnableRadioBtn->setChecked(false);
 }
