@@ -16,3 +16,5 @@ x64/DADM/DADM.sdf
 x64/DADM/DADM.opensdf
 x64/DADM/.vs/
 x64/DADM/DADM/DADM.vcxproj
+x64/DADM/x64/Debug/DADM.pdb
+x64/DADM/DADM/DADM.vcxproj.filters

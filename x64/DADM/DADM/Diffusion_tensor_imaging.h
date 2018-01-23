@@ -22,15 +22,18 @@ public:
 	~Diffusion_tensor_imaging();
 
 private:
+	TensorData T;
+	std::vector<double> eigenVector;
+
 	TensorData EstimateTensor();
 	double b_value;
 	MatrixXd gradients;
 	Data4D diffusionData4D;
 	MatrixXd BMatrix();
-	VectorXd EigenVector();
-	Data4D FractionalAnisotropy();
-	Data3D RelativeAnisotropy();
-	Data3D MeanDiffusivity();
-	Data3D VolumeRatio();
+	void EigenVector();
+	void FractionalAnisotropy();
+	void RelativeAnisotropy();
+	void MeanDiffusivity();
+	void VolumeRatio();
 };
 

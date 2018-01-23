@@ -3,6 +3,8 @@
 #include <Eigen/Eigen>
 #include <Eigen/Dense>
 #include <iostream>
+#include <cmath>
+#include <algorithm>
 using namespace Eigen;
 
 
@@ -15,6 +17,9 @@ Diffusion_tensor_imaging::Diffusion_tensor_imaging(Data4D data, double b_value, 
 }
 
 void Diffusion_tensor_imaging::Start() {
+	this->T = EstimateTensor();
+	this->EigenVector();
+	this->MeanDiffusivity();
 
 }
 TensorData Diffusion_tensor_imaging::EstimateTensor() {
@@ -78,86 +83,7 @@ MatrixXd Diffusion_tensor_imaging::BMatrix() {
 	return b_matrix;
 }
 
-//VectorXd Diffusion_tensor_imaging::EigenVector() {
-//
-//	double v1, v2, v3;
-//	VectorXd v(v1, v2, v3);
-//	TensorData T = EstimateTensor();
-//
-//	for (int k = 0; k < this->inputData.size(); k++)
-//	{
-//		for (int i = 0; i < this->inputData[k].size(); i++)
-//		{
-//			for (int j = 0; j < this->inputData[k][i].size(); j++)
-//			{
-//				for (int l = 0; l < this->inputData[k][i].cols(); l++) {
-//
-//					v1 = T[k][i][j][l].row(0)(0);
-//					v2 = T[k][i][j][l].row(1)(1);
-//					v3 = T[k][i][j][l].row(2)(2);
-//					return v;
-//				}
-//			}
-//		}
-//	}
-//	
-//}
-
-Data3D Diffusion_tensor_imaging::MeanDiffusivity() {
-
-	TensorData T = EstimateTensor();
-	double v1, v2, v3;
-	Data3D MD;
-	for (int k = 0; k < this->inputData.size(); k++)
-	{
-		for (int i = 0; i < this->inputData[k].size(); i++)
-		{
-			for (int j = 0; j < this->inputData[k][i].size(); j++)
-			{
-					v1 = T[k][i][j].row(0)(0);
-					v2 = T[k][i][j].row(1)(1);
-					v3 = T[k][i][j].row(2)(2);
-					MD[k].row(i)(j) = (v1 + v2 + v3) / 3;
-			}
-		}
-		
-	}
-	return MD;
-}
-
-//Data4D Diffusion_tensor_imaging::FractionalAnisotropy() {
-//	
-//	TensorData T = EstimateTensor();
-//	double v1, v2, v3, v;
-//	MD = MeanDiffusivity();
-//
-//	for (int k = 0; k < this->inputData.size(); k++)
-//	{
-//		for (int i = 0; i < this->inputData[k].size(); i++)
-//		{
-//			for (int j = 0; j < this->inputData[k][i].size(); j++)
-//			{
-//				
-//				v = MD[k].row(i)(j);
-//				v1 = T[k][i][j].row(0)(0);
-//				v2 = T[k][i][j].row(1)(1);
-//				v3 = T[k][i][j].row(2)(2);
-//				FA[k].row(i)(j) = sqrt(3 * ((pow((v1 - v),2) + (pow((v2 - v),2)) + (pow((v3 - v),2)))) / sqrt(2 * ((pow(v1, 2) + (pow(v2,2)) + (pow(v3,2))))));
-//				/*r = (int)cimg::min(30 + 1.5f*cimg::abs(255 * fa * v1), 255.0f),
-//				g = (int)cimg::min(30 + 1.5f*cimg::abs(255 * fa * v2), 255.0f),
-//				b = (int)cimg::min(30 + 1.5f*cimg::abs(255 * fa * v3), 255.0f);*/
-//
-//			}
-//		}
-//	}
-//
-//	return FA; };
-
-Data3D Diffusion_tensor_imaging::RelativeAnisotropy() {
-
-	TensorData T = EstimateTensor();
-	double v1, v2, v3, v;
-	MD = MeanDiffusivity();
+void Diffusion_tensor_imaging::EigenVector() {
 
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
@@ -165,21 +91,72 @@ Data3D Diffusion_tensor_imaging::RelativeAnisotropy() {
 		{
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
+				for (int l = 0; l < this->inputData[k][i].cols(); l++) {
 
-				v = MD[k].row(i)(j);
-				v1 = T[k][i][j].row(0)(0);
-				v2 = T[k][i][j].row(1)(1);
-				v3 = T[k][i][j].row(2)(2);
-				RA[k].row(i)(j) = sqrt(pow((v1 - v), 2) + (pow((v2 - v), 2)) + (pow((v3 - v),2)))/ sqrt(3 * v);
+					this->eigenVector.push_back(this->T[k][i][j].row(0)(0));
+					this->eigenVector.push_back(this->T[k][i][j].row(1)(1));
+					this->eigenVector.push_back(this->T[k][i][j].row(2)(2));
+				}
 			}
 		}
 	}
 	
-	return RA; };
-Data3D Diffusion_tensor_imaging::VolumeRatio() {
+}
 
-	TensorData T = EstimateTensor();
-	double v1, v2, v3, v;	
+void Diffusion_tensor_imaging::MeanDiffusivity() {
+
+
+	for (int k = 0; k < this->inputData.size(); k++)
+	{
+		for (int i = 0; i < this->inputData[k].size(); i++)
+		{
+			for (int j = 0; j < this->inputData[k][i].size(); j++)
+			{
+				this->MD[k].row(i)(j) = (this->eigenVector[0] + this->eigenVector[1] + this->eigenVector[2]) / 3;
+			}
+		}
+		
+	}
+}
+
+void Diffusion_tensor_imaging::FractionalAnisotropy() {
+	double v1, v2, v3, v;
+	
+
+	v1 = this->eigenVector[0];
+	v2 = this->eigenVector[1];
+	v3 = this->eigenVector[2];
+
+	for (int k = 0; k < this->inputData.size(); k++)
+	{
+		for (int i = 0; i < this->inputData[k].size(); i++)
+		{
+			for (int j = 0; j < this->inputData[k][i].size(); j++)
+			{
+				
+				v = this->getMD()[k].row(i)(j);
+				
+				double fa = sqrt(3 * ((pow((v1 - v),2) + (pow((v2 - v),2)) + (pow((v3 - v),2)))) / sqrt(2 * ((pow(v1, 2) + (pow(v2,2)) + (pow(v3,2))))));
+				int r = (int)min(30 + 1.5f*abs(255 * fa * v1), 255.0f);
+				int g = (int)min(30 + 1.5f*abs(255 * fa * v2), 255.0f);
+				int b = (int)min(30 + 1.5f*abs(255 * fa * v3), 255.0f);
+				this->FA[k][i].row(0)(0) = r;
+				this->FA[k][i].row(0)(1) = g;
+				this->FA[k][i].row(0)(2) = b;
+			}
+		}
+	}
+
+};
+
+void Diffusion_tensor_imaging::RelativeAnisotropy() {
+
+	
+	double v1, v2, v3, v;
+
+	v1 = this->eigenVector[0];
+	v2 = this->eigenVector[1];
+	v3 = this->eigenVector[2];
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
 		for (int i = 0; i < this->inputData[k].size(); i++)
@@ -187,16 +164,31 @@ Data3D Diffusion_tensor_imaging::VolumeRatio() {
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
 
-				v = MD[k].row(i)(j);
-				v1 = T[k][i][j].row(0)(0);
-				v2 = T[k][i][j].row(1)(1);
-				v3 = T[k][i][j].row(2)(2);
-				VR[k].row(i)(j) = (v1*v2*v3) / (pow(v,3));
+				v = this->getMD()[k].row(i)(j);
+				this->RA[k].row(i)(j) = sqrt(pow((v1 - v), 2) + (pow((v2 - v), 2)) + (pow((v3 - v),2)))/ sqrt(3 * v);
 			}
 		}
 	}
+};
+void Diffusion_tensor_imaging::VolumeRatio() {
 
-	return VR; };
+	double v1, v2, v3, v;	
+	v1 = this->eigenVector[0];
+	v2 = this->eigenVector[1];
+	v3 = this->eigenVector[2];
+	for (int k = 0; k < this->inputData.size(); k++)
+	{
+		for (int i = 0; i < this->inputData[k].size(); i++)
+		{
+			for (int j = 0; j < this->inputData[k][i].size(); j++)
+			{
+
+				v = this->getMD()[k].row(i)(j);
+				this->VR[k].row(i)(j) = (v1*v2*v3) / (pow(v,3));
+			}
+		}
+	}
+};
 
 Diffusion_tensor_imaging::~Diffusion_tensor_imaging() {}
 
