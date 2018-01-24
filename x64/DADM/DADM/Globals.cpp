@@ -1,7 +1,7 @@
 #include "Globals.h"
 
 namespace Global {
-	extern Biomarker biomarker = Biomarker::FA;
+	extern Biomarker biomarker = Biomarker::GRADIENTS;
 	extern int current_slice = 0;
 	extern FilteringType ftype = LMMSE;
 	extern DataType dtype = STRUCTURAL_DATA;

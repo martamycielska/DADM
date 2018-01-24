@@ -528,7 +528,7 @@ QToolBox::tab:selected { /* italicize selected tabs */
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="FiltrationPage">
             <property name="geometry">
@@ -590,8 +590,8 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>93</width>
-              <height>98</height>
+              <width>135</width>
+              <height>178</height>
              </rect>
             </property>
             <attribute name="label">
@@ -618,6 +618,9 @@ QToolBox::tab:selected { /* italicize selected tabs */
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="maximum">
+                  <double>90.000000000000000</double>
+                 </property>
                 </widget>
                </item>
               </layout>
@@ -638,7 +641,11 @@ QToolBox::tab:selected { /* italicize selected tabs */
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="betaPlaneSpinBox"/>
+                <widget class="QDoubleSpinBox" name="betaPlaneSpinBox">
+                 <property name="maximum">
+                  <double>90.000000000000000</double>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -770,21 +777,41 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>93</width>
-              <height>94</height>
+              <width>135</width>
+              <height>178</height>
              </rect>
             </property>
             <attribute name="label">
-             <string>Biomarkers</string>
+             <string>Diffusion Data</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_11">
+             <item>
+              <widget class="QRadioButton" name="diffGradientsRadioButton">
+               <property name="text">
+                <string>Gradients</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="gradientSpinBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QRadioButton" name="diffFARadioButton">
                <property name="text">
                 <string>FA</string>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>

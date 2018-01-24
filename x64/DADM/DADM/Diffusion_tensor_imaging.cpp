@@ -24,12 +24,16 @@ void Diffusion_tensor_imaging::Start() {
 }
 TensorData Diffusion_tensor_imaging::EstimateTensor() {
 	MatrixXd B = this->BMatrix();
-	TensorData T;
-
+	TensorData T = TensorData(0);
+	qDebug() << 1;
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		std::vector<std::vector<Eigen::Matrix2d>> vec1;
+		T.push_back(vec1);
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
+			std::vector<Eigen::Matrix2d> vec2;
+			T.at(k).push_back(vec2);
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
 				for (int l = 0; l < this->inputData[k][i].cols(); l++)
@@ -45,14 +49,19 @@ TensorData Diffusion_tensor_imaging::EstimateTensor() {
 				MatrixXd covar = this->inputData[k][i].row(j).asDiagonal();
 
 				MatrixXd X = ((B.transpose() * covar * B).inverse()).array() * (B.transpose() * covar).array() * this->inputData[k][i].row(j).array().log();
+				MatrixXd m(3,3);
+				m.setZero(3,3);
 
-				T[k][i][j].setZero(3, 3);
-				T[k][i][j].row(0)(0) = X(1, 0);
-				T[k][i][j].row(0)(1) = X(2, 0);
-				T[k][i][j].row(0)(2) = X(3, 0);
-				T[k][i][j].row(1)(1) = X(4, 0);
-				T[k][i][j].row(1)(2) = X(5, 0);
-				T[k][i][j].row(2)(2) = X(6, 0);
+				//T.at(k).at(i).push_back(X);
+				
+				//T[k][i][j].setZero(3, 3);
+				m.row(0)(0) = X(1, 0);
+				m.row(0)(1) = X(2, 0);
+				m.row(0)(2) = X(3, 0);
+				m.row(1)(1) = X(4, 0);
+				m.row(1)(2) = X(5, 0);
+				m.row(2)(2) = X(6, 0);
+				qDebug() << 4;
 
 			}
 		}
@@ -108,20 +117,23 @@ void Diffusion_tensor_imaging::MeanDiffusivity() {
 
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		MatrixXd tmp(this->inputData[k].size(), this->inputData[k][0].size());
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
-				this->MD[k].row(i)(j) = (this->eigenVector[0] + this->eigenVector[1] + this->eigenVector[2]) / 3;
+				tmp.row(i)(j) = (this->eigenVector[0] + this->eigenVector[1] + this->eigenVector[2]) / 3;
 			}
 		}
-
+		this->MD.push_back(tmp);
 	}
 }
 
 void Diffusion_tensor_imaging::FractionalAnisotropy() {
 	double v1, v2, v3, v;
 
+	//>> >> >> > Stashed changes
 
 	v1 = this->eigenVector[0];
 	v2 = this->eigenVector[1];
@@ -129,8 +141,12 @@ void Diffusion_tensor_imaging::FractionalAnisotropy() {
 
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		std::vector<MatrixXd> tmp2;
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
+			MatrixXd tmp(this->inputData[k][i].size(), 3);
+
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
 
@@ -140,17 +156,21 @@ void Diffusion_tensor_imaging::FractionalAnisotropy() {
 				int r = (int)min(30 + 1.5f*abs(255 * fa * v1), 255.0f);
 				int g = (int)min(30 + 1.5f*abs(255 * fa * v2), 255.0f);
 				int b = (int)min(30 + 1.5f*abs(255 * fa * v3), 255.0f);
-				this->FA[k][i].row(0)(0) = r;
-				this->FA[k][i].row(0)(1) = g;
-				this->FA[k][i].row(0)(2) = b;
+				tmp.row(j)(0) = r;
+				tmp.row(j)(1) = g;
+				tmp.row(j)(2) = b;
+
 			}
+			tmp2.push_back(tmp);
+
 		}
+		this->FA.push_back(tmp2);
+
 	}
 
 };
 
 void Diffusion_tensor_imaging::RelativeAnisotropy() {
-
 
 	double v1, v2, v3, v;
 
@@ -159,15 +179,20 @@ void Diffusion_tensor_imaging::RelativeAnisotropy() {
 	v3 = this->eigenVector[2];
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		MatrixXd tmp(this->inputData[k].size(), this->inputData[k][0].size());
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
+
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
 
 				v = this->getMD()[k].row(i)(j);
-				this->RA[k].row(i)(j) = sqrt(pow((v1 - v), 2) + (pow((v2 - v), 2)) + (pow((v3 - v), 2))) / sqrt(3 * v);
+				tmp.row(i)(j) = sqrt(pow((v1 - v), 2) + (pow((v2 - v), 2)) + (pow((v3 - v), 2))) / sqrt(3 * v);
+
 			}
 		}
+		this->RA.push_back(tmp);
 	}
 };
 void Diffusion_tensor_imaging::VolumeRatio() {
@@ -178,15 +203,17 @@ void Diffusion_tensor_imaging::VolumeRatio() {
 	v3 = this->eigenVector[2];
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		MatrixXd tmp(this->inputData[k].size(), this->inputData[k][0].size());
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
-
 				v = this->getMD()[k].row(i)(j);
-				this->VR[k].row(i)(j) = (v1*v2*v3) / (pow(v, 3));
+				tmp.row(i)(j) = (v1*v2*v3) / (pow(v, 3));
 			}
 		}
+		this->VR.push_back(tmp);
 	}
 };
 

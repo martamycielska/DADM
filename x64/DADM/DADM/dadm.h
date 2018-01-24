@@ -127,6 +127,8 @@ private slots:
 
 	void resolutionValuesChanged();
 	void planeValuesChanged();
+	void gradientChanged(int gradient);
+	void diffusionGradientsSet();
 	void diffusionFASet();
 	void diffusionMDSet();
 	void diffusionRASet();

@@ -50,6 +50,8 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	connect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
 	connect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	connect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
+	connect(ui.diffGradientsRadioButton, &QRadioButton::toggled, this, &DADM::diffusionGradientsSet);
+	connect(ui.gradientSpinBox, SIGNAL(valueChanged(int)), this, SLOT(gradientChanged(int)));
 	ui.progressBar->hide();
 
 	connect(ui.xySlider, SIGNAL(valueChanged(int)), this, SLOT(xySliderValueChanged(int)));
@@ -72,6 +74,8 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 
 	planesSetNum = 0;
 	ui.actionVisualize_2D->setVisible(false);
+	ui.DiffusionPage->hide();
+	ui.actionImport_test_data->setVisible(false);
 }
 
 void DADM::mri_reconstruct() {
@@ -94,16 +98,6 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
-	//Global::structuralData.clear();
-	//Global::dataXY.clear();
-	//Global::dataXZ.clear();
-	//Global::dataYZ.clear();
-
-	//Global::structuralData = Data3D(0);
-	//Global::dataXY = Data3D(0);
-	//Global::dataXZ = Data3D(0);
-	//Global::dataYZ = Data3D(0);
-
 	ui.DiffusionPage->hide();
 	Global::dtype = STRUCTURAL_DATA;
 	ui.statusBar->showMessage("Busy");
@@ -124,22 +118,14 @@ void DADM::importDiffusionData()
 	if (url.isEmpty())
 		return;
 
-	//Global::FA.clear();
-	//Global::MD.clear();
-	//Global::RA.clear();
-	//Global::VR.clear();
-	//Global::structuralData.clear();
-	//Global::dataXY.clear();
-	//Global::dataXZ.clear();
-	//Global::dataYZ.clear();
-
 	ui.DiffusionPage->show();
 	disconnect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
 	disconnect(ui.diffMDRadioButton, &QRadioButton::toggled, this, &DADM::diffusionMDSet);
 	disconnect(ui.difRARadioButton, &QRadioButton::toggled, this, &DADM::diffusionRASet);
 	disconnect(ui.diffVRRadioButton, &QRadioButton::toggled, this, &DADM::diffusionVRSet);
 
-	ui.diffFARadioButton->setChecked(true);
+	ui.diffGradientsRadioButton->setChecked(true);
+	ui.diffFARadioButton->setChecked(false);
 	ui.diffMDRadioButton->setChecked(false);
 	ui.diffVRRadioButton->setChecked(false);
 	ui.difRARadioButton->setChecked(false);
@@ -189,9 +175,15 @@ void DADM::visualization2d() {
 
 	qDebug() << "VIS 2D";
 	if (Global::dtype == DIFFUSION_DATA) {
-		if (Global::FA.size() == 0) return;
+		if (Global::diffusionData4D.size() == 0) return;
 
 		switch (Global::biomarker) {
+		case Biomarker::GRADIENTS:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::dataXY);
+			xySliceVisualizator->visualize();
+			break;
+		}
 		case Biomarker::FA:
 		{
 			//xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::FA);
@@ -200,40 +192,48 @@ void DADM::visualization2d() {
 		}
 		case Biomarker::MD:
 		{
-			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::MD);
-			xySliceVisualizator->visualize();
+			//xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::MD);
+			//xySliceVisualizator->visualize();
 			break;
 		}
 		case Biomarker::RA:
 		{
-			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::RA);
-			xySliceVisualizator->visualize();
+			//xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::RA);
+			//xySliceVisualizator->visualize();
 			break;
 		}
 		case Biomarker::VR:
 		{
-			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::VR);
-			xySliceVisualizator->visualize();
+			//xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::VR);
+			//xySliceVisualizator->visualize();
 			break;
 		}
 		}
-	}
 
-	if (Global::dataXY.size() != 0) {
-		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::dataXY);
-		xySliceVisualizator->visualize();
-		yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::dataYZ);
-		yzSliceVisualizator->visualize();
-		xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::dataXZ);
-		xzSliceVisualizator->visualize();
-
-		
 		ui.xySlider->setMinimum(0);
 		ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
 		ui.xzSlider->setMinimum(0);
-		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+		ui.xzSlider->setMaximum(0);
 		ui.yzSlider->setMinimum(0);
-		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+		ui.yzSlider->setMaximum(0);
+	}
+	if (Global::dtype == STRUCTURAL_DATA) {
+		if (Global::dataXY.size() != 0) {
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::dataXY);
+			xySliceVisualizator->visualize();
+			yzSliceVisualizator = new SliceVisualizator(renderWndYZ, SlicePlane::YZ, Global::dataYZ);
+			yzSliceVisualizator->visualize();
+			xzSliceVisualizator = new SliceVisualizator(renderWndXZ, SlicePlane::XZ, Global::dataXZ);
+			xzSliceVisualizator->visualize();
+
+
+			ui.xySlider->setMinimum(0);
+			ui.xySlider->setMaximum(xySliceVisualizator->getImageViewerXY()->GetSliceMax());
+			ui.xzSlider->setMinimum(0);
+			ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
+			ui.yzSlider->setMinimum(0);
+			ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+		}
 	}
 }
 
@@ -330,6 +330,27 @@ void DADM::structuralTestDataImport()
 void DADM::onPreprocessingDone()
 {
 	ui.statusBar->showMessage("Ready");
+	if (Global::dtype == STRUCTURAL_DATA) {
+		Global::FA.clear();
+		Global::MD.clear();
+		Global::RA.clear();
+		Global::VR.clear();
+		Global::diffusionData4D.clear();
+		ui.SaggitalPlaneRadioButton->setEnabled(true);
+		ui.FrontalPlaneRadioButton->setEnabled(true);
+	}
+	if (Global::dtype == DIFFUSION_DATA) {
+		Global::structuralData.clear();
+		Global::dataXY.clear();
+		Global::dataXZ.clear();
+		Global::dataYZ.clear();
+		ui.SaggitalPlaneRadioButton->setEnabled(false);
+		ui.FrontalPlaneRadioButton->setEnabled(false);
+
+		ui.gradientSpinBox->setMinimum(1);
+		ui.gradientSpinBox->setMaximum(Global::diffusionData4D.size());
+		Global::dataXY = Global::diffusionData4D.at(ui.gradientSpinBox->value());
+	}
 	visualization2d();
 }
 
@@ -366,6 +387,19 @@ void DADM::planeValuesChanged()
 	if (Global::dataXY.empty()) return;
 	ui.planeApplyPushButton->setEnabled(false);
 
+	if (Global::dtype == DIFFUSION_DATA) {
+		ui.statusBar->showMessage("Busy");
+
+		if (Global::biomarker == GRADIENTS) {
+			ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::diffusionData4D.at(ui.gradientSpinBox->value()), ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL, ui.xySlider->maximum());
+			connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
+			connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
+			worker_horizontal->start();
+		}
+
+		return;
+	}
+
 	ui.statusBar->showMessage("Busy");
 	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::structuralData, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL, ui.xySlider->maximum());
 	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
@@ -384,11 +418,28 @@ void DADM::planeValuesChanged()
 
 }
 
+void DADM::gradientChanged(int gradient)
+{
+	Global::dataXY = Global::diffusionData4D.at(ui.gradientSpinBox->value() - 1);
+	visualization2d();
+}
+
+void DADM::diffusionGradientsSet()
+{
+	if (!ui.diffGradientsRadioButton->isChecked())
+		return;
+
+	if (!ui.gradientSpinBox->isEnabled()) ui.gradientSpinBox->setEnabled(true);
+	Global::biomarker = Biomarker::GRADIENTS;
+	visualization2d();
+}
+
 void DADM::diffusionFASet()
 {
 	if (!ui.diffFARadioButton->isChecked())
 		return;
 
+	if (ui.gradientSpinBox->isEnabled()) ui.gradientSpinBox->setEnabled(false);
 	Global::biomarker = Biomarker::FA;
 	visualization2d();
 }
@@ -398,6 +449,7 @@ void DADM::diffusionMDSet()
 	if (!ui.diffMDRadioButton->isChecked())
 		return;
 
+	if (ui.gradientSpinBox->isEnabled()) ui.gradientSpinBox->setEnabled(false);
 	Global::biomarker = Biomarker::MD;
 	visualization2d();
 }
@@ -407,6 +459,7 @@ void DADM::diffusionRASet()
 	if (!ui.difRARadioButton->isChecked())
 		return;
 
+	if (ui.gradientSpinBox->isEnabled()) ui.gradientSpinBox->setEnabled(false);
 	Global::biomarker = Biomarker::RA;
 	visualization2d();
 }
@@ -416,6 +469,7 @@ void DADM::diffusionVRSet()
 	if (!ui.diffVRRadioButton->isChecked())
 		return;
 
+	if (ui.gradientSpinBox->isEnabled()) ui.gradientSpinBox->setEnabled(false);
 	Global::biomarker = Biomarker::VR;
 	visualization2d();
 }
@@ -449,7 +503,10 @@ void DADM::NoneFiltrationSet()
 
 void DADM::restoreDefault()
 {
-	if (Global::structuralData.empty() || Global::FA.empty()) return;
+	if (Global::dtype == DIFFUSION_DATA) {
+		return;
+	}
+	if (Global::structuralData.empty()) return;
 	ui.alphaPlaneSpinBox->setValue(0);
 	ui.betaPlaneSpinBox->setValue(0);
 	ui.resolutionWidthSpinBox->setValue(1);
@@ -545,6 +602,12 @@ void DADM::onObliqueImagingSaggitalDone()
 
 void DADM::onObliqueImagingHorizontalDone()
 {
+	if (Global::dtype == DIFFUSION_DATA) {
+		visualization2d();
+		ui.planeApplyPushButton->setEnabled(true);
+		ui.statusBar->showMessage("Ready");
+		return;
+	}
 	qDebug() << "Done HORIZONTAL";
 	mutex.lock();
 	planesSetNum += 1;
@@ -727,7 +790,7 @@ void Worker::run()
 		skull_stripping->Start();
 		images4D.clear();
 		images4D = skull_stripping->getData4D();
-		*/
+		
 		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
 		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D, Global::b_value, Global::gradients);
 		diff->Start();
@@ -737,6 +800,7 @@ void Worker::run()
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
 		delete diff;
+		*/
 		break;
 	}
 	}
@@ -1128,7 +1192,7 @@ void ObliqueImagingWorker::run() {
 	switch (profile) {
 	case SAGGITAL:
 		for (int i = 0; i < Global::dataXZ.size(); i++) {
-			qDebug() << "Iteration sagittal: " << i;
+			//qDebug() << "Iteration sagittal: " << i;
 			imaging = new Oblique_imaging(data, a, b, SAGGITAL, i);
 			imaging->Start();
 			d.push_back(imaging->getData());
@@ -1139,7 +1203,7 @@ void ObliqueImagingWorker::run() {
 		break;
 	case FRONTAL:
 		for (int i = 0; i < Global::dataYZ.size(); i++) {
-			qDebug() << "Iteration frontal: " << i;
+			//qDebug() << "Iteration frontal: " << i;
 			imaging = new Oblique_imaging(data, a, b, FRONTAL, i);
 			imaging->Start();
 			d.push_back(imaging->getData());
@@ -1149,7 +1213,7 @@ void ObliqueImagingWorker::run() {
 		break;
 	case HORIZONTAL:
 		for (int i = 0; i < Global::dataXY.size(); i++) {
-			qDebug() << "Iteration horizontal: " << i;
+			//qDebug() << "Iteration horizontal: " << i;
 			imaging = new Oblique_imaging(data, a, b, HORIZONTAL, i);
 			imaging->Start();
 			d.push_back(imaging->getData());

@@ -1,19 +1,20 @@
-//#include <vtkImageActor.h>
-//#include <vtkRenderWindow.h>
-//#include <vtkInteractorStyleImage.h>
-//#include <vtkSmartPointer.h>
-//#include <vtkCamera.h>
-//#include <vtkProperty.h>
-//#include <vtkRenderer.h>
-//#include <vtkRenderWindowInteractor.h>
-//#include <vtkNamedColors.h>
-//#include <vtkImageData.h>
-//#include <vtkAutoInit.h>
-//#include <vtkImageMapper3D.h>
-//#include <vtkImageMapToColors.h>
-//#include <vtkLookupTable.h>
-//#include <vtkImageProperty.h>
-
+/*
+#include <vtkimageactor.h>
+#include <vtkrenderwindow.h>
+#include <vtkinteractorstyleimage.h>
+#include <vtksmartpointer.h>
+#include <vtkcamera.h>
+#include <vtkproperty.h>
+#include <vtkrenderer.h>
+#include <vtkrenderwindowinteractor.h>
+#include <vtknamedcolors.h>
+#include <vtkimagedata.h>
+#include <vtkautoinit.h>
+#include <vtkimagemapper3d.h>
+#include <vtkimagemaptocolors.h>
+#include <vtklookuptable.h>
+#include <vtkimageproperty.h>
+*/
 #include "Non_stationary_noise_estimation.h"
 #include "qdebug.h"
 
@@ -41,55 +42,56 @@ void Non_stationary_noise_estimation::StructuralDataAlgorithm() {
 			setEstimators(data3D_input[i], i);
 		}
 
-		//int xspace = RiceEstimator3D[0].rows();
-		//int yspace = RiceEstimator3D[0].cols();
+		/*
+		int xspace = RiceEstimator3D[0].rows();
+		int yspace = RiceEstimator3D[0].cols();
 
-		//vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
-		//imageData->SetDimensions(xspace, yspace, 1);
-		//imageData->AllocateScalars(VTK_DOUBLE, 1);
-		//int* dims = imageData->GetDimensions();
+		vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+		imageData->SetDimensions(xspace, yspace, 1);
+		imageData->AllocateScalars(VTK_DOUBLE, 1);
+		int* dims = imageData->GetDimensions();
 
-		//for (int y = 0; y < dims[1]; y++)
-		//	for (int x = 0; x < dims[0]; x++)
-		//	{
-		//		double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, 0));
-		//		pixel[0] = RiceEstimator3D[0](x, y);
-		//	}
+		for (int y = 0; y < dims[1]; y++)
+			for (int x = 0; x < dims[0]; x++)
+			{
+				double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, 0));
+				pixel[0] = RiceEstimator3D[0](x, y);
+			}
 
 		//// Map the scalar values in the image to colors with a lookup table:
-		//vtkSmartPointer<vtkLookupTable> lookupTable =
-		//	vtkSmartPointer<vtkLookupTable>::New();
-		//lookupTable->SetNumberOfTableValues(14);
-		//lookupTable->SetRange(0.0, 13.0);
-		//lookupTable->Build();
+		vtkSmartPointer<vtkLookupTable> lookupTable =
+			vtkSmartPointer<vtkLookupTable>::New();
+		lookupTable->SetNumberOfTableValues(14);
+		lookupTable->SetRange(0.0, 13.0);
+		lookupTable->Build();
 
 		//// Pass the original image and the lookup table to a filter to create
 		//// a color image:
-		//vtkSmartPointer<vtkImageMapToColors> scalarValuesToColors =
-		//	vtkSmartPointer<vtkImageMapToColors>::New();
-		//scalarValuesToColors->SetLookupTable(lookupTable);
-		//scalarValuesToColors->PassAlphaToOutputOn();
-		//scalarValuesToColors->SetInputData(imageData);
+		vtkSmartPointer<vtkImageMapToColors> scalarValuesToColors =
+			vtkSmartPointer<vtkImageMapToColors>::New();
+		scalarValuesToColors->SetLookupTable(lookupTable);
+		scalarValuesToColors->PassAlphaToOutputOn();
+		scalarValuesToColors->SetInputData(imageData);
 
 
-		//vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
-		//actor->GetMapper()->SetInputConnection(scalarValuesToColors->GetOutputPort());
-		//actor->GetProperty()->SetInterpolationTypeToNearest();
+		vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
+		actor->GetMapper()->SetInputConnection(scalarValuesToColors->GetOutputPort());
+		actor->GetProperty()->SetInterpolationTypeToNearest();
 
-		//vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
-		//renderer->AddActor(actor);
-		//renderer->ResetCamera();
+		vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+		renderer->AddActor(actor);
+		renderer->ResetCamera();
 
-		//vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-		//renderWindow->AddRenderer(renderer);
+		vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+		renderWindow->AddRenderer(renderer);
 
-		//vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-		//vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
-		//renderWindowInteractor->SetInteractorStyle(style);
-		//renderWindowInteractor->SetRenderWindow(renderWindow);
-		//renderWindowInteractor->Initialize();
-		//renderWindowInteractor->Start();
-
+		vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+		vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
+		renderWindowInteractor->SetInteractorStyle(style);
+		renderWindowInteractor->SetRenderWindow(renderWindow);
+		renderWindowInteractor->Initialize();
+		renderWindowInteractor->Start();
+	*/
 }
 
 void Non_stationary_noise_estimation::DiffusionDataAlgorithm() {
