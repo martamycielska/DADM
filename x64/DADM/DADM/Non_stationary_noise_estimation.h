@@ -28,7 +28,6 @@ private:
 	virtual void DiffusionDataAlgorithm();
 	bool Non_stationary_noise_estimation::getSum(MatrixXd matrix);
 	MatrixXd Non_stationary_noise_estimation::getFinded(MatrixXd matrix, int conditionValue);
-	MatrixXd Non_stationary_noise_estimation::setValueOnSpecifiedIndexes(MatrixXd matrixToSet, MatrixXd Indexes);
 	void Non_stationary_noise_estimation::setValueOnSpecifiedIndexes(MatrixXd& matrixToSet, MatrixXd Indexes, double value);
 	void Non_stationary_noise_estimation::setBesselValues(MatrixXd z, MatrixXd K, MatrixXd& M);
 	MatrixXd Non_stationary_noise_estimation::bessel(MatrixXd matrix);
