@@ -71,6 +71,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.yzSlider->setMaximum(0);
 
 	planesSetNum = 0;
+	ui.actionVisualize_2D->setVisible(false);
 }
 
 void DADM::mri_reconstruct() {
@@ -93,15 +94,15 @@ void DADM::importStructuralData()
 	if (url.isEmpty())
 		return;
 
-	Global::structuralData.clear();
-	Global::dataXY.clear();
-	Global::dataXZ.clear();
-	Global::dataYZ.clear();
+	//Global::structuralData.clear();
+	//Global::dataXY.clear();
+	//Global::dataXZ.clear();
+	//Global::dataYZ.clear();
 
-	Global::structuralData = Data3D(0);
-	Global::dataXY = Data3D(0);
-	Global::dataXZ = Data3D(0);
-	Global::dataYZ = Data3D(0);
+	//Global::structuralData = Data3D(0);
+	//Global::dataXY = Data3D(0);
+	//Global::dataXZ = Data3D(0);
+	//Global::dataYZ = Data3D(0);
 
 	ui.DiffusionPage->hide();
 	Global::dtype = STRUCTURAL_DATA;
@@ -123,14 +124,14 @@ void DADM::importDiffusionData()
 	if (url.isEmpty())
 		return;
 
-	Global::FA.clear();
-	Global::MD.clear();
-	Global::RA.clear();
-	Global::VR.clear();
-	Global::structuralData.clear();
-	Global::dataXY.clear();
-	Global::dataXZ.clear();
-	Global::dataYZ.clear();
+	//Global::FA.clear();
+	//Global::MD.clear();
+	//Global::RA.clear();
+	//Global::VR.clear();
+	//Global::structuralData.clear();
+	//Global::dataXY.clear();
+	//Global::dataXZ.clear();
+	//Global::dataYZ.clear();
 
 	ui.DiffusionPage->show();
 	disconnect(ui.diffFARadioButton, &QRadioButton::toggled, this, &DADM::diffusionFASet);
@@ -180,6 +181,13 @@ void DADM::visualization3d() {
 
 void DADM::visualization2d() {
 
+	if (!xySliceVisualizator) {
+		delete xySliceVisualizator;
+		delete yzSliceVisualizator;
+		delete xzSliceVisualizator;
+	}
+
+	qDebug() << "VIS 2D";
 	if (Global::dtype == DIFFUSION_DATA) {
 		if (Global::FA.size() == 0) return;
 
@@ -226,10 +234,6 @@ void DADM::visualization2d() {
 		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
 		ui.yzSlider->setMinimum(0);
 		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
-
-		delete xySliceVisualizator;
-		delete yzSliceVisualizator;
-		delete xzSliceVisualizator;
 	}
 }
 

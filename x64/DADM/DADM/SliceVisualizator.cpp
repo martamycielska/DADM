@@ -125,7 +125,6 @@ void SliceVisualizator::visualize()
 		//imageViewerYZ->SetSliceOrientationToYZ();
 		imageViewerYZ->SetSlice((int)(imageViewerYZ->GetSliceMax() / 2));
 		imageViewerYZ->Render();
-
 		qDebug() << "Skonczona wizualizacja YZ";
 	}
 
@@ -143,7 +142,6 @@ void SliceVisualizator::visualize()
 		//imageViewerXZ->SetSliceOrientationToXZ();
 		imageViewerXZ->SetSlice((int)(imageViewerXZ->GetSliceMax() / 2));
 		imageViewerXZ->Render();
-
 		qDebug() << "Skonczona wizualizacja XZ";
 	}
 }
