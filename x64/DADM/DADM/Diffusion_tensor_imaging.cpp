@@ -28,8 +28,11 @@ TensorData Diffusion_tensor_imaging::EstimateTensor() {
 
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		std::vector<std::vector<MatrixXd>> tmp3;
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
+			std::vector<MatrixXd> tmp2;
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
 				for (int l = 0; l < this->inputData[k][i].cols(); l++)
@@ -45,17 +48,22 @@ TensorData Diffusion_tensor_imaging::EstimateTensor() {
 				this->inputData[k][i].row(j) = this->inputData[k][i].row(j).array().square();
 				MatrixXd covar = this->inputData[k][i].row(j).asDiagonal();
 				MatrixXd X = ((B.transpose() * covar * B).inverse()).array() * (B.transpose() * covar).array() * this->inputData[k][i].row(j).array().log();
+				MatrixXd tmp(3, 3);
 
-				T[k][i][j].setZero(3, 3);
-				T[k][i][j].row(0)(0) = X(1, 0);
-				T[k][i][j].row(0)(1) = X(2, 0);
-				T[k][i][j].row(0)(2) = X(3, 0);
-				T[k][i][j].row(1)(1) = X(4, 0);
-				T[k][i][j].row(1)(2) = X(5, 0);
-				T[k][i][j].row(2)(2) = X(6, 0);
-
+				tmp.setZero(3, 3);
+				tmp.row(0)(0) = X(1, 0);
+				tmp.row(0)(1) = X(2, 0);
+				tmp.row(0)(2) = X(3, 0);
+				tmp.row(1)(1) = X(4, 0);
+				tmp.row(1)(2) = X(5, 0);
+				tmp.row(2)(2) = X(6, 0);
+				tmp2.push_back(tmp);
 			}
+			tmp3.push_back(tmp2);
+
+
 		}
+		T.push_back(tmp3);
 
 	}
 	return T;
@@ -123,8 +131,6 @@ void Diffusion_tensor_imaging::MeanDiffusivity() {
 
 void Diffusion_tensor_imaging::FractionalAnisotropy() {
 	double v1, v2, v3, v;
-
->>>>>>> Stashed changes
 
 	v1 = this->eigenVector[0];
 	v2 = this->eigenVector[1];

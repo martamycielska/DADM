@@ -11,7 +11,7 @@
 
 //typedef std::vector<std::vector<std::vector<matrixxcd>>> data5draw;
 //typedef std::vector<std::vector<matrixxcd>> data4draw;
-typedef std::vector<std::vector<std::vector<Eigen::Matrix2d>>> TensorData;
+typedef std::vector<std::vector<std::vector<Eigen::MatrixXd>>> TensorData;
 
 class Diffusion_tensor_imaging :
 	public Diffusion_Module
