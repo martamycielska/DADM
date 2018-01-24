@@ -34,24 +34,24 @@ void Reconstruction::StructuralDataAlgorithm() {
 
 	int slices_no = data4DRaw_input.size();//slices number
 	size = sensitivityMaps3D[0].rows();
-	qDebug() << "Size: " << slices_no;
+	//qDebug() << "Size: " << slices_no;
 	Data3DRaw data_raw;
 	MatrixXd reconstructed_data;
 	Data3D slices(slices_no);
 
 	for (int i = 0; i < slices_no; i++)
 	{
-		qDebug() << "Iteration: " << i;
+		//qDebug() << "Iteration: " << i;
 		//Inverse Discrete Fourier Transform
 		data_raw = data4DRaw_input[i];
 		data_raw = FourierTransform(data_raw);
 		
 		//Image Reconstruction
 		reconstructed_data = LSreconstruction(data_raw);
-		qDebug() << "LS reconstruction done";
+		//qDebug() << "LS reconstruction done";
 
 		reconstructed_data = TikhonovRegularization(data_raw, reconstructed_data);
-		qDebug() << "Tikhonov regularization done";
+		//qDebug() << "Tikhonov regularization done";
 
 		//Value normalization to 0-255
 		double min = reconstructed_data.minCoeff();
