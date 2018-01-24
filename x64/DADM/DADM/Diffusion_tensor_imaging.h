@@ -13,7 +13,7 @@
 //typedef std::vector<std::vector<matrixxcd>> data4draw;
 typedef std::vector<std::vector<std::vector<Eigen::Matrix2d>>> TensorData;
 
-class Diffusion_tensor_imaging:
+class Diffusion_tensor_imaging :
 	public Diffusion_Module
 {
 public:
@@ -36,4 +36,3 @@ private:
 	void MeanDiffusivity();
 	void VolumeRatio();
 };
-
