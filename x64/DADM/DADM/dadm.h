@@ -55,9 +55,9 @@ public:
 	void run();
 
 signals:
-	void resultReadyFrontal(Data3D);
-	void resultReadySggital(Data3D);
-	void resultReadyHorizontal(Data3D);
+	void resultReadyFrontal();
+	void resultReadySggital();
+	void resultReadyHorizontal();
 
 private:
 	Profile profile;
@@ -105,6 +105,8 @@ private:
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXY;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndYZ;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXZ;
+	int planesSetNum;
+	ImportWorker *iw;
 
 protected:
 	void closeEvent(QCloseEvent*);
@@ -137,9 +139,9 @@ private slots:
 	void restoreDefault();
 	void showProgramInformation();
 
-	void onObliqueImagingFrontalDone(Data3D);
-	void onObliqueImagingSaggitalDone(Data3D);
-	void onObliqueImagingHorizontalDone(Data3D);
+	void onObliqueImagingFrontalDone();
+	void onObliqueImagingSaggitalDone();
+	void onObliqueImagingHorizontalDone();
 
 	void xySliderValueChanged(int);
 	void yzSliderValueChanged(int);

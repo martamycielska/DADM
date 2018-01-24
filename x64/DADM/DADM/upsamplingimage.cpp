@@ -111,5 +111,6 @@ void UpsamplingWorker::run() {
 	upsampling->Start();
 	qDebug() << "DONE";
 	emit processingDone(upsampling->getData());
+	delete upsampling;
 	qDebug() << "EMITTED";
 }

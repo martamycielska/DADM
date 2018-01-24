@@ -528,7 +528,7 @@ QToolBox::tab:selected { /* italicize selected tabs */
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="FiltrationPage">
             <property name="geometry">
@@ -590,8 +590,8 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>93</width>
+              <height>98</height>
              </rect>
             </property>
             <attribute name="label">
@@ -674,7 +674,7 @@ QToolBox::tab:selected { /* italicize selected tabs */
              </rect>
             </property>
             <attribute name="label">
-             <string>Resolution</string>
+             <string>Upsampling</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_10">
              <item>
