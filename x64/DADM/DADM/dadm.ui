@@ -549,7 +549,7 @@ QToolBox::tab:selected { /* italicize selected tabs */
                 <string>LMMSE</string>
                </property>
                <property name="checked">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -566,7 +566,7 @@ QToolBox::tab:selected { /* italicize selected tabs */
                 <string>None</string>
                </property>
                <property name="checked">
-                <bool>true</bool>
+                <bool>false</bool>
                </property>
               </widget>
              </item>
@@ -680,7 +680,7 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <item>
               <widget class="QRadioButton" name="FrontalPlaneRadioButton">
                <property name="text">
-                <string>Frontal (XZ)</string>
+                <string>Frontal</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -690,14 +690,14 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <item>
               <widget class="QRadioButton" name="SaggitalPlaneRadioButton">
                <property name="text">
-                <string>Sagittal (XY)</string>
+                <string>Sagittal</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QRadioButton" name="HorizontalPlaneRadioButton">
                <property name="text">
-                <string>Horizontal (YZ)</string>
+                <string>Horizontal</string>
                </property>
               </widget>
              </item>
@@ -712,6 +712,9 @@ QToolBox::tab:selected { /* italicize selected tabs */
                </item>
                <item>
                 <widget class="QSpinBox" name="resolutionWidthSpinBox">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
                  <property name="maximum">
                   <number>1024</number>
                  </property>
@@ -730,6 +733,9 @@ QToolBox::tab:selected { /* italicize selected tabs */
                </item>
                <item>
                 <widget class="QSpinBox" name="resolutionHeightSpinBox">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
                  <property name="maximum">
                   <number>1024</number>
                  </property>
@@ -764,8 +770,8 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>93</width>
+              <height>94</height>
              </rect>
             </property>
             <attribute name="label">

@@ -39,6 +39,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 
 	connect(ui.LMMSERadioButton, &QRadioButton::toggled, this, &DADM::LMMSEFiltrationSet);
 	connect(ui.UNLMRadioButton, &QRadioButton::toggled, this, &DADM::UNLMFiltrationSet);
+	connect(ui.NoneFiltrationRadioButton, &QRadioButton::toggled, this, &DADM::NoneFiltrationSet);
 
 	connect(ui.planeApplyPushButton, SIGNAL(clicked()), this, SLOT(planeValuesChanged()));
 	connect(ui.resolutionApplyPushButton, SIGNAL(clicked()), this, SLOT(resolutionValuesChanged()));
@@ -164,6 +165,38 @@ void DADM::visualization3d() {
 }
 
 void DADM::visualization2d() {
+
+	if (Global::dtype == DIFFUSION_DATA) {
+		if (Global::FA.size() == 0) return;
+
+		switch (Global::biomarker) {
+		case Biomarker::FA:
+		{
+			//xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::FA);
+			//xySliceVisualizator->visualize();
+			break;
+		}
+		case Biomarker::MD:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::MD);
+			xySliceVisualizator->visualize();
+			break;
+		}
+		case Biomarker::RA:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::RA);
+			xySliceVisualizator->visualize();
+			break;
+		}
+		case Biomarker::VR:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::VR);
+			xySliceVisualizator->visualize();
+			break;
+		}
+		}
+	}
+
 	if (Global::dataXY.size() != 0) {
 		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::dataXY);
 		xySliceVisualizator->visualize();
@@ -292,15 +325,15 @@ void DADM::onProccesing(QString msg)
 void DADM::resolutionValuesChanged()
 {
 	if (ui.FrontalPlaneRadioButton->isChecked()) {
-		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xzSlider->value());
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::YZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.yzSlider->value());
 		upsamlingImageWindow->show();
 	}
 	if (ui.SaggitalPlaneRadioButton->isChecked()) {
-		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XY, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xySlider->value());
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xzSlider->value());
 		upsamlingImageWindow->show();
 	}
 	if (ui.HorizontalPlaneRadioButton->isChecked()) {
-		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::YZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.yzSlider->value());
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XY, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xySlider->value());
 		upsamlingImageWindow->show();
 	}
 }
@@ -308,7 +341,7 @@ void DADM::resolutionValuesChanged()
 void DADM::planeValuesChanged()
 {
 	ui.statusBar->showMessage("Busy");
-	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataXZ, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
+	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataXY, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL, ui.xySlider->maximum());
 	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
 	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
 	worker_frontal->start();
@@ -319,24 +352,36 @@ void DADM::diffusionFASet()
 {
 	if (!ui.diffFARadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::FA;
+	visualization2d();
 }
 
 void DADM::diffusionMDSet()
 {
 	if (!ui.diffMDRadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::MD;
+	visualization2d();
 }
 
 void DADM::diffusionRASet()
 {
 	if (!ui.difRARadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::RA;
+	visualization2d();
 }
 
 void DADM::diffusionVRSet()
 {
 	if (!ui.diffVRRadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::VR;
+	visualization2d();
 }
 
 void DADM::LMMSEFiltrationSet()
@@ -357,6 +402,15 @@ void DADM::UNLMFiltrationSet()
 	Global::ftype = UNLM;
 }
 
+void DADM::NoneFiltrationSet()
+{
+	if (!ui.UNLMRadioButton->isChecked())
+		return;
+
+	qDebug() << "UNLM";
+	Global::ftype = NONE;
+}
+
 void DADM::restoreDefault()
 {
 	ui.alphaPlaneSpinBox->setValue(0);
@@ -372,20 +426,20 @@ void DADM::showProgramInformation()
 
 void DADM::onObliqueImagingFrontalDone(Data3D data)
 {
-	//Global::temporaryDataXZ = data;
-	qDebug() << "Done XZ";
+	//Global::dataYZ = data;
+	qDebug() << "Done FRONTAL";
 }
 
 void DADM::onObliqueImagingSaggitalDone(Data3D data)
 {
-	//Global::temporaryDataXY = data;
-	qDebug() << "Done XY";
+	//Global::XZ = data;
+	qDebug() << "Done SAGITTAL";
 }
 
 void DADM::onObliqueImagingHorizontalDone(Data3D data)
 {
-	//Global::temporaryDataYZ = data;
-	qDebug() << "Done YZ";
+	//Global::dataXY = data;
+	qDebug() << "Done HORIZONTAL";
 }
 
 DADM::~DADM()
@@ -402,10 +456,10 @@ Worker::Worker(DataType dtype, FilteringType ftype)
 
 void Worker::run()
 {
-	Data3D images3D;
-	Data4D images4D;
-	Data3D rice3D;
-	Data4D rice4D;
+	Data3D images3D = Data3D(0);
+	Data4D images4D = Data4D(0);
+	Data3D rice3D = Data3D(0);
+	Data4D rice4D = Data4D(0);
 	switch (dtype)
 	{
 	case STRUCTURAL_DATA:
@@ -413,8 +467,9 @@ void Worker::run()
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
-		Global::structuralData = reconstruction->getData3D();
+		images3D = reconstruction->getData3D();
 		Global::structuralRawData.clear();
+		Global::structuralSensitivityMaps.clear();
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
 		if (ftype != NONE) {
 
@@ -439,6 +494,7 @@ void Worker::run()
 				Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
 				unlm->Start();
 				images3D.clear();
+				qDebug() << "UNLM getData()";
 				images3D = unlm->getData3D();
 				break;
 			}
@@ -451,8 +507,9 @@ void Worker::run()
 		Global::structuralData = correction->getData3D();
 		*/
 		//------------------------------------------------------------YZ
+		Global::structuralData = images3D;
 		Eigen::MatrixXd slice;
-		slice = Global::structuralData.at(90);
+		slice = Global::structuralData.at(0);
 
 		int size_z = Global::structuralData.size();
 		int size_x = slice.rows();
@@ -497,35 +554,22 @@ void Worker::run()
 		qDebug() << Global::dataXY.size();
 		qDebug() << Global::dataYZ.size();
 		qDebug() << Global::dataXZ.size();
-		//TODO k¹ty do ustalenia
-		/*
-		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
-		frontal->Start();
-		Global::dataFrontal = frontal->getData();
-		Oblique_imaging *saggital = new Oblique_imaging(Global::structuralData, 0, 0);
-		saggital->Start();
-		Global::dataSaggital = frontal->getData();
-		Oblique_imaging *horizontal = new Oblique_imaging(Global::structuralData, 0, 0);
-		horizontal->Start();
-		Global::dataHorizontal = frontal->getData();
-		*/
 		
 		break;
 	}
 	case DIFFUSION_DATA:
 	{
-		emit progress(0, 6);
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		Global::diffusionRawData.clear();
-		Global::structuralData = reconstruction->getData4D().at(3);
+		Global::diffusionSensitivityMaps.clear();
+		images4D = reconstruction->getData4D();
 		if (ftype != NONE) {
 			emit currentProcess("Preprocessing: Non stationary noise estimation...");
 			Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
 			estimation->Start();
 			rice4D = estimation->getData4D(RICE);
-			emit progress(2, 6);
 			switch (ftype)
 			{
 			case LMMSE:
@@ -548,6 +592,7 @@ void Worker::run()
 			}
 			}
 		}
+		Global::diffusionData4D = images4D;
 		/*
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
@@ -559,27 +604,15 @@ void Worker::run()
 		skull_stripping->Start();
 		images4D.clear();
 		images4D = skull_stripping->getData4D();
+		*/
 		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
-		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
+		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D, Global::b_value, Global::gradients);
 		diff->Start();
-		Global::diffusionData4D = diff->getData();
+		//Global::diffusionData4D = diff->getData();
 		Global::FA = diff->getFA();
 		Global::RA = diff->getRA();
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
-		*/
-		//TODO k¹ty do ustalenia
-		/* 
-		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
-		frontal->Start();
-		Global::dataFrontal = frontal->getData();
-		Oblique_imaging *saggital = new Oblique_imaging(Global::FA, 0, 0);
-		saggital->Start();
-		Global::dataSaggital = frontal->getData();
-		Oblique_imaging *horizontal = new Oblique_imaging(Global::FA, 0, 0);
-		horizontal->Start();
-		Global::dataHorizontal = frontal->getData();
-		*/
 		break;
 	}
 	}
@@ -815,19 +848,22 @@ void ImportWorker::structuralDataImport()
 
 	if (mat) {
 		qDebug() << "Otwarto plik";
+		int max = 0;
 
-		matvar_t *matVar = 0;
-		matVar = Mat_VarRead(mat, (char*)"raw_data");
 		matvar_t *s_matVar = 0;
 		s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
-		int max = 0;
-		if (matVar) {
-			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
-		}
-
 		if (s_matVar) {
 			max += s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2];
+		}
+
+		Mat_VarFree(s_matVar);
+
+		matvar_t *matVar = 0;
+		matVar = Mat_VarRead(mat, (char*)"raw_data");
+
+		if (matVar) {
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
 		}
 
 		int status = 0;
@@ -882,6 +918,7 @@ void ImportWorker::structuralDataImport()
 			Global::structuralRawData = RawData;
 
 			//matvar_t *s_matVar = 0;
+			s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
 			if (s_matVar) {
@@ -948,29 +985,31 @@ void ImportWorker::structuralDataImport()
 }
 
 
-ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
+ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile, int max) {
 	qRegisterMetaType<Data3D>("Data3D");
 	this->profile = profile;
 	this->data = data;
 	this->a = a;
 	this->b = b;
+	this->max_slice = max;
 }
 
 void ObliqueImagingWorker::run() {
 	Oblique_imaging *imaging;
+	Data3D d;
 	switch (profile) {
-	case FRONTAL:
-		imaging = new Oblique_imaging(data, a, b, FRONTAL, 30);
-		break;
 	case SAGGITAL:
-		imaging = new Oblique_imaging(data, a, b, SAGGITAL, 30);
+		imaging = new Oblique_imaging(data, a, b, SAGGITAL);
+		break;
+	case FRONTAL:
+		imaging = new Oblique_imaging(data, a, b, FRONTAL);
 		break;
 	case HORIZONTAL:
-		imaging = new Oblique_imaging(data, a, b, HORIZONTAL, 30);
+		imaging = new Oblique_imaging(data, a, b, HORIZONTAL);
 		break;
 	}
 	imaging->Start();
-	Data3D d = imaging->getData();
+	Global::dataXY = imaging->getData();
 	switch (profile) {
 	case FRONTAL:
 		emit resultReadyFrontal(d);

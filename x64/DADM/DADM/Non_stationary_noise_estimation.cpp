@@ -1,7 +1,6 @@
 #include "Non_stationary_noise_estimation.h"
 #include "qdebug.h"
 
-
 Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data3D data)
 {
 	qDebug() << "Non stationary noise estimation constructor called";
@@ -17,7 +16,7 @@ Non_stationary_noise_estimation::Non_stationary_noise_estimation(Data4D data)
 }
 
 void Non_stationary_noise_estimation::StructuralDataAlgorithm() {
-	
+	qDebug() << "START ESTIMATION";
 		for (int i = 0; i < data3D_input.size(); i++) {
 			setEstimators(data3D_input[i], i);
 		}
@@ -29,6 +28,10 @@ void Non_stationary_noise_estimation::DiffusionDataAlgorithm() {
 		for (int j = 0; j < data4D_input[i].size(); j++) {
 			setEstimators(data4D_input[i][j], i, j, true);
 		}
+		GaussEstimator4D.push_back(gradientEstimatorGauss);
+		RiceEstimator4D.push_back(gradientEstimatorRice);
+		gradientEstimatorGauss.clear();
+		gradientEstimatorRice.clear();
 	}
 }
 
@@ -325,10 +328,8 @@ void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage,
 	MatrixXd reconstructedWithoutMean = reconstructedImage - mean;
 	MatrixXd abs = absoluteValue(reconstructedWithoutMean);
 	MatrixXd log = logCalculate(abs);
-
 	MatrixXd kernel = MatrixXd::Zero(2*reconstructedImage.rows(), 2 * reconstructedImage.cols());
 	MatrixXd filtered = gaussianKernel(kernel, log, 3.4);
-
 	MatrixXd dctValue = dct(log);
 	MatrixXd lpfF = dctValue.array()*filtered.array();
 	MatrixXd lpf = idct(lpfF);
@@ -337,22 +338,20 @@ void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage,
 	MatrixXd SNR = getSNR(3, reconstructedImage);
 	MatrixXd correctSNR = riceCorrection(SNR);
 	MatrixXd LPF1 = lpf - correctSNR;
-
 	MatrixXd filtered2 = gaussianKernel(kernel, log, 3.4 + 2);
 	MatrixXd dctValue2 = dct(LPF1);
 	MatrixXd lpfF2 = dctValue2.array()*filtered2.array();
 	MatrixXd lpf2 = idct(lpfF2);
 	MatrixXd exp2=expCalculate(lpf2);
 	MatrixXd estimator2 = noiseEstimation(exp2);
-
 	if (isDiffusion)
 	{
-		GaussEstimator4D[i][j] = estimator;
-		RiceEstimator4D[i][j] = estimator2;
+		gradientEstimatorGauss.push_back(estimator);
+		gradientEstimatorRice.push_back(estimator2);
 	}
 	else
 	{
-		GaussEstimator3D[i] = estimator;
-		RiceEstimator3D[i] = estimator2;
+		GaussEstimator3D.push_back(estimator);
+		RiceEstimator3D.push_back(estimator2);
 	}
 }

@@ -1,6 +1,7 @@
 #include "Globals.h"
 
 namespace Global {
+	extern Biomarker biomarker = Biomarker::FA;
 	extern int current_slice = 0;
 	extern FilteringType ftype = LMMSE;
 	extern DataType dtype = STRUCTURAL_DATA;
@@ -19,7 +20,7 @@ namespace Global {
 	extern Data4D diffusionData4D = Data4D(0);
 	extern Data3D diffusionData3D = Data3D(0);
 	extern SegmentationData segmentationData = { {"white_matter", Data3D(0)}, { "gray_matter", Data3D(0) }, { "cerebrospinal_fluid", Data3D(0) } };
-	extern Data3D FA = Data3D(0);
+	extern Data4D FA = Data4D(0);
 	extern Data3D MD = Data3D(0);
 	extern Data3D RA = Data3D(0);
 	extern Data3D VR = Data3D(0);

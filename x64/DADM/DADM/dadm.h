@@ -51,7 +51,7 @@ class ObliqueImagingWorker : public QThread
 	Q_OBJECT
 
 public:
-	ObliqueImagingWorker(Data3D, double, double, Profile);
+	ObliqueImagingWorker(Data3D, double, double, Profile, int);
 	void run();
 
 signals:
@@ -64,6 +64,7 @@ private:
 	Data3D data;
 	double a;
 	double b;
+	int max_slice;
 };
 
 class ImportWorker : public QThread
@@ -130,6 +131,8 @@ private slots:
 	void diffusionVRSet();
 	void LMMSEFiltrationSet();
 	void UNLMFiltrationSet();
+
+	void NoneFiltrationSet();
 
 	void restoreDefault();
 	void showProgramInformation();

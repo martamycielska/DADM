@@ -20,7 +20,6 @@ Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data3D images
 	this->data3D_input = images;
 	estimator3D = estim;
 	dtype = STRUCTURAL_DATA;
-	StructuralDataAlgorithm();
 }
 
 Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data4D images, Data4D estim)
@@ -29,15 +28,16 @@ Non_stationary_noise_filtering_2::Non_stationary_noise_filtering_2(Data4D images
 	this->data4D_input = images;
 	estimator4D = estim;
 	dtype = DIFFUSION_DATA;
-	DiffusionDataAlgorithm();
 }
 
 void Non_stationary_noise_filtering_2::StructuralDataAlgorithm() {
 	Data3D data = data3D_input;
 	Data3D sigmaTab = estimator3D;
 	for (int i = 0; i < data3D_input.size(); i++) {
-		data3D_output[i] = unlm(data3D_input[i], estimator3D[i]);
+		qDebug() << i;
+		data3D_output.push_back(unlm(data3D_input[i], estimator3D[i]));
 	}
+	qDebug() << "Output size" << data3D_output.size();
 }
 
 void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
@@ -45,8 +45,9 @@ void Non_stationary_noise_filtering_2::DiffusionDataAlgorithm() {
 	Data4D sigmaTab = estimator4D;
 	for (int i = 0; i < data4D_input.size(); i++) {
 		for (int j = 0; j < data4D_input[i].size(); j++) {
-			data4D_output[i][j] = unlm(data4D_input[i][j], estimator4D[i][j]);
+			part_out.push_back(unlm(data4D_input[i][j], estimator4D[i][j]));
 		}
+		data4D_output.push_back(part_out);
 	}
 }
 
@@ -138,8 +139,6 @@ MatrixXd Non_stationary_noise_filtering_2::unlm(MatrixXd input, MatrixXd sigma) 
 			else {
 				output(i, j) = input1(i, j);
 			}
-			qDebug() << test++;
-			qDebug() << "\n";
 		}
 	}
 	return output;
