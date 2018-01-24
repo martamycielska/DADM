@@ -658,53 +658,6 @@ QToolBox::tab:selected { /* italicize selected tabs */
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="shrinkDataGroupBox">
-         <property name="maximumSize">
-          <size>
-           <width>200</width>
-           <height>90</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="title">
-          <string>Shrinking data</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QSlider" name="shrinkSlider">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>5</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="shrinkingLabel">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>* Shrink data to increase efficiency</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="processGroupBox">
          <property name="maximumSize">
           <size>
