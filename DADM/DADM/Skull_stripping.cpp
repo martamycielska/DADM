@@ -1,8 +1,22 @@
-#include "Skull_stripping.h"
+#include <Skull_stripping.h>
 #include "qdebug.h"
 #include <Eigen/Eigen>
 #include <Eigen/Dense>
 #include <iostream>
+#include <math.h> 
+#include <vtkImageActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkSmartPointer.h>
+#include <vtkCamera.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkNamedColors.h>-
+#include <vtkImageData.h>
+#include <vtkAutoInit.h>
+VTK_MODULE_INIT(vtkRenderingOpenGL2);
+VTK_MODULE_INIT(vtkInteractionStyle);
 using namespace Eigen;
 typedef Matrix<bool, Dynamic, Dynamic> MatrixXb;
 const double PI = 3.14159265359;
@@ -33,14 +47,14 @@ MatrixXd slice_to_fit(Data3D input) {
 	Eigen::MatrixXd slice;
 	//choose another more appropriate slice to fit first level set
 	//serch size of this slice to find point to find elipse in the next step
-	slice = input[0];
+	slice = input[90];
 	return slice;
 }
 
 
 MatrixXd elipse(Data3D input) {
 
-	
+
 
 
 
@@ -69,10 +83,9 @@ MatrixXd elipse(Data3D input) {
 	}
 
 	//////////////////////////////////////////////
-
-	int swit = 0;
-	int j = 0;
-	int i = 0;
+	swit = 0;
+	j = 0;
+	i = 0;
 	int poz_w_a2 = 0;
 	for (j = (w - 1); j <= 0; j--) {
 		if (swit == 1) { break; }
@@ -89,11 +102,11 @@ MatrixXd elipse(Data3D input) {
 	int pol_sz = (poz_w_a2 - poz_w_a1) / 2 + poz_w_a1;
 
 	//////////////////////////////////////////////////////posiotion b1
-	int swit = 0;
-	int j = 0;
-	int i = 0;
+	swit = 0;
+	j = 0;
+	i = 0;
 	int poz_k_b1 = 0;
-	for (j = 0; j < k j++) {
+	for (j = 0; j < k; j++) {
 		if (swit == 1) { break; }
 		for (i = 0; i < w; i++) {
 			if (slice_threshold(j, i) != 1) {
@@ -105,9 +118,9 @@ MatrixXd elipse(Data3D input) {
 		}
 	}
 
-	int swit = 0;
-	int j = 0;
-	int i = 0;
+	swit = 0;
+	j = 0;
+	i = 0;
 	int poz_k_b2 = 0;
 	for (j = (k - 1); j <= 0; j--) {
 		if (swit == 1) { break; }
@@ -133,8 +146,6 @@ MatrixXd elipse(Data3D input) {
 	y = slice_threshold.row(pol_sz);
 	x = slice_threshold.col(pol_dl);
 	x = x.adjoint();
-
-
 	MatrixXd diffx;
 	MatrixXd diffy;
 	int len_x;
@@ -142,21 +153,18 @@ MatrixXd elipse(Data3D input) {
 	////////////////you need amount of columns
 	len_x = x.size();
 	len_y = y.size();
-
-
 	diffx = diffx.setOnes(1, (len_x - 4));
 	diffy = diffy.setOnes(1, (len_y - 4));
 
 	///Differentation x
 
-	int i;
+
 	for (i = 0; i < (len_x - 4); i++) {
 		diffx(1, i) = ((-1)*x(1, i) - 2 * x(1, (i + 1)) + 2 * x(1, (i + 3)) + x(1, (i + 4))) / 8;
 	}
 
 	///Differentation y
 
-	int i;
 	for (i = 0; i < (len_y - 4); i++) {
 		diffy(1, i) = ((-1)*y(1, i) - 2 * y(1, (i + 1)) + 2 * y(1, (i + 3)) + y(1, (i + 4))) / 8;
 	}
@@ -167,7 +175,7 @@ MatrixXd elipse(Data3D input) {
 	i = 0;
 	//from left to right side
 		//serach d1
-	while (s(i) == 0) {
+	while (diffx(i) == 0) {
 		i = i++;
 	}
 	//serach d2
@@ -245,7 +253,7 @@ MatrixXd elipse(Data3D input) {
 	}
 
 	//serach f8
-	while (s(i - 1) > s(i)) {
+	while (diffx(i - 1) > diffx(i)) {
 		i = i - 1;
 	}
 	int f8 = i;
@@ -302,7 +310,7 @@ MatrixXd elipse(Data3D input) {
 
 	i = (diffy.size() - 1);
 	//serach f1
-	while (s(i) == 0) {
+	while (diffy(i) == 0) {
 		i = i - 1;
 	}
 
@@ -341,7 +349,7 @@ MatrixXd elipse(Data3D input) {
 		i = i - 1;
 	}
 
-	int f8 = i;
+	f8 = i;
 
 	int a1 = d8;
 	int a2 = f8;
@@ -362,20 +370,21 @@ MatrixXd elipse(Data3D input) {
 	time.col(1) = t;
 	time = time.adjoint();
 
-	ArrayXd x_e;
-	ArrayXd y_e;
+	MatrixXd  x_e;
+	MatrixXd  y_e;
 
+	
+	x_e.array() = time.array().cos();
+	y_e.array() = time.array().sin();
 
-	x_e = time.cos();
-	y_e = time.cos();
 
 	
 	x_e.array() += x0;
 	y_e.array() += y0;
 	
 	
-	x_e = round(x_e);
-	y_e = round(y_e);
+	x_e.array() = round(x_e.array());
+	y_e.array() = round(y_e.array());
 	int c;
 	int d;
 
@@ -453,14 +462,18 @@ MatrixXd median_filter(MatrixXd slice) {
 
 
 MatrixXd Dirac(MatrixXd x, double sigma) {
-	MatrixXd f2,f,b;
+	MatrixXd f2, f;
+	MatrixXb b;
 	double f1;
 	f1 = 0.5 / sigma;
 	f2 = (PI / sigma)*x.array();
-	f2 = f2.cos();
+	
+	f2 = f2.array().cos();
 	f2.array() += 1;
+
+
 	f = f1*f2.array();
-	b = (x.array<= sigma) && (x.array() >= -sigma); //dla | x | < sigma
+	b = (x.array()<= sigma) && (x.array() >= -sigma); //dla | x | < sigma
 	f = f.array()*b.array();
 	return f;
 }
@@ -528,7 +541,7 @@ MatrixXd distReg_p2(MatrixXd phi) {
 	a = (s.array() >= 0) && (s.array() <= 1);
 	b = (s.array() > 1);
 	ar_sin = 2 * PI*s.array();
-	sin1 = ar_sin.sin();
+	sin1 = ar_sin.array().sin();
 	sin1 = a.array()*sin1.array() / (2 * PI);
 
 	ps =  sin1.array()+b.array()*(s.array() - 1);
@@ -549,7 +562,7 @@ MatrixXd NeumannBoundCond(MatrixXd f) {
 	// Reinicjalizacja metodą Neumanna->zapewnienie lepszej
 		//stablizacji->lepszego dopasowania
 	int ncol, nrow;
-	MatrixXd g,1;
+	MatrixXd g;
 	nrow = f.rows();
 	ncol = f.cols();
 	g = f;
@@ -662,6 +675,27 @@ MatrixXd levelset(int el_or_sku, double alfa, MatrixXd Img, MatrixXd earlierLSF,
 
 
 void algorithm(Data3D input) {
+	//--------------test data
+	std::vector<MatrixXd> test_data;
+	test_data = Global::structuralData;
+
+	if (0 == test_data.size()) {
+		qDebug() << "skull striping modue have no data in";
+		return;
+	}
+
+	Eigen::MatrixXd Img;
+	Img = test_data.at(90);
+	//---------------------
+
+	/*
+	MatrixXd slice;
+	slice = slice_to_fit(input);
+	*/
+
+
+
+
 
 	//Skull_stripping(input);
 	int poz_w_a1;
@@ -672,8 +706,11 @@ void algorithm(Data3D input) {
 
 
 	//create elipse
+	/*
 	MatrixXd Img;
-	Img= elipse(input);
+	*/
+	Img= elipse(test_data);
+	
 	int w = Img.rows();
 	int k = Img.cols();
 
@@ -693,8 +730,45 @@ void algorithm(Data3D input) {
 	
 	
 	MatrixXb logic_mask = (second_contour_fit.array() < (-1));
-	//to będzie na pętli second itd
 
+	//--------------------------------------------visualise
+	VTK_MODULE_INIT(vtkRenderingOpenGL2);
+	VTK_MODULE_INIT(vtkInteractionStyle);
+
+	int xspace = logic_mask.rows();
+	int yspace = logic_mask.cols();
+
+	vtkSmartPointer<vtkImageData> imageData = vtkSmartPointer<vtkImageData>::New();
+	imageData->SetDimensions(xspace, yspace, 1);
+	imageData->AllocateScalars(VTK_DOUBLE, 1);
+	int* dims = imageData->GetDimensions();
+
+	for (int y = 0; y < dims[1]; y++)
+		for (int x = 0; x < dims[0]; x++)
+		{
+			double* pixel = static_cast<double*>(imageData->GetScalarPointer(x, y, 0));
+			pixel[0] = logic_mask(x, y);
+		}
+
+	vtkSmartPointer<vtkImageActor> actor = vtkSmartPointer<vtkImageActor>::New();
+	actor->SetInputData(imageData);
+
+	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderer->AddActor(actor);
+	renderer->ResetCamera();
+
+	vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+	renderWindow->AddRenderer(renderer);
+
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
+	renderWindowInteractor->SetInteractorStyle(style);
+	renderWindowInteractor->SetRenderWindow(renderWindow);
+	renderWindowInteractor->Initialize();
+	renderWindowInteractor->Start();
+	//---------------------------------------------visualise
+	//to będzie na pętli second itd
+	cout << "DAne";
 
 }
 
