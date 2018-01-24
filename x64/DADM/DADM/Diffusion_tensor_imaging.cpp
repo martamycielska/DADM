@@ -108,14 +108,16 @@ void Diffusion_tensor_imaging::MeanDiffusivity() {
 
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		MatrixXd tmp(this->inputData[k].size(), this->inputData[k][0].size());
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
-				this->MD[k].row(i)(j) = (this->eigenVector[0] + this->eigenVector[1] + this->eigenVector[2]) / 3;
+				tmp.row(i)(j) = (this->eigenVector[0] + this->eigenVector[1] + this->eigenVector[2]) / 3;
 			}
 		}
-		
+		this->MD.push_back(tmp);
 	}
 }
 
@@ -129,6 +131,7 @@ void Diffusion_tensor_imaging::FractionalAnisotropy() {
 
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		std::vector<MatrixXd> tmp;
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
@@ -140,7 +143,8 @@ void Diffusion_tensor_imaging::FractionalAnisotropy() {
 				int r = (int)min(30 + 1.5f*abs(255 * fa * v1), 255.0f);
 				int g = (int)min(30 + 1.5f*abs(255 * fa * v2), 255.0f);
 				int b = (int)min(30 + 1.5f*abs(255 * fa * v3), 255.0f);
-				this->FA[k][i].row(0)(0) = r;
+				MatrixXd vectorsColor(1, 3);
+				vectorsColor.row(0)(0) = r;
 				this->FA[k][i].row(0)(1) = g;
 				this->FA[k][i].row(0)(2) = b;
 			}
@@ -159,8 +163,11 @@ void Diffusion_tensor_imaging::RelativeAnisotropy() {
 	v3 = this->eigenVector[2];
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		MatrixXd tmp(this->inputData[k].size(), this->inputData[k][0].size());
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
+
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
 
@@ -168,6 +175,7 @@ void Diffusion_tensor_imaging::RelativeAnisotropy() {
 				this->RA[k].row(i)(j) = sqrt(pow((v1 - v), 2) + (pow((v2 - v), 2)) + (pow((v3 - v),2)))/ sqrt(3 * v);
 			}
 		}
+		this->RA.push_back(tmp);
 	}
 };
 void Diffusion_tensor_imaging::VolumeRatio() {
@@ -178,15 +186,17 @@ void Diffusion_tensor_imaging::VolumeRatio() {
 	v3 = this->eigenVector[2];
 	for (int k = 0; k < this->inputData.size(); k++)
 	{
+		MatrixXd tmp(this->inputData[k].size(), this->inputData[k][0].size());
+
 		for (int i = 0; i < this->inputData[k].size(); i++)
 		{
 			for (int j = 0; j < this->inputData[k][i].size(); j++)
 			{
-
 				v = this->getMD()[k].row(i)(j);
 				this->VR[k].row(i)(j) = (v1*v2*v3) / (pow(v,3));
 			}
 		}
+		this->VR.push_back(tmp);
 	}
 };
 
