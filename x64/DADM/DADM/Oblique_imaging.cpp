@@ -3,12 +3,13 @@
 
 Oblique_imaging::Oblique_imaging(Data3D data, double a, double b, Profile profile, int profile_nr)
 {
-	qDebug() << "Oblique imaging constructor called";
+	//qDebug() << "Oblique imaging constructor called";
 	this->inputData = data;
 	this->a = a;
 	this->b = b;
 	this->profile = profile;
 	this->profile_nr = profile_nr;
+
 }
 
 void Oblique_imaging::Start() {
@@ -24,7 +25,8 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 	int size_x = 0;
 	int size_y = 0;
 	int size_z = 0;
-	int border = 100;
+	int border = 130;
+	//4 input data
 	/*
 	std::vector<MatrixXd> test_data;
 	test_data = Global::structuralData;
@@ -33,14 +35,17 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 		qDebug() << "Oblique Imaging modue have no data in";
 		return;
 	}
-
+	//qDebug() << "profile nr:  " << profile_nr;
+	//qDebug() << "rotacje: " << a << b;
 	Eigen::MatrixXd slice;
-	slice = inputData.at(90);
+	slice = inputData.at(0);
 
 	size_z = inputData.size();
 	size_x = slice.rows();
 	size_y = slice.cols();
-
+	//qDebug() << "Size_x: " << size_x;
+	//qDebug() << "Size_y: " << size_y;
+	//qDebug() << "Size_z: " << size_z;
 	//adding borders to data
 	slice = Eigen::MatrixXd::Zero((2 * border + size_x), (2 * border + size_y));
 	std::vector<MatrixXd> data;
@@ -64,18 +69,20 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 	case HORIZONTAL:
 		v1 << 1, 0, 0;
 		v2 << 0, 1, 0;
-		break;
-	case SAGGITAL:
-		v1 << 1, 0, 0;
-		v2 << 0, 0, 1;
+		point << (border + (size_x / 2)), (border + (size_y / 2)), (border + profile_nr);
 		break;
 	case FRONTAL:
+		v1 << 1, 0, 0;
+		v2 << 0, 0, 1;
+		point << (border + (size_x / 2)), (border + profile_nr), (border + (size_z / 2));
+		break;
+	case SAGGITAL:
 		v1 << 0, 1, 0;
 		v2 << 0, 0, 1;
+		point << (border + (size_x / 2)), (border + profile_nr), (border + (size_z / 2));
 		break;
 
 	}
-	point << (border + (size_x / 2)), (border + (size_y / 2)), (border + profile_nr);
 
 	//rotation
 	const double M_PI = 3.14159265358979323846;
@@ -94,12 +101,12 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 			* Eigen::AngleAxisf(b*M_PI, Eigen::Vector3f::UnitY());
 		break;
 
-	case SAGGITAL:
+	case FRONTAL:
 		rot_matrix = Eigen::AngleAxisf(a*M_PI, Eigen::Vector3f::UnitX())
 			* Eigen::AngleAxisf(b*M_PI, Eigen::Vector3f::UnitZ());
 		break;
 
-	case FRONTAL:
+	case SAGGITAL:
 		rot_matrix = Eigen::AngleAxisf(a*M_PI, Eigen::Vector3f::UnitY())
 			* Eigen::AngleAxisf(b*M_PI, Eigen::Vector3f::UnitZ());
 		break;
@@ -107,8 +114,8 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 
 	v1 = v1*rot_matrix;
 	v2 = v2 * rot_matrix;
-	qDebug() << v1(0) << v1(1) << v1(2);
-	qDebug() << v2(0) << v2(1) << v2(2);
+	//qDebug() << v1(0) << v1(1) << v1(2);
+	//qDebug() << v2(0) << v2(1) << v2(2);
 
 	//get new plane's points and interpolate values
 	Eigen::MatrixXd image_out = Eigen::MatrixXd::Zero(size_x, size_y);
@@ -126,8 +133,8 @@ void Oblique_imaging::getObliqueImage(Data3D inputData) {
 		}
 	}
 
-	outputData.push_back(image_out);
-	qDebug() << "DONE";
+	outputData = image_out;
+	//qDebug() << "DONE";
 }
 
 

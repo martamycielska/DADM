@@ -82,17 +82,16 @@ void UpsamplingImage::onProessingDone(MatrixXd outputData) {
 	renderer->AddActor(actor);
 	renderer->ResetCamera();
 
-	vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-	renderWindow->AddRenderer(renderer);
+	//vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+	//renderWindow->AddRenderer(renderer);
+	ui.widget->GetRenderWindow()->AddRenderer(renderer);
 
 	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 	vtkSmartPointer<vtkInteractorStyleImage> style = vtkSmartPointer<vtkInteractorStyleImage>::New();
 	renderWindowInteractor->SetInteractorStyle(style);
-	renderWindowInteractor->SetRenderWindow(renderWindow);
+	renderWindowInteractor->SetRenderWindow(ui.widget->GetRenderWindow());
 	renderWindowInteractor->Initialize();
 	renderWindowInteractor->Start();
-
-
 }
 
 UpsamplingImage::~UpsamplingImage()
@@ -112,5 +111,6 @@ void UpsamplingWorker::run() {
 	upsampling->Start();
 	qDebug() << "DONE";
 	emit processingDone(upsampling->getData());
+	delete upsampling;
 	qDebug() << "EMITTED";
 }

@@ -19,5 +19,7 @@ private:
 	virtual void DiffusionDataAlgorithm();
 	Data3D estimator3D;
 	Data4D estimator4D;
+
+	Data3D part_out;
 };
 

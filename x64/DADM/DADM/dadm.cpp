@@ -19,11 +19,13 @@
 #include "matio.h"
 #include "qaction.h"
 #include "qfiledialog.h"
+#include "qmutex.h"
 #include <SliceVisualizator.h>
 #include "upsamplingimage.h"
 //#include "mat.h"
 
 //using MatFileHandler;
+QMutex mutex;
 
 DADM::DADM(QWidget *parent) : QMainWindow(parent)
 {
@@ -39,6 +41,7 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 
 	connect(ui.LMMSERadioButton, &QRadioButton::toggled, this, &DADM::LMMSEFiltrationSet);
 	connect(ui.UNLMRadioButton, &QRadioButton::toggled, this, &DADM::UNLMFiltrationSet);
+	connect(ui.NoneFiltrationRadioButton, &QRadioButton::toggled, this, &DADM::NoneFiltrationSet);
 
 	connect(ui.planeApplyPushButton, SIGNAL(clicked()), this, SLOT(planeValuesChanged()));
 	connect(ui.resolutionApplyPushButton, SIGNAL(clicked()), this, SLOT(resolutionValuesChanged()));
@@ -66,6 +69,8 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.xzSlider->setMaximum(0);
 	ui.yzSlider->setMinimum(0);
 	ui.yzSlider->setMaximum(0);
+
+	planesSetNum = 0;
 }
 
 void DADM::mri_reconstruct() {
@@ -93,12 +98,17 @@ void DADM::importStructuralData()
 	Global::dataXZ.clear();
 	Global::dataYZ.clear();
 
+	Global::structuralData = Data3D(0);
+	Global::dataXY = Data3D(0);
+	Global::dataXZ = Data3D(0);
+	Global::dataYZ = Data3D(0);
+
 	ui.DiffusionPage->hide();
 	Global::dtype = STRUCTURAL_DATA;
 	ui.statusBar->showMessage("Busy");
 	ui.progressBar->show();
 	QString path = url.path().remove(0, 1);
-	ImportWorker* iw = new ImportWorker(path, STRUCTURAL_DATA);
+	iw = new ImportWorker(path, STRUCTURAL_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
 	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
 	connect(iw, &Worker::finished, iw, &QObject::deleteLater);
@@ -113,6 +123,10 @@ void DADM::importDiffusionData()
 	if (url.isEmpty())
 		return;
 
+	Global::FA.clear();
+	Global::MD.clear();
+	Global::RA.clear();
+	Global::VR.clear();
 	Global::structuralData.clear();
 	Global::dataXY.clear();
 	Global::dataXZ.clear();
@@ -138,7 +152,7 @@ void DADM::importDiffusionData()
 	QString path = url.path().remove(0, 1);
 	ui.statusBar->showMessage("Busy");
 	ui.progressBar->show();
-	ImportWorker* iw = new ImportWorker(path, DIFFUSION_DATA);
+	iw = new ImportWorker(path, DIFFUSION_DATA);
 	connect(iw, &ImportWorker::importDone, this, &DADM::onImportDone);
 	connect(iw, &ImportWorker::importProgress, this, &DADM::onProgress);
 	connect(iw, &ImportWorker::finished, iw, &QObject::deleteLater);
@@ -149,7 +163,8 @@ void DADM::onImportDone()
 {
 	ui.statusBar->showMessage("Ready");
 	ui.progressBar->hide();
-	Worker* worker = new Worker(Global::dtype, Global::ftype);
+	delete iw;
+	worker = new Worker(Global::dtype, Global::ftype);
 	connect(worker, &Worker::resultReady, this, &DADM::onPreprocessingDone);
 	connect(worker, &Worker::currentProcess, this, &DADM::onProccesing);
 	connect(worker, &Worker::progress, this, &DADM::onProgress);
@@ -164,6 +179,38 @@ void DADM::visualization3d() {
 }
 
 void DADM::visualization2d() {
+
+	if (Global::dtype == DIFFUSION_DATA) {
+		if (Global::FA.size() == 0) return;
+
+		switch (Global::biomarker) {
+		case Biomarker::FA:
+		{
+			//xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::FA);
+			//xySliceVisualizator->visualize();
+			break;
+		}
+		case Biomarker::MD:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::MD);
+			xySliceVisualizator->visualize();
+			break;
+		}
+		case Biomarker::RA:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::RA);
+			xySliceVisualizator->visualize();
+			break;
+		}
+		case Biomarker::VR:
+		{
+			xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::VR);
+			xySliceVisualizator->visualize();
+			break;
+		}
+		}
+	}
+
 	if (Global::dataXY.size() != 0) {
 		xySliceVisualizator = new SliceVisualizator(renderWndXY, SlicePlane::XY, Global::dataXY);
 		xySliceVisualizator->visualize();
@@ -179,6 +226,10 @@ void DADM::visualization2d() {
 		ui.xzSlider->setMaximum(xzSliceVisualizator->getImageViewerXZ()->GetSliceMax());
 		ui.yzSlider->setMinimum(0);
 		ui.yzSlider->setMaximum(yzSliceVisualizator->getImageViewerYZ()->GetSliceMax());
+
+		delete xySliceVisualizator;
+		delete yzSliceVisualizator;
+		delete xzSliceVisualizator;
 	}
 }
 
@@ -291,27 +342,41 @@ void DADM::onProccesing(QString msg)
 
 void DADM::resolutionValuesChanged()
 {
+	if (Global::dataXY.empty()) return;
 	if (ui.FrontalPlaneRadioButton->isChecked()) {
-		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xzSlider->value());
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::YZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.yzSlider->value());
 		upsamlingImageWindow->show();
 	}
 	if (ui.SaggitalPlaneRadioButton->isChecked()) {
-		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XY, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xySlider->value());
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xzSlider->value());
 		upsamlingImageWindow->show();
 	}
 	if (ui.HorizontalPlaneRadioButton->isChecked()) {
-		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::YZ, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.yzSlider->value());
+		UpsamplingImage *upsamlingImageWindow = new UpsamplingImage(SlicePlane::XY, ui.resolutionWidthSpinBox->value(), ui.resolutionHeightSpinBox->value(), ui.xySlider->value());
 		upsamlingImageWindow->show();
 	}
 }
 
 void DADM::planeValuesChanged()
 {
+	if (Global::dataXY.empty()) return;
+	ui.planeApplyPushButton->setEnabled(false);
+
 	ui.statusBar->showMessage("Busy");
-	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::dataXZ, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL);
+	ObliqueImagingWorker *worker_horizontal = new ObliqueImagingWorker(Global::structuralData, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), HORIZONTAL, ui.xySlider->maximum());
+	connect(worker_horizontal, &ObliqueImagingWorker::resultReadyHorizontal, this, &DADM::onObliqueImagingHorizontalDone);
+	connect(worker_horizontal, &ObliqueImagingWorker::finished, worker_horizontal, &QObject::deleteLater);
+	worker_horizontal->start();
+
+	ObliqueImagingWorker *worker_frontal = new ObliqueImagingWorker(Global::structuralData, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), FRONTAL, ui.xySlider->maximum());
 	connect(worker_frontal, &ObliqueImagingWorker::resultReadyFrontal, this, &DADM::onObliqueImagingFrontalDone);
 	connect(worker_frontal, &ObliqueImagingWorker::finished, worker_frontal, &QObject::deleteLater);
 	worker_frontal->start();
+
+	ObliqueImagingWorker *worker_sagittal = new ObliqueImagingWorker(Global::structuralData, ui.alphaPlaneSpinBox->value(), ui.betaPlaneSpinBox->value(), SAGGITAL, ui.xySlider->maximum());
+	connect(worker_sagittal, &ObliqueImagingWorker::resultReadySggital, this, &DADM::onObliqueImagingSaggitalDone);
+	connect(worker_sagittal, &ObliqueImagingWorker::finished, worker_sagittal, &QObject::deleteLater);
+	worker_sagittal->start();
 
 }
 
@@ -319,24 +384,36 @@ void DADM::diffusionFASet()
 {
 	if (!ui.diffFARadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::FA;
+	visualization2d();
 }
 
 void DADM::diffusionMDSet()
 {
 	if (!ui.diffMDRadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::MD;
+	visualization2d();
 }
 
 void DADM::diffusionRASet()
 {
 	if (!ui.difRARadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::RA;
+	visualization2d();
 }
 
 void DADM::diffusionVRSet()
 {
 	if (!ui.diffVRRadioButton->isChecked())
 		return;
+
+	Global::biomarker = Biomarker::VR;
+	visualization2d();
 }
 
 void DADM::LMMSEFiltrationSet()
@@ -357,12 +434,76 @@ void DADM::UNLMFiltrationSet()
 	Global::ftype = UNLM;
 }
 
+void DADM::NoneFiltrationSet()
+{
+	if (!ui.NoneFiltrationRadioButton->isChecked())
+		return;
+
+	qDebug() << "NONE";
+	Global::ftype = NONE;
+}
+
 void DADM::restoreDefault()
 {
+	if (Global::structuralData.empty() || Global::FA.empty()) return;
 	ui.alphaPlaneSpinBox->setValue(0);
 	ui.betaPlaneSpinBox->setValue(0);
-	ui.resolutionWidthSpinBox->setValue(0);
-	ui.resolutionHeightSpinBox->setValue(0);
+	ui.resolutionWidthSpinBox->setValue(1);
+	ui.resolutionHeightSpinBox->setValue(1);
+
+	//------------------------------------------------------------YZ
+	Eigen::MatrixXd slice;
+	slice = Global::structuralData.at(0);
+
+	int size_z = Global::structuralData.size();
+	int size_x = slice.rows();
+	int size_y = slice.cols();
+
+	std::vector<MatrixXd> YZ_data_out;
+	Eigen::MatrixXd image_out = Eigen::MatrixXd::Zero(size_y, size_z);
+
+	for (int YZ_slice_nr = 0; YZ_slice_nr < size_x; ++YZ_slice_nr) {
+		for (int i = 0; i < size_y; ++i) {
+			for (int j = 0; j < size_z; ++j) {
+				image_out(i, j) = Global::structuralData[j](YZ_slice_nr, i);
+			}
+		}
+		YZ_data_out.push_back(image_out);
+	}
+
+	//------------------------------------------------------------ XZ
+	slice = Global::structuralData.at(90);
+
+	size_z = Global::structuralData.size();
+	size_x = slice.rows();
+	size_y = slice.cols();
+
+	std::vector<MatrixXd> XZ_data_out;
+	image_out = Eigen::MatrixXd::Zero(size_x, size_z);
+
+	for (int XZ_slice_nr = 0; XZ_slice_nr < size_x; ++XZ_slice_nr) {
+		for (int i = 0; i < size_x; ++i) {
+			for (int j = 0; j < size_z; ++j) {
+				image_out(i, j) = Global::structuralData[j](i, XZ_slice_nr);
+			}
+		}
+		XZ_data_out.push_back(image_out);
+	}
+
+	Global::dataXY.clear();
+	Global::dataXZ.clear();
+	Global::dataYZ.clear();
+
+	Global::dataXY = Data3D(0);
+	Global::dataXZ = Data3D(0);
+	Global::dataYZ = Data3D(0);
+
+	Global::dataXY = Global::structuralData;
+	//Global::structuralData.clear();
+	Global::dataYZ = YZ_data_out;
+	Global::dataXZ = XZ_data_out;
+
+	visualization2d();
 }
 
 void DADM::showProgramInformation()
@@ -370,22 +511,46 @@ void DADM::showProgramInformation()
 }
 
 
-void DADM::onObliqueImagingFrontalDone(Data3D data)
+void DADM::onObliqueImagingFrontalDone()
 {
-	//Global::temporaryDataXZ = data;
-	qDebug() << "Done XZ";
+	qDebug() << "Done FRONTAL";
+	mutex.lock();
+	planesSetNum += 1;
+	mutex.unlock();
+	if (planesSetNum == 3) {
+		visualization2d();
+		ui.planeApplyPushButton->setEnabled(true);
+		planesSetNum = 0;
+		ui.statusBar->showMessage("Ready");
+	}
 }
 
-void DADM::onObliqueImagingSaggitalDone(Data3D data)
+void DADM::onObliqueImagingSaggitalDone()
 {
-	//Global::temporaryDataXY = data;
-	qDebug() << "Done XY";
+	qDebug() << "Done SAGITTAL";
+	mutex.lock();
+	planesSetNum += 1;
+	mutex.unlock();
+	if (planesSetNum == 3) {
+		visualization2d();
+		ui.planeApplyPushButton->setEnabled(true);
+		planesSetNum = 0;
+		ui.statusBar->showMessage("Ready");
+	}
 }
 
-void DADM::onObliqueImagingHorizontalDone(Data3D data)
+void DADM::onObliqueImagingHorizontalDone()
 {
-	//Global::temporaryDataYZ = data;
-	qDebug() << "Done YZ";
+	qDebug() << "Done HORIZONTAL";
+	mutex.lock();
+	planesSetNum += 1;
+	mutex.unlock();
+	if (planesSetNum == 3) {
+		visualization2d();
+		ui.planeApplyPushButton->setEnabled(true);
+		planesSetNum = 0;
+		ui.statusBar->showMessage("Ready");
+	}
 }
 
 DADM::~DADM()
@@ -402,19 +567,21 @@ Worker::Worker(DataType dtype, FilteringType ftype)
 
 void Worker::run()
 {
-	Data3D images3D;
-	Data4D images4D;
-	Data3D rice3D;
-	Data4D rice4D;
+	Data3D images3D = Data3D(0);
+	Data4D images4D = Data4D(0);
+	Data3D rice3D = Data3D(0);
+	Data4D rice4D = Data4D(0);
 	switch (dtype)
 	{
 	case STRUCTURAL_DATA:
 	{
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::structuralRawData, Global::structuralSensitivityMaps, Global::L, Global::r);
-		reconstruction->Start();
-		Global::structuralData = reconstruction->getData3D();
 		Global::structuralRawData.clear();
+		Global::structuralSensitivityMaps.clear();
+		reconstruction->Start();
+		images3D = reconstruction->getData3D();
+		delete reconstruction;
 		//odkomentowaæ jesli maj¹ ruszyæ inne modu³y
 		if (ftype != NONE) {
 
@@ -422,6 +589,7 @@ void Worker::run()
 			Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images3D);
 			estimation->Start();
 			rice3D = estimation->getData3D(RICE);
+			delete estimation;
 			switch (ftype)
 			{
 			case LMMSE:
@@ -431,6 +599,7 @@ void Worker::run()
 				lmmse->Start();
 				images3D.clear();
 				images3D = lmmse->getData3D();
+				delete lmmse;
 				break;
 			}
 			case UNLM:
@@ -439,7 +608,9 @@ void Worker::run()
 				Non_stationary_noise_filtering_2 *unlm = new Non_stationary_noise_filtering_2(images3D, rice3D);
 				unlm->Start();
 				images3D.clear();
+				qDebug() << "UNLM getData()";
 				images3D = unlm->getData3D();
+				delete unlm;
 				break;
 			}
 			}
@@ -451,8 +622,9 @@ void Worker::run()
 		Global::structuralData = correction->getData3D();
 		*/
 		//------------------------------------------------------------YZ
+		Global::structuralData = images3D;
 		Eigen::MatrixXd slice;
-		slice = Global::structuralData.at(90);
+		slice = Global::structuralData.at(0);
 
 		int size_z = Global::structuralData.size();
 		int size_x = slice.rows();
@@ -490,42 +662,31 @@ void Worker::run()
 		}
 
 		Global::dataXY = Global::structuralData;
-		Global::structuralData.clear();
+		//Global::structuralData.clear();
 		Global::dataYZ = YZ_data_out;
 		Global::dataXZ = XZ_data_out;
 
 		qDebug() << Global::dataXY.size();
 		qDebug() << Global::dataYZ.size();
 		qDebug() << Global::dataXZ.size();
-		//TODO k¹ty do ustalenia
-		/*
-		Oblique_imaging *frontal = new Oblique_imaging(Global::structuralData, 0, 0);
-		frontal->Start();
-		Global::dataFrontal = frontal->getData();
-		Oblique_imaging *saggital = new Oblique_imaging(Global::structuralData, 0, 0);
-		saggital->Start();
-		Global::dataSaggital = frontal->getData();
-		Oblique_imaging *horizontal = new Oblique_imaging(Global::structuralData, 0, 0);
-		horizontal->Start();
-		Global::dataHorizontal = frontal->getData();
-		*/
 		
 		break;
 	}
 	case DIFFUSION_DATA:
 	{
-		emit progress(0, 6);
 		emit currentProcess("Preprocessing: Reconstruction...");
 		Reconstruction *reconstruction = new Reconstruction(Global::diffusionRawData, Global::diffusionSensitivityMaps, Global::L, Global::r);
 		reconstruction->Start();
 		Global::diffusionRawData.clear();
-		Global::structuralData = reconstruction->getData4D().at(3);
+		Global::diffusionSensitivityMaps.clear();
+		images4D = reconstruction->getData4D();
+		delete reconstruction;
 		if (ftype != NONE) {
 			emit currentProcess("Preprocessing: Non stationary noise estimation...");
 			Non_stationary_noise_estimation *estimation = new Non_stationary_noise_estimation(images4D);
 			estimation->Start();
 			rice4D = estimation->getData4D(RICE);
-			emit progress(2, 6);
+			delete estimation;
 			switch (ftype)
 			{
 			case LMMSE:
@@ -535,6 +696,7 @@ void Worker::run()
 				lmmse->Start();
 				images4D.clear();
 				images4D = lmmse->getData4D();
+				delete lmmse;
 				break;
 			}
 			case UNLM:
@@ -544,10 +706,12 @@ void Worker::run()
 				unlm->Start();
 				images4D.clear();
 				images4D = unlm->getData4D();
+				delete unlm;
 				break;
 			}
 			}
 		}
+		Global::diffusionData4D = images4D;
 		/*
 		emit currentProcess("Preprocessing: Intensity inhomogenity correction...");
 		Intensity_inhomogenity_correction *correction = new Intensity_inhomogenity_correction(images4D);
@@ -559,27 +723,16 @@ void Worker::run()
 		skull_stripping->Start();
 		images4D.clear();
 		images4D = skull_stripping->getData4D();
+		*/
 		emit currentProcess("Preprocessing: Diffusion tensor imaging...");
-		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D);
+		Diffusion_tensor_imaging *diff = new Diffusion_tensor_imaging(images4D, Global::b_value, Global::gradients);
 		diff->Start();
-		Global::diffusionData4D = diff->getData();
+		//Global::diffusionData4D = diff->getData();
 		Global::FA = diff->getFA();
 		Global::RA = diff->getRA();
 		Global::MD = diff->getMD();
 		Global::VR = diff->getVR();
-		*/
-		//TODO k¹ty do ustalenia
-		/* 
-		Oblique_imaging *frontal = new Oblique_imaging(Global::FA, 0, 0);
-		frontal->Start();
-		Global::dataFrontal = frontal->getData();
-		Oblique_imaging *saggital = new Oblique_imaging(Global::FA, 0, 0);
-		saggital->Start();
-		Global::dataSaggital = frontal->getData();
-		Oblique_imaging *horizontal = new Oblique_imaging(Global::FA, 0, 0);
-		horizontal->Start();
-		Global::dataHorizontal = frontal->getData();
-		*/
+		delete diff;
 		break;
 	}
 	}
@@ -662,6 +815,8 @@ void ImportWorker::diffusionDataImport()
 			Global::gradients = m;
 		}
 
+		Mat_VarFree(g_matVar);
+
 		//matvar_t *matVar = 0;
 
 		matVar = Mat_VarRead(mat, (char*)"raw_data");
@@ -726,6 +881,8 @@ void ImportWorker::diffusionDataImport()
 			}
 
 			Global::diffusionRawData = RawData5D;
+			RawData5D.clear();
+			Mat_VarFree(matVar);
 			//------------------------------------
 			//Data5DRaw RawData5D(1);
 			//RawData5D[0] = RawData;
@@ -764,6 +921,7 @@ void ImportWorker::diffusionDataImport()
 				}
 
 				Global::diffusionSensitivityMaps = sensitivity_maps;
+				sensitivity_maps.clear();
 			}
 		}
 
@@ -793,12 +951,10 @@ void ImportWorker::diffusionDataImport()
 			Global::b_value = xData[0];
 		}
 
-		Mat_VarFree(matVar);
 		Mat_VarFree(s_matVar);
 		Mat_VarFree(r_matVar);
 		Mat_VarFree(l_matVar);
 		Mat_VarFree(b_matVar);
-		Mat_VarFree(g_matVar);
 	}
 	qDebug() << Global::L;
 	qDebug() << Global::r;
@@ -815,19 +971,22 @@ void ImportWorker::structuralDataImport()
 
 	if (mat) {
 		qDebug() << "Otwarto plik";
+		int max = 0;
 
-		matvar_t *matVar = 0;
-		matVar = Mat_VarRead(mat, (char*)"raw_data");
 		matvar_t *s_matVar = 0;
 		s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
-		int max = 0;
-		if (matVar) {
-			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
-		}
-
 		if (s_matVar) {
 			max += s_matVar->dims[0] * s_matVar->dims[1] * s_matVar->dims[2];
+		}
+
+		Mat_VarFree(s_matVar);
+
+		matvar_t *matVar = 0;
+		matVar = Mat_VarRead(mat, (char*)"raw_data");
+
+		if (matVar) {
+			max += matVar->dims[0] * matVar->dims[1] * matVar->dims[2] * matVar->dims[3];
 		}
 
 		int status = 0;
@@ -867,7 +1026,6 @@ void ImportWorker::structuralDataImport()
 			}
 			//Data4DRaw DataRaw4D(1);
 			//DataRaw4D[0] = raw_data;
-
 			Data4DRaw RawData(matVar->dims[2]);
 			Data3DRaw data(matVar->dims[3]);
 			for (int d = 0; d<matVar->dims[2]; d++)
@@ -880,8 +1038,10 @@ void ImportWorker::structuralDataImport()
 				RawData.at(d) = data;
 			}
 			Global::structuralRawData = RawData;
-
+			RawData.clear();
+			Mat_VarFree(matVar);
 			//matvar_t *s_matVar = 0;
+			s_matVar = 0;
 			s_matVar = Mat_VarRead(mat, (char*)"sensitivity_maps");
 
 			if (s_matVar) {
@@ -913,8 +1073,8 @@ void ImportWorker::structuralDataImport()
 					sensitivity_maps.push_back(m);
 					emit importProgress(status, max);
 				}
-
 				Global::structuralSensitivityMaps = sensitivity_maps;
+				sensitivity_maps.clear();
 			}
 		}
 
@@ -935,51 +1095,74 @@ void ImportWorker::structuralDataImport()
 			Global::r = xData[0];
 		}
 
-		Mat_VarFree(matVar);
 		Mat_VarFree(s_matVar);
 		Mat_VarFree(r_matVar);
 		Mat_VarFree(l_matVar);
 
 	}
+	
 	qDebug() << Global::L;
 	qDebug() << Global::r;
 	Mat_Close(mat);
+	mat = 0;
 	emit importDone();
 }
 
 
-ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile) {
+ObliqueImagingWorker::ObliqueImagingWorker(Data3D data, double a, double b, Profile profile, int max) {
 	qRegisterMetaType<Data3D>("Data3D");
 	this->profile = profile;
 	this->data = data;
 	this->a = a;
 	this->b = b;
+	this->max_slice = max;
 }
 
 void ObliqueImagingWorker::run() {
 	Oblique_imaging *imaging;
+	Data3D d;
 	switch (profile) {
-	case FRONTAL:
-		imaging = new Oblique_imaging(data, a, b, FRONTAL, 30);
-		break;
 	case SAGGITAL:
-		imaging = new Oblique_imaging(data, a, b, SAGGITAL, 30);
+		for (int i = 0; i < Global::dataXZ.size(); i++) {
+			qDebug() << "Iteration sagittal: " << i;
+			imaging = new Oblique_imaging(data, a, b, SAGGITAL, i);
+			imaging->Start();
+			d.push_back(imaging->getData());
+			delete imaging;
+		}
+		Global::dataXZ = d;
+		break;
+		break;
+	case FRONTAL:
+		for (int i = 0; i < Global::dataYZ.size(); i++) {
+			qDebug() << "Iteration frontal: " << i;
+			imaging = new Oblique_imaging(data, a, b, FRONTAL, i);
+			imaging->Start();
+			d.push_back(imaging->getData());
+			delete imaging;
+		}
+		Global::dataYZ = d;
 		break;
 	case HORIZONTAL:
-		imaging = new Oblique_imaging(data, a, b, HORIZONTAL, 30);
+		for (int i = 0; i < Global::dataXY.size(); i++) {
+			qDebug() << "Iteration horizontal: " << i;
+			imaging = new Oblique_imaging(data, a, b, HORIZONTAL, i);
+			imaging->Start();
+			d.push_back(imaging->getData());
+			delete imaging;
+		}
+		Global::dataXY = d;
 		break;
 	}
-	imaging->Start();
-	Data3D d = imaging->getData();
 	switch (profile) {
 	case FRONTAL:
-		emit resultReadyFrontal(d);
+		emit resultReadyFrontal();
 		break;
 	case SAGGITAL:
-		emit resultReadySggital(d);
+		emit resultReadySggital();
 		break;
 	case HORIZONTAL:
-		emit resultReadyHorizontal(d);
+		emit resultReadyHorizontal();
 		break;
 	}
 }

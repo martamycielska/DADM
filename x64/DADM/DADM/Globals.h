@@ -7,6 +7,7 @@
 #include "helpermethods.h"
 
 namespace Global {
+	extern Biomarker biomarker;
 	extern int current_slice;
 	extern FilteringType ftype;
 	extern DataType dtype;
@@ -25,7 +26,7 @@ namespace Global {
 	extern Data4D diffusionData4D;
 	extern Data3D diffusionData3D;
 	extern SegmentationData segmentationData;
-	extern Data3D FA;
+	extern Data4D FA;
 	extern Data3D MD;
 	extern Data3D RA;
 	extern Data3D VR;

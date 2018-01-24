@@ -6,7 +6,7 @@
 typedef enum Profile { FRONTAL, SAGGITAL, HORIZONTAL } Profile;
 
 class Oblique_imaging :
-	public MRI_Module<Data3D, Data3D>
+	public MRI_Module<Data3D, MatrixXd>
 {
 public:
 	Oblique_imaging(Data3D, double, double, Profile, int = 0);

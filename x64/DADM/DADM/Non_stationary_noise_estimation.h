@@ -12,7 +12,6 @@
 using namespace std;
 using namespace boost::math;
 using namespace Eigen;
-
 class Non_stationary_noise_estimation:
 	public Estimation_Module
 {
@@ -46,5 +45,8 @@ private:
 	MatrixXd Non_stationary_noise_estimation::riceCorrection(MatrixXd SNR);
 	void Non_stationary_noise_estimation::writeToCSVfile(string name, MatrixXd matrix);
 	void Non_stationary_noise_estimation::setEstimators(MatrixXd reconstructedImage, int i, int j = 0, bool isDiffusion = false);
+
+	Data3D gradientEstimatorGauss;
+	Data3D gradientEstimatorRice;
 };
 

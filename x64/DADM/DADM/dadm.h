@@ -51,19 +51,20 @@ class ObliqueImagingWorker : public QThread
 	Q_OBJECT
 
 public:
-	ObliqueImagingWorker(Data3D, double, double, Profile);
+	ObliqueImagingWorker(Data3D, double, double, Profile, int);
 	void run();
 
 signals:
-	void resultReadyFrontal(Data3D);
-	void resultReadySggital(Data3D);
-	void resultReadyHorizontal(Data3D);
+	void resultReadyFrontal();
+	void resultReadySggital();
+	void resultReadyHorizontal();
 
 private:
 	Profile profile;
 	Data3D data;
 	double a;
 	double b;
+	int max_slice;
 };
 
 class ImportWorker : public QThread
@@ -104,6 +105,8 @@ private:
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXY;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndYZ;
 	vtkSmartPointer<vtkGenericOpenGLRenderWindow> renderWndXZ;
+	int planesSetNum;
+	ImportWorker *iw;
 
 protected:
 	void closeEvent(QCloseEvent*);
@@ -131,12 +134,14 @@ private slots:
 	void LMMSEFiltrationSet();
 	void UNLMFiltrationSet();
 
+	void NoneFiltrationSet();
+
 	void restoreDefault();
 	void showProgramInformation();
 
-	void onObliqueImagingFrontalDone(Data3D);
-	void onObliqueImagingSaggitalDone(Data3D);
-	void onObliqueImagingHorizontalDone(Data3D);
+	void onObliqueImagingFrontalDone();
+	void onObliqueImagingSaggitalDone();
+	void onObliqueImagingHorizontalDone();
 
 	void xySliderValueChanged(int);
 	void yzSliderValueChanged(int);

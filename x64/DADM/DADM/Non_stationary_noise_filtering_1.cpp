@@ -22,16 +22,19 @@ Non_stationary_noise_filtering_1::Non_stationary_noise_filtering_1(Data4D images
 }
 
 void Non_stationary_noise_filtering_1::StructuralDataAlgorithm() {
+	qDebug() << "START FILTERING";
 	for (int i = 0; i < data3D_input.size(); i++) {
-		data3D_output[i] = lmmse(data3D_input[i], 7, estimator3D[i]);
+		data3D_output.push_back(lmmse(data3D_input[i], 7, estimator3D[i]));
 	}
 }
 
 void Non_stationary_noise_filtering_1::DiffusionDataAlgorithm() {
 	for (int i = 0; i < data4D_input.size(); i++) {
 		for (int j = 0; j < data4D_input[i].size(); j++) {
-			data4D_output[i][j] = lmmse(data4D_input[i][j], 7, estimator4D[i][j]);
+			part_out.push_back(lmmse(data4D_input[i][j], 7, estimator4D[i][j]));
 		}
+		data4D_output.push_back(part_out);
+		part_out.clear();
 	}
 }
 

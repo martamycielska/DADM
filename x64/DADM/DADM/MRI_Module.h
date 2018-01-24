@@ -10,6 +10,7 @@ using namespace Eigen;
 //typedef Tensor<double, 4> Data4D;
 
 enum class SlicePlane { XY, YZ, XZ };
+typedef enum Biomarker {FA, MD, RA, VR} Biomarker;
 
 typedef std::vector<MatrixXd> Data3D;
 typedef std::vector<std::vector<MatrixXd>> Data4D;
