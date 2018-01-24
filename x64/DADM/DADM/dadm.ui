@@ -483,7 +483,7 @@ QToolBox::tab {
 }
 
 QToolBox::tab:selected { /* italicize selected tabs */
-    font: italic;
+    font: bold;
     /*color: white;*/
 }
 </string>
@@ -535,8 +535,8 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>93</width>
+              <height>75</height>
              </rect>
             </property>
             <attribute name="label">
@@ -676,8 +676,8 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>104</width>
+              <height>155</height>
              </rect>
             </property>
             <attribute name="label">
@@ -777,8 +777,8 @@ QToolBox::tab:selected { /* italicize selected tabs */
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>135</width>
-              <height>178</height>
+              <width>93</width>
+              <height>137</height>
              </rect>
             </property>
             <attribute name="label">
