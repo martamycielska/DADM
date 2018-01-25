@@ -173,14 +173,13 @@ void DADM::visualization3d() {
 }
 
 void DADM::visualization2d() {
-
-	if (!xySliceVisualizator) {
+	qDebug() << "VIS 2D";
+	if (xySliceVisualizator != NULL) {
 		delete xySliceVisualizator;
 		delete yzSliceVisualizator;
 		delete xzSliceVisualizator;
 	}
 
-	qDebug() << "VIS 2D";
 	if (Global::dtype == DIFFUSION_DATA) {
 		if (Global::diffusionData4D.size() == 0) return;
 
@@ -343,6 +342,7 @@ void DADM::onPreprocessingDone()
 		Global::RA.clear();
 		Global::VR.clear();
 		Global::diffusionData4D.clear();
+		qDebug() << "CLEARED";
 		ui.SaggitalPlaneRadioButton->setEnabled(true);
 		ui.FrontalPlaneRadioButton->setEnabled(true);
 	}
