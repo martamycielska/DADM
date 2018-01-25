@@ -26,6 +26,7 @@
 #include "helpermethods.h"
 #include "SliceVisualizator.h"
 #include "Oblique_imaging.h"
+#include "helpwindow.h"
 
 class Worker : public QThread
 {
@@ -98,6 +99,7 @@ public:
 private:
 	Ui::DADMClass ui;
 	Visualization3D *vis3D;
+	helpwindow *helpwnd;
 	Worker *worker;
 	SliceVisualizator *xySliceVisualizator;
 	SliceVisualizator *yzSliceVisualizator;
@@ -117,6 +119,7 @@ private slots:
 	void onReconstructionFinished(Data3D);
 	void visualization3d();
 	void visualization2d();
+	void show_help();
 	void importStructuralData();
 	void importDiffusionData();
 	void onImportDone();

@@ -22,6 +22,7 @@
 #include "qmutex.h"
 #include <SliceVisualizator.h>
 #include "upsamplingimage.h"
+#include "helpwindow.h"
 //#include "mat.h"
 
 //using MatFileHandler;
@@ -31,6 +32,8 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 {
 	ui.setupUi(this);
 	vis3D = new Visualization3D();
+	helpwnd = new helpwindow();
+	connect(ui.actionInformation, &QAction::triggered, this, &DADM::show_help);
 	connect(ui.actionVisualization_3D, &QAction::triggered, this, &DADM::visualization3d);
 	connect(ui.actionVisualize_2D, &QAction::triggered, this, &DADM::visualization2d);
 	connect(ui.actionStructural_data, &QAction::triggered, this, &DADM::importStructuralData);
@@ -76,6 +79,10 @@ DADM::DADM(QWidget *parent) : QMainWindow(parent)
 	ui.actionVisualize_2D->setVisible(false);
 	ui.DiffusionPage->hide();
 	ui.actionImport_test_data->setVisible(false);
+}
+
+void DADM::show_help() {
+	helpwnd->show();
 }
 
 void DADM::mri_reconstruct() {
