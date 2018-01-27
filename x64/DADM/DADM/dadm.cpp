@@ -174,11 +174,17 @@ void DADM::visualization3d() {
 
 void DADM::visualization2d() {
 	qDebug() << "VIS 2D";
+	/*
 	if (xySliceVisualizator != NULL) {
 		delete xySliceVisualizator;
+	}
+	if (yzSliceVisualizator != NULL) {
 		delete yzSliceVisualizator;
+	}
+	if (xzSliceVisualizator != NULL) {
 		delete xzSliceVisualizator;
 	}
+	qDebug() << "Deleted";*/
 
 	if (Global::dtype == DIFFUSION_DATA) {
 		if (Global::diffusionData4D.size() == 0) return;
@@ -356,7 +362,7 @@ void DADM::onPreprocessingDone()
 
 		ui.gradientSpinBox->setMinimum(1);
 		ui.gradientSpinBox->setMaximum(Global::diffusionData4D.size());
-		Global::dataXY = Global::diffusionData4D.at(ui.gradientSpinBox->value());
+		Global::dataXY = Global::diffusionData4D.at(ui.gradientSpinBox->value()-1);
 	}
 	visualization2d();
 }
@@ -1199,7 +1205,7 @@ void ObliqueImagingWorker::run() {
 	switch (profile) {
 	case SAGGITAL:
 		for (int i = 0; i < Global::dataXZ.size(); i++) {
-			//qDebug() << "Iteration sagittal: " << i;
+			qDebug() << "Iteration sagittal: " << i;
 			imaging = new Oblique_imaging(data, a, b, SAGGITAL, i);
 			imaging->Start();
 			d.push_back(imaging->getData());
@@ -1210,7 +1216,7 @@ void ObliqueImagingWorker::run() {
 		break;
 	case FRONTAL:
 		for (int i = 0; i < Global::dataYZ.size(); i++) {
-			//qDebug() << "Iteration frontal: " << i;
+			qDebug() << "Iteration frontal: " << i;
 			imaging = new Oblique_imaging(data, a, b, FRONTAL, i);
 			imaging->Start();
 			d.push_back(imaging->getData());
@@ -1220,7 +1226,7 @@ void ObliqueImagingWorker::run() {
 		break;
 	case HORIZONTAL:
 		for (int i = 0; i < Global::dataXY.size(); i++) {
-			//qDebug() << "Iteration horizontal: " << i;
+			qDebug() << "Iteration horizontal: " << i;
 			imaging = new Oblique_imaging(data, a, b, HORIZONTAL, i);
 			imaging->Start();
 			d.push_back(imaging->getData());
